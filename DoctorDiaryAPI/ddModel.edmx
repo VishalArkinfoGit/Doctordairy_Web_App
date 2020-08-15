@@ -1,0 +1,1770 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="ddiarydbModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="account_table">
+          <Key>
+            <PropertyRef Name="account_id" />
+          </Key>
+          <Property Name="account_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="patient_id" Type="int" Nullable="false" />
+          <Property Name="amount" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="date" Type="date" />
+          <Property Name="remarks" Type="varchar" MaxLength="100" />
+          <Property Name="transaction_type" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Treat_crno" Type="int" />
+          <Property Name="Doctor_id" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="application_version">
+          <Key>
+            <PropertyRef Name="version_id" />
+          </Key>
+          <Property Name="version_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="version" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="isForceful" Type="bit" Nullable="false" />
+          <Property Name="version_date" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Appointment">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="DateStart" Type="datetime" Nullable="false" />
+          <Property Name="DateEnd" Type="datetime" Nullable="false" />
+          <Property Name="DoctorId" Type="int" Nullable="false" />
+          <Property Name="PatientName" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="PatientMobile" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="Relation" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="Status" Type="nvarchar(max)" />
+          <Property Name="SessionId" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="CreatedDate" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Disease">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="disease_name" Type="varchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Doctor_Master">
+          <Key>
+            <PropertyRef Name="Doctor_id" />
+          </Key>
+          <Property Name="Reg_date" Type="datetime" />
+          <Property Name="User_id" Type="int" Nullable="false" />
+          <Property Name="Doctor_state" Type="varchar" MaxLength="30" />
+          <Property Name="Doctor_photo" Type="varchar(max)" />
+          <Property Name="Doctor_name" Type="varchar" MaxLength="50" />
+          <Property Name="Doctor_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Doctor_exp" Type="varchar" MaxLength="20" />
+          <Property Name="Doctor_email" Type="varchar" MaxLength="50" />
+          <Property Name="Doctor_degree" Type="varchar" MaxLength="20" />
+          <Property Name="Doctor_country" Type="varchar" MaxLength="30" />
+          <Property Name="Doctor_contact" Type="varchar" MaxLength="20" />
+          <Property Name="Doctor_city" Type="varchar" MaxLength="30" />
+          <Property Name="Doctor_address" Type="varchar" MaxLength="500" />
+          <Property Name="Clinic_name" Type="varchar" MaxLength="100" />
+          <Property Name="Gender" Type="varchar" MaxLength="50" />
+          <Property Name="IsActive" Type="bit" />
+        </EntityType>
+        <EntityType Name="DoctorShifts">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="DoctorId" Type="int" Nullable="false" />
+          <Property Name="MorningStart" Type="time" Precision="7" Nullable="false" />
+          <Property Name="MorningEnd" Type="time" Precision="7" Nullable="false" />
+          <Property Name="AfternoonStart" Type="time" Precision="7" Nullable="false" />
+          <Property Name="AfternoonEnd" Type="time" Precision="7" Nullable="false" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Injury_Photos_Master">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Treatment_Id" Type="int" />
+          <Property Name="Injury_Photos" Type="varchar" MaxLength="200" />
+          <Property Name="Is_Active" Type="bit" />
+          <Property Name="User_Id" Type="int" />
+        </EntityType>
+        <EntityType Name="Login_Master">
+          <Key>
+            <PropertyRef Name="intUserId" />
+          </Key>
+          <Property Name="stUserName" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="stPhoneNo" Type="varchar" MaxLength="20" />
+          <Property Name="stPassword" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="stEmail" Type="varchar" MaxLength="50" />
+          <Property Name="intUserId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Login_Track">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="User_Id" Type="int" />
+          <Property Name="Email" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Login_Date" Type="datetime" Nullable="false" />
+          <Property Name="IsSuccess" Type="bit" Nullable="false" />
+          <Property Name="App_Version" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="Mail_Track">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="User_Id" Type="int" />
+          <Property Name="Email" Type="varchar" MaxLength="50" />
+          <Property Name="Verify_Code" Type="varchar" MaxLength="50" />
+          <Property Name="IsSuccess" Type="bit" />
+        </EntityType>
+        <EntityType Name="medicine_table">
+          <Key>
+            <PropertyRef Name="medicine_id" />
+          </Key>
+          <Property Name="medicine_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Doctor_id" Type="int" />
+          <Property Name="Medicine" Type="varchar" MaxLength="200" Nullable="false" />
+        </EntityType>
+        <EntityType Name="monthly_sms">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="user_id" Type="int" Nullable="false" />
+          <Property Name="date" Type="datetime" />
+          <Property Name="sms_count" Type="int" Nullable="false" />
+          <Property Name="sms_remaining_count" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="OTPVerification">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="MobileNo" Type="varchar" MaxLength="20" />
+          <Property Name="EmailId" Type="varchar(max)" />
+          <Property Name="OTP" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="IsSMSSend" Type="bit" />
+          <Property Name="IsEmailSend" Type="bit" />
+          <Property Name="CreatedDate" Type="datetime" />
+          <Property Name="UpdatedDate" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Package_Assigned">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Package_Id" Type="bigint" Nullable="false" />
+          <Property Name="User_id" Type="int" Nullable="false" />
+          <Property Name="Date" Type="datetime" />
+          <Property Name="Last_Date" Type="datetime" />
+          <Property Name="Package_Count" Type="int" />
+          <Property Name="Package_Remaining_Count" Type="int" Nullable="false" />
+          <Property Name="IsActive" Type="bit" />
+        </EntityType>
+        <EntityType Name="Package_Master">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Package_Name" Type="varchar(max)" Nullable="false" />
+          <Property Name="Price" Type="int" />
+          <Property Name="No_Of_Sms" Type="int" Nullable="false" />
+          <Property Name="Days" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="isActive" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Package_Requested">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="User_Id" Type="int" Nullable="false" />
+          <Property Name="Package_Id" Type="bigint" Nullable="false" />
+          <Property Name="Date" Type="datetime" />
+          <Property Name="isActive" Type="varchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Patient_Master">
+          <Key>
+            <PropertyRef Name="Patient_Id" />
+          </Key>
+          <Property Name="Patient_state" Type="varchar" MaxLength="30" />
+          <Property Name="Patient_photo" Type="varchar" MaxLength="200" />
+          <Property Name="Patient_name" Type="varchar" MaxLength="50" />
+          <Property Name="Patient_email" Type="varchar" MaxLength="100" />
+          <Property Name="Patient_contact" Type="varchar" MaxLength="20" />
+          <Property Name="Patient_city" Type="varchar" MaxLength="30" />
+          <Property Name="Patient_address" Type="varchar" MaxLength="500" />
+          <Property Name="Patient_Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Patient_Country" Type="varchar" MaxLength="30" />
+          <Property Name="Reg_Date" Type="date" />
+          <Property Name="User_Id" Type="int" />
+          <Property Name="note" Type="varchar" MaxLength="500" />
+          <Property Name="age" Type="numeric" Precision="16" Scale="2" />
+        </EntityType>
+        <EntityType Name="prescription_table">
+          <Key>
+            <PropertyRef Name="prescription_id" />
+          </Key>
+          <Property Name="prescription_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Patient_Id" Type="int" Nullable="false" />
+          <Property Name="Doctor_id" Type="int" Nullable="false" />
+          <Property Name="Treat_crno" Type="int" Nullable="false" />
+          <Property Name="medicine_name" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="note" Type="varchar" MaxLength="200" />
+          <Property Name="isMorning" Type="bit" />
+          <Property Name="isNoon" Type="bit" />
+          <Property Name="isEvening" Type="bit" />
+          <Property Name="isNight" Type="bit" />
+          <Property Name="no_of_tablet" Type="nvarchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="Report_Problems_Mst">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Problem_Detail" Type="varchar" MaxLength="200" />
+          <Property Name="User_Id" Type="int" />
+        </EntityType>
+        <EntityType Name="SecurityAccount">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="RoleId" Type="int" />
+          <Property Name="passwd" Type="varchar" MaxLength="255" />
+          <Property Name="LoginName" Type="varchar" MaxLength="255" />
+          <Property Name="IsActive" Type="tinyint" Nullable="false" />
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+        </EntityType>
+        <EntityType Name="SecurityRole">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="nme" Type="varchar" MaxLength="255" />
+          <Property Name="IsAdministrator" Type="tinyint" Nullable="false" />
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="HomeView" Type="varchar" MaxLength="255" />
+        </EntityType>
+        <EntityType Name="Send_Mail">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="OutgoingPort" Type="int" />
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="HostName" Type="varchar" MaxLength="100" />
+          <Property Name="FromAddress" Type="varchar" MaxLength="100" />
+          <Property Name="EnableSSL" Type="bit" />
+          <Property Name="DisplayName" Type="varchar" MaxLength="100" />
+          <Property Name="AccountPassword" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="SMS_Master">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="User_id" Type="int" Nullable="false" />
+          <Property Name="Message" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="isDelivered" Type="bit" />
+          <Property Name="isMonthly" Type="bit" Nullable="false" />
+          <Property Name="To_Address" Type="nvarchar(max)" />
+          <Property Name="Date" Type="date" />
+        </EntityType>
+        <EntityType Name="Smtp_Mail_Master">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Port_No" Type="int" Nullable="false" />
+          <Property Name="From_Email_Address" Type="varchar" MaxLength="255" />
+          <Property Name="Credential_Email_Address" Type="varchar" MaxLength="255" />
+          <Property Name="Credential_Password" Type="varchar" MaxLength="255" />
+          <Property Name="Display_name" Type="varchar" MaxLength="255" />
+          <Property Name="Host_name" Type="varchar" MaxLength="255" />
+          <Property Name="EnableSSL" Type="bit" />
+          <Property Name="IsActive" Type="bit" />
+        </EntityType>
+        <EntityType Name="symptoms">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="d_id" Type="bigint" />
+          <Property Name="name" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="user_id" Type="bigint" />
+        </EntityType>
+        <EntityType Name="tblAddress">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="State_Name" Type="varchar" MaxLength="50" />
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Country_Name" Type="varchar" MaxLength="50" />
+          <Property Name="City_Name" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="Treatment_Image_Master">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Treat_crno" Type="int" Nullable="false" />
+          <Property Name="Image_Path" Type="varchar(max)" />
+          <Property Name="CreatedDate" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Treatment_Master">
+          <Key>
+            <PropertyRef Name="Treat_crno" />
+          </Key>
+          <Property Name="Treat_date" Type="date" />
+          <Property Name="Treat_crno" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="SPO_two" Type="varchar" MaxLength="50" />
+          <Property Name="Remarks" Type="varchar" MaxLength="200" />
+          <Property Name="Patient_temp" Type="char" MaxLength="10" />
+          <Property Name="Patient_pulse" Type="char" MaxLength="50" />
+          <Property Name="Patient_image" Type="varchar" MaxLength="200" />
+          <Property Name="Patient_complain" Type="varchar" MaxLength="500" />
+          <Property Name="Patient_Id" Type="int" />
+          <Property Name="Patient_BP" Type="char" MaxLength="50" />
+          <Property Name="Medicine" Type="varchar" MaxLength="200" />
+          <Property Name="Counsultancyfee" Type="decimal" Precision="18" Scale="2" />
+          <Property Name="Advice" Type="varchar" MaxLength="200" />
+          <Property Name="Status" Type="varchar" MaxLength="100" />
+          <Property Name="Referred_Doctor_Name" Type="varchar" MaxLength="200" />
+          <Property Name="Referred_Hospital_Detail" Type="varchar" MaxLength="500" />
+          <Property Name="Patient_Report_Detail" Type="varchar" MaxLength="500" />
+          <Property Name="User_Id" Type="int" />
+          <Property Name="Is_Paid" Type="bit" Nullable="false" />
+          <Property Name="Follow_Date" Type="datetime" />
+          <Property Name="paid_Amount" Type="decimal" Precision="18" Scale="2" />
+          <Property Name="bill_Amount" Type="decimal" Precision="18" Scale="2" />
+          <Property Name="symptoms_id" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="usr">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Email" Type="varchar" MaxLength="255" />
+          <Property Name="Firstname" Type="varchar" MaxLength="255" />
+          <Property Name="Gender" Type="varchar" MaxLength="255" />
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Lastname" Type="varchar" MaxLength="255" />
+          <Property Name="passwd" Type="varchar" MaxLength="255" />
+          <Property Name="AccountId" Type="int" />
+          <Property Name="IsActive" Type="bit" />
+          <Property Name="token_id" Type="nvarchar(max)" />
+          <Property Name="date" Type="datetime" />
+        </EntityType>
+        <Association Name="FK_Doctor_Master_Login_Master">
+          <End Role="usr" Type="Self.usr" Multiplicity="1" />
+          <End Role="Doctor_Master" Type="Self.Doctor_Master" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="usr">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Doctor_Master">
+              <PropertyRef Name="User_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Injury_Photos_Master_Treatment_Master">
+          <End Role="Treatment_Master" Type="Self.Treatment_Master" Multiplicity="0..1" />
+          <End Role="Injury_Photos_Master" Type="Self.Injury_Photos_Master" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Treatment_Master">
+              <PropertyRef Name="Treat_crno" />
+            </Principal>
+            <Dependent Role="Injury_Photos_Master">
+              <PropertyRef Name="Treatment_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Injury_Photos_Master_usr">
+          <End Role="usr" Type="Self.usr" Multiplicity="0..1" />
+          <End Role="Injury_Photos_Master" Type="Self.Injury_Photos_Master" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="usr">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Injury_Photos_Master">
+              <PropertyRef Name="User_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_monthly_sms_usr">
+          <End Role="usr" Type="Self.usr" Multiplicity="1" />
+          <End Role="monthly_sms" Type="Self.monthly_sms" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="usr">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="monthly_sms">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_package_assigned_package_master">
+          <End Role="Package_Master" Type="Self.Package_Master" Multiplicity="1" />
+          <End Role="Package_Assigned" Type="Self.Package_Assigned" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Package_Master">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Package_Assigned">
+              <PropertyRef Name="Package_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_package_assigned_usr">
+          <End Role="usr" Type="Self.usr" Multiplicity="1" />
+          <End Role="Package_Assigned" Type="Self.Package_Assigned" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="usr">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Package_Assigned">
+              <PropertyRef Name="User_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_package_requested_package_master">
+          <End Role="Package_Master" Type="Self.Package_Master" Multiplicity="1" />
+          <End Role="Package_Requested" Type="Self.Package_Requested" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Package_Master">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Package_Requested">
+              <PropertyRef Name="Package_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_package_requested_usr">
+          <End Role="usr" Type="Self.usr" Multiplicity="1" />
+          <End Role="Package_Requested" Type="Self.Package_Requested" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="usr">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Package_Requested">
+              <PropertyRef Name="User_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Patient_Master_usr">
+          <End Role="usr" Type="Self.usr" Multiplicity="0..1" />
+          <End Role="Patient_Master" Type="Self.Patient_Master" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="usr">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Patient_Master">
+              <PropertyRef Name="User_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Report_Problems_Mst_usr">
+          <End Role="usr" Type="Self.usr" Multiplicity="0..1" />
+          <End Role="Report_Problems_Mst" Type="Self.Report_Problems_Mst" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="usr">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Report_Problems_Mst">
+              <PropertyRef Name="User_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SMS_Master_SMS_Master">
+          <End Role="usr" Type="Self.usr" Multiplicity="1" />
+          <End Role="SMS_Master" Type="Self.SMS_Master" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="usr">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="SMS_Master">
+              <PropertyRef Name="User_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Treatment_Image_Master_Treatment_Master">
+          <End Role="Treatment_Master" Type="Self.Treatment_Master" Multiplicity="1" />
+          <End Role="Treatment_Image_Master" Type="Self.Treatment_Image_Master" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Treatment_Master">
+              <PropertyRef Name="Treat_crno" />
+            </Principal>
+            <Dependent Role="Treatment_Image_Master">
+              <PropertyRef Name="Treat_crno" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Treatment_Master_Patient_Master">
+          <End Role="Patient_Master" Type="Self.Patient_Master" Multiplicity="0..1" />
+          <End Role="Treatment_Master" Type="Self.Treatment_Master" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Patient_Master">
+              <PropertyRef Name="Patient_Id" />
+            </Principal>
+            <Dependent Role="Treatment_Master">
+              <PropertyRef Name="Patient_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Treatment_Master_usr">
+          <End Role="usr" Type="Self.usr" Multiplicity="0..1" />
+          <End Role="Treatment_Master" Type="Self.Treatment_Master" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="usr">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Treatment_Master">
+              <PropertyRef Name="User_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="Patient_Id">
+          <End Role="Patient_Master" Type="Self.Patient_Master" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Treatment_Master" Type="Self.Treatment_Master" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Patient_Master">
+              <PropertyRef Name="Patient_Id" />
+            </Principal>
+            <Dependent Role="Treatment_Master">
+              <PropertyRef Name="Patient_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="ref_ScrtyAccnt_ScrtyR_C93DD2C4">
+          <End Role="SecurityRole" Type="Self.SecurityRole" Multiplicity="0..1" />
+          <End Role="SecurityAccount" Type="Self.SecurityAccount" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SecurityRole">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="SecurityAccount">
+              <PropertyRef Name="RoleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="ref_usr_SecurityAccount">
+          <End Role="SecurityAccount" Type="Self.SecurityAccount" Multiplicity="0..1" />
+          <End Role="usr" Type="Self.usr" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SecurityAccount">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="usr">
+              <PropertyRef Name="AccountId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="ddiarydbModelStoreContainer">
+          <EntitySet Name="account_table" EntityType="Self.account_table" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="application_version" EntityType="Self.application_version" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Appointment" EntityType="Self.Appointment" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Disease" EntityType="Self.Disease" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Doctor_Master" EntityType="Self.Doctor_Master" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DoctorShifts" EntityType="Self.DoctorShifts" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Injury_Photos_Master" EntityType="Self.Injury_Photos_Master" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Login_Master" EntityType="Self.Login_Master" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Login_Track" EntityType="Self.Login_Track" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Mail_Track" EntityType="Self.Mail_Track" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="medicine_table" EntityType="Self.medicine_table" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="monthly_sms" EntityType="Self.monthly_sms" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="OTPVerification" EntityType="Self.OTPVerification" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Package_Assigned" EntityType="Self.Package_Assigned" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Package_Master" EntityType="Self.Package_Master" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Package_Requested" EntityType="Self.Package_Requested" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Patient_Master" EntityType="Self.Patient_Master" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="prescription_table" EntityType="Self.prescription_table" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Report_Problems_Mst" EntityType="Self.Report_Problems_Mst" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SecurityAccount" EntityType="Self.SecurityAccount" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SecurityRole" EntityType="Self.SecurityRole" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Send_Mail" EntityType="Self.Send_Mail" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SMS_Master" EntityType="Self.SMS_Master" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Smtp_Mail_Master" EntityType="Self.Smtp_Mail_Master" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="symptoms" EntityType="Self.symptoms" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblAddress" EntityType="Self.tblAddress" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Treatment_Image_Master" EntityType="Self.Treatment_Image_Master" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Treatment_Master" EntityType="Self.Treatment_Master" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="usr" EntityType="Self.usr" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_Doctor_Master_Login_Master" Association="Self.FK_Doctor_Master_Login_Master">
+            <End Role="usr" EntitySet="usr" />
+            <End Role="Doctor_Master" EntitySet="Doctor_Master" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Injury_Photos_Master_Treatment_Master" Association="Self.FK_Injury_Photos_Master_Treatment_Master">
+            <End Role="Treatment_Master" EntitySet="Treatment_Master" />
+            <End Role="Injury_Photos_Master" EntitySet="Injury_Photos_Master" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Injury_Photos_Master_usr" Association="Self.FK_Injury_Photos_Master_usr">
+            <End Role="usr" EntitySet="usr" />
+            <End Role="Injury_Photos_Master" EntitySet="Injury_Photos_Master" />
+          </AssociationSet>
+          <AssociationSet Name="fk_monthly_sms_usr" Association="Self.fk_monthly_sms_usr">
+            <End Role="usr" EntitySet="usr" />
+            <End Role="monthly_sms" EntitySet="monthly_sms" />
+          </AssociationSet>
+          <AssociationSet Name="fk_package_assigned_package_master" Association="Self.fk_package_assigned_package_master">
+            <End Role="Package_Master" EntitySet="Package_Master" />
+            <End Role="Package_Assigned" EntitySet="Package_Assigned" />
+          </AssociationSet>
+          <AssociationSet Name="fk_package_assigned_usr" Association="Self.fk_package_assigned_usr">
+            <End Role="usr" EntitySet="usr" />
+            <End Role="Package_Assigned" EntitySet="Package_Assigned" />
+          </AssociationSet>
+          <AssociationSet Name="fk_package_requested_package_master" Association="Self.fk_package_requested_package_master">
+            <End Role="Package_Master" EntitySet="Package_Master" />
+            <End Role="Package_Requested" EntitySet="Package_Requested" />
+          </AssociationSet>
+          <AssociationSet Name="fk_package_requested_usr" Association="Self.fk_package_requested_usr">
+            <End Role="usr" EntitySet="usr" />
+            <End Role="Package_Requested" EntitySet="Package_Requested" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Patient_Master_usr" Association="Self.FK_Patient_Master_usr">
+            <End Role="usr" EntitySet="usr" />
+            <End Role="Patient_Master" EntitySet="Patient_Master" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Report_Problems_Mst_usr" Association="Self.FK_Report_Problems_Mst_usr">
+            <End Role="usr" EntitySet="usr" />
+            <End Role="Report_Problems_Mst" EntitySet="Report_Problems_Mst" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SMS_Master_SMS_Master" Association="Self.FK_SMS_Master_SMS_Master">
+            <End Role="usr" EntitySet="usr" />
+            <End Role="SMS_Master" EntitySet="SMS_Master" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Treatment_Image_Master_Treatment_Master" Association="Self.FK_Treatment_Image_Master_Treatment_Master">
+            <End Role="Treatment_Master" EntitySet="Treatment_Master" />
+            <End Role="Treatment_Image_Master" EntitySet="Treatment_Image_Master" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Treatment_Master_Patient_Master" Association="Self.FK_Treatment_Master_Patient_Master">
+            <End Role="Patient_Master" EntitySet="Patient_Master" />
+            <End Role="Treatment_Master" EntitySet="Treatment_Master" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Treatment_Master_usr" Association="Self.FK_Treatment_Master_usr">
+            <End Role="usr" EntitySet="usr" />
+            <End Role="Treatment_Master" EntitySet="Treatment_Master" />
+          </AssociationSet>
+          <AssociationSet Name="Patient_Id" Association="Self.Patient_Id">
+            <End Role="Patient_Master" EntitySet="Patient_Master" />
+            <End Role="Treatment_Master" EntitySet="Treatment_Master" />
+          </AssociationSet>
+          <AssociationSet Name="ref_ScrtyAccnt_ScrtyR_C93DD2C4" Association="Self.ref_ScrtyAccnt_ScrtyR_C93DD2C4">
+            <End Role="SecurityRole" EntitySet="SecurityRole" />
+            <End Role="SecurityAccount" EntitySet="SecurityAccount" />
+          </AssociationSet>
+          <AssociationSet Name="ref_usr_SecurityAccount" Association="Self.ref_usr_SecurityAccount">
+            <End Role="SecurityAccount" EntitySet="SecurityAccount" />
+            <End Role="usr" EntitySet="usr" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="ddiarydbModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="ddiarydbEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="OTPVerifications" EntityType="ddiarydbModel.OTPVerification" />
+          <EntitySet Name="account_table" EntityType="ddiarydbModel.account_table" />
+          <EntitySet Name="application_version" EntityType="ddiarydbModel.application_version" />
+          <EntitySet Name="Appointments" EntityType="ddiarydbModel.Appointment" />
+          <EntitySet Name="Diseases" EntityType="ddiarydbModel.Disease" />
+          <EntitySet Name="Doctor_Master" EntityType="ddiarydbModel.Doctor_Master" />
+          <EntitySet Name="DoctorShifts" EntityType="ddiarydbModel.DoctorShift" />
+          <EntitySet Name="Injury_Photos_Master" EntityType="ddiarydbModel.Injury_Photos_Master" />
+          <EntitySet Name="Login_Master" EntityType="ddiarydbModel.Login_Master" />
+          <EntitySet Name="Login_Track" EntityType="ddiarydbModel.Login_Track" />
+          <EntitySet Name="Mail_Track" EntityType="ddiarydbModel.Mail_Track" />
+          <EntitySet Name="medicine_table" EntityType="ddiarydbModel.medicine_table" />
+          <EntitySet Name="monthly_sms" EntityType="ddiarydbModel.monthly_sms" />
+          <EntitySet Name="Package_Assigned" EntityType="ddiarydbModel.Package_Assigned" />
+          <EntitySet Name="Package_Master" EntityType="ddiarydbModel.Package_Master" />
+          <EntitySet Name="Package_Requested" EntityType="ddiarydbModel.Package_Requested" />
+          <EntitySet Name="Patient_Master" EntityType="ddiarydbModel.Patient_Master" />
+          <EntitySet Name="prescription_table" EntityType="ddiarydbModel.prescription_table" />
+          <EntitySet Name="Report_Problems_Mst" EntityType="ddiarydbModel.Report_Problems_Mst" />
+          <EntitySet Name="SecurityAccounts" EntityType="ddiarydbModel.SecurityAccount" />
+          <EntitySet Name="SecurityRoles" EntityType="ddiarydbModel.SecurityRole" />
+          <EntitySet Name="Send_Mail" EntityType="ddiarydbModel.Send_Mail" />
+          <EntitySet Name="SMS_Master" EntityType="ddiarydbModel.SMS_Master" />
+          <EntitySet Name="Smtp_Mail_Master" EntityType="ddiarydbModel.Smtp_Mail_Master" />
+          <EntitySet Name="symptoms" EntityType="ddiarydbModel.symptom" />
+          <EntitySet Name="tblAddresses" EntityType="ddiarydbModel.tblAddress" />
+          <EntitySet Name="Treatment_Image_Master" EntityType="ddiarydbModel.Treatment_Image_Master" />
+          <EntitySet Name="Treatment_Master" EntityType="ddiarydbModel.Treatment_Master" />
+          <EntitySet Name="usrs" EntityType="ddiarydbModel.usr" />
+          <AssociationSet Name="FK_Doctor_Master_Login_Master" Association="ddiarydbModel.FK_Doctor_Master_Login_Master">
+            <End Role="usr" EntitySet="usrs" />
+            <End Role="Doctor_Master" EntitySet="Doctor_Master" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Injury_Photos_Master_Treatment_Master" Association="ddiarydbModel.FK_Injury_Photos_Master_Treatment_Master">
+            <End Role="Treatment_Master" EntitySet="Treatment_Master" />
+            <End Role="Injury_Photos_Master" EntitySet="Injury_Photos_Master" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Injury_Photos_Master_usr" Association="ddiarydbModel.FK_Injury_Photos_Master_usr">
+            <End Role="usr" EntitySet="usrs" />
+            <End Role="Injury_Photos_Master" EntitySet="Injury_Photos_Master" />
+          </AssociationSet>
+          <AssociationSet Name="fk_monthly_sms_usr" Association="ddiarydbModel.fk_monthly_sms_usr">
+            <End Role="usr" EntitySet="usrs" />
+            <End Role="monthly_sms" EntitySet="monthly_sms" />
+          </AssociationSet>
+          <AssociationSet Name="fk_package_assigned_package_master" Association="ddiarydbModel.fk_package_assigned_package_master">
+            <End Role="Package_Master" EntitySet="Package_Master" />
+            <End Role="Package_Assigned" EntitySet="Package_Assigned" />
+          </AssociationSet>
+          <AssociationSet Name="fk_package_assigned_usr" Association="ddiarydbModel.fk_package_assigned_usr">
+            <End Role="usr" EntitySet="usrs" />
+            <End Role="Package_Assigned" EntitySet="Package_Assigned" />
+          </AssociationSet>
+          <AssociationSet Name="fk_package_requested_package_master" Association="ddiarydbModel.fk_package_requested_package_master">
+            <End Role="Package_Master" EntitySet="Package_Master" />
+            <End Role="Package_Requested" EntitySet="Package_Requested" />
+          </AssociationSet>
+          <AssociationSet Name="fk_package_requested_usr" Association="ddiarydbModel.fk_package_requested_usr">
+            <End Role="usr" EntitySet="usrs" />
+            <End Role="Package_Requested" EntitySet="Package_Requested" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Patient_Master_usr" Association="ddiarydbModel.FK_Patient_Master_usr">
+            <End Role="usr" EntitySet="usrs" />
+            <End Role="Patient_Master" EntitySet="Patient_Master" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Treatment_Master_Patient_Master" Association="ddiarydbModel.FK_Treatment_Master_Patient_Master">
+            <End Role="Patient_Master" EntitySet="Patient_Master" />
+            <End Role="Treatment_Master" EntitySet="Treatment_Master" />
+          </AssociationSet>
+          <AssociationSet Name="Patient_Id" Association="ddiarydbModel.Patient_Id">
+            <End Role="Patient_Master" EntitySet="Patient_Master" />
+            <End Role="Treatment_Master" EntitySet="Treatment_Master" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Report_Problems_Mst_usr" Association="ddiarydbModel.FK_Report_Problems_Mst_usr">
+            <End Role="usr" EntitySet="usrs" />
+            <End Role="Report_Problems_Mst" EntitySet="Report_Problems_Mst" />
+          </AssociationSet>
+          <AssociationSet Name="ref_ScrtyAccnt_ScrtyR_C93DD2C4" Association="ddiarydbModel.ref_ScrtyAccnt_ScrtyR_C93DD2C4">
+            <End Role="SecurityRole" EntitySet="SecurityRoles" />
+            <End Role="SecurityAccount" EntitySet="SecurityAccounts" />
+          </AssociationSet>
+          <AssociationSet Name="ref_usr_SecurityAccount" Association="ddiarydbModel.ref_usr_SecurityAccount">
+            <End Role="SecurityAccount" EntitySet="SecurityAccounts" />
+            <End Role="usr" EntitySet="usrs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SMS_Master_SMS_Master" Association="ddiarydbModel.FK_SMS_Master_SMS_Master">
+            <End Role="usr" EntitySet="usrs" />
+            <End Role="SMS_Master" EntitySet="SMS_Master" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Treatment_Image_Master_Treatment_Master" Association="ddiarydbModel.FK_Treatment_Image_Master_Treatment_Master">
+            <End Role="Treatment_Master" EntitySet="Treatment_Master" />
+            <End Role="Treatment_Image_Master" EntitySet="Treatment_Image_Master" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Treatment_Master_usr" Association="ddiarydbModel.FK_Treatment_Master_usr">
+            <End Role="usr" EntitySet="usrs" />
+            <End Role="Treatment_Master" EntitySet="Treatment_Master" />
+          </AssociationSet>
+          </EntityContainer>
+        <EntityType Name="OTPVerification">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="MobileNo" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="EmailId" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="OTP" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="IsSMSSend" Type="Boolean" />
+          <Property Name="IsEmailSend" Type="Boolean" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="account_table">
+          <Key>
+            <PropertyRef Name="account_id" />
+          </Key>
+          <Property Name="account_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="patient_id" Type="Int32" Nullable="false" />
+          <Property Name="amount" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="date" Type="DateTime" Precision="0" />
+          <Property Name="remarks" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="transaction_type" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Treat_crno" Type="Int32" />
+          <Property Name="Doctor_id" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="application_version">
+          <Key>
+            <PropertyRef Name="version_id" />
+          </Key>
+          <Property Name="version_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="version" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="isForceful" Type="Boolean" Nullable="false" />
+          <Property Name="version_date" Type="DateTime" Nullable="false" Precision="3" />
+        </EntityType>
+        <EntityType Name="Appointment">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="DateStart" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="DateEnd" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="DoctorId" Type="Int32" Nullable="false" />
+          <Property Name="PatientName" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="PatientMobile" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Relation" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Status" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="SessionId" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+        </EntityType>
+        <EntityType Name="Disease">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="disease_name" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="Doctor_Master">
+          <Key>
+            <PropertyRef Name="Doctor_id" />
+          </Key>
+          <Property Name="Reg_date" Type="DateTime" Precision="3" />
+          <Property Name="User_id" Type="Int32" Nullable="false" />
+          <Property Name="Doctor_state" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="Doctor_photo" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="Doctor_name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Doctor_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Doctor_exp" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Doctor_email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Doctor_degree" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Doctor_country" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="Doctor_contact" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Doctor_city" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="Doctor_address" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="Clinic_name" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Gender" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="IsActive" Type="Boolean" />
+          <NavigationProperty Name="usr" Relationship="ddiarydbModel.FK_Doctor_Master_Login_Master" FromRole="Doctor_Master" ToRole="usr" />
+        </EntityType>
+        <EntityType Name="DoctorShift">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="DoctorId" Type="Int32" Nullable="false" />
+          <Property Name="MorningStart" Type="Time" Nullable="false" Precision="7" />
+          <Property Name="MorningEnd" Type="Time" Nullable="false" Precision="7" />
+          <Property Name="AfternoonStart" Type="Time" Nullable="false" Precision="7" />
+          <Property Name="AfternoonEnd" Type="Time" Nullable="false" Precision="7" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Injury_Photos_Master">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Treatment_Id" Type="Int32" />
+          <Property Name="Injury_Photos" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="Is_Active" Type="Boolean" />
+          <Property Name="User_Id" Type="Int32" />
+          <NavigationProperty Name="Treatment_Master" Relationship="ddiarydbModel.FK_Injury_Photos_Master_Treatment_Master" FromRole="Injury_Photos_Master" ToRole="Treatment_Master" />
+          <NavigationProperty Name="usr" Relationship="ddiarydbModel.FK_Injury_Photos_Master_usr" FromRole="Injury_Photos_Master" ToRole="usr" />
+        </EntityType>
+        <EntityType Name="Login_Master">
+          <Key>
+            <PropertyRef Name="intUserId" />
+          </Key>
+          <Property Name="stUserName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="stPhoneNo" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="stPassword" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="stEmail" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="intUserId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+        </EntityType>
+        <EntityType Name="Login_Track">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="User_Id" Type="Int32" />
+          <Property Name="Email" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Login_Date" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="IsSuccess" Type="Boolean" Nullable="false" />
+          <Property Name="App_Version" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="Mail_Track">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="User_Id" Type="Int32" />
+          <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Verify_Code" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="IsSuccess" Type="Boolean" />
+        </EntityType>
+        <EntityType Name="medicine_table">
+          <Key>
+            <PropertyRef Name="medicine_id" />
+          </Key>
+          <Property Name="medicine_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Doctor_id" Type="Int32" />
+          <Property Name="Medicine" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="monthly_sms">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="user_id" Type="Int32" Nullable="false" />
+          <Property Name="date" Type="DateTime" Precision="3" />
+          <Property Name="sms_count" Type="Int32" Nullable="false" />
+          <Property Name="sms_remaining_count" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="usr" Relationship="ddiarydbModel.fk_monthly_sms_usr" FromRole="monthly_sms" ToRole="usr" />
+        </EntityType>
+        <EntityType Name="Package_Assigned">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Package_Id" Type="Int64" Nullable="false" />
+          <Property Name="User_id" Type="Int32" Nullable="false" />
+          <Property Name="Date" Type="DateTime" Precision="3" />
+          <Property Name="Last_Date" Type="DateTime" Precision="3" />
+          <Property Name="Package_Count" Type="Int32" />
+          <Property Name="Package_Remaining_Count" Type="Int32" Nullable="false" />
+          <Property Name="IsActive" Type="Boolean" />
+          <NavigationProperty Name="Package_Master" Relationship="ddiarydbModel.fk_package_assigned_package_master" FromRole="Package_Assigned" ToRole="Package_Master" />
+          <NavigationProperty Name="usr" Relationship="ddiarydbModel.fk_package_assigned_usr" FromRole="Package_Assigned" ToRole="usr" />
+        </EntityType>
+        <EntityType Name="Package_Master">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Package_Name" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="Price" Type="Int32" />
+          <Property Name="No_Of_Sms" Type="Int32" Nullable="false" />
+          <Property Name="Days" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="isActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Package_Assigned" Relationship="ddiarydbModel.fk_package_assigned_package_master" FromRole="Package_Master" ToRole="Package_Assigned" />
+          <NavigationProperty Name="Package_Requested" Relationship="ddiarydbModel.fk_package_requested_package_master" FromRole="Package_Master" ToRole="Package_Requested" />
+        </EntityType>
+        <EntityType Name="Package_Requested">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="User_Id" Type="Int32" Nullable="false" />
+          <Property Name="Package_Id" Type="Int64" Nullable="false" />
+          <Property Name="Date" Type="DateTime" Precision="3" />
+          <Property Name="isActive" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Package_Master" Relationship="ddiarydbModel.fk_package_requested_package_master" FromRole="Package_Requested" ToRole="Package_Master" />
+          <NavigationProperty Name="usr" Relationship="ddiarydbModel.fk_package_requested_usr" FromRole="Package_Requested" ToRole="usr" />
+        </EntityType>
+        <EntityType Name="Patient_Master">
+          <Key>
+            <PropertyRef Name="Patient_Id" />
+          </Key>
+          <Property Name="Patient_state" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="Patient_photo" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="Patient_name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Patient_email" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Patient_contact" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Patient_city" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="Patient_address" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="Patient_Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Patient_Country" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="Reg_Date" Type="DateTime" Precision="0" />
+          <Property Name="User_Id" Type="Int32" />
+          <Property Name="note" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="age" Type="Decimal" Precision="16" Scale="2" />
+          <NavigationProperty Name="usr" Relationship="ddiarydbModel.FK_Patient_Master_usr" FromRole="Patient_Master" ToRole="usr" />
+          <NavigationProperty Name="Treatment_Master" Relationship="ddiarydbModel.FK_Treatment_Master_Patient_Master" FromRole="Patient_Master" ToRole="Treatment_Master" />
+          <NavigationProperty Name="Treatment_Master1" Relationship="ddiarydbModel.Patient_Id" FromRole="Patient_Master" ToRole="Treatment_Master" />
+        </EntityType>
+        <EntityType Name="prescription_table">
+          <Key>
+            <PropertyRef Name="prescription_id" />
+          </Key>
+          <Property Name="prescription_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Patient_Id" Type="Int32" Nullable="false" />
+          <Property Name="Doctor_id" Type="Int32" Nullable="false" />
+          <Property Name="Treat_crno" Type="Int32" Nullable="false" />
+          <Property Name="medicine_name" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="note" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="isMorning" Type="Boolean" />
+          <Property Name="isNoon" Type="Boolean" />
+          <Property Name="isEvening" Type="Boolean" />
+          <Property Name="isNight" Type="Boolean" />
+          <Property Name="no_of_tablet" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="Report_Problems_Mst">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Problem_Detail" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="User_Id" Type="Int32" />
+          <NavigationProperty Name="usr" Relationship="ddiarydbModel.FK_Report_Problems_Mst_usr" FromRole="Report_Problems_Mst" ToRole="usr" />
+        </EntityType>
+        <EntityType Name="SecurityAccount">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="RoleId" Type="Int32" />
+          <Property Name="passwd" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="LoginName" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="IsActive" Type="Byte" Nullable="false" />
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="SecurityRole" Relationship="ddiarydbModel.ref_ScrtyAccnt_ScrtyR_C93DD2C4" FromRole="SecurityAccount" ToRole="SecurityRole" />
+          <NavigationProperty Name="usrs" Relationship="ddiarydbModel.ref_usr_SecurityAccount" FromRole="SecurityAccount" ToRole="usr" />
+        </EntityType>
+        <EntityType Name="SecurityRole">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="nme" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="IsAdministrator" Type="Byte" Nullable="false" />
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="HomeView" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="SecurityAccounts" Relationship="ddiarydbModel.ref_ScrtyAccnt_ScrtyR_C93DD2C4" FromRole="SecurityRole" ToRole="SecurityAccount" />
+        </EntityType>
+        <EntityType Name="Send_Mail">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="OutgoingPort" Type="Int32" />
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="HostName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="FromAddress" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="EnableSSL" Type="Boolean" />
+          <Property Name="DisplayName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="AccountPassword" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="SMS_Master">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="User_id" Type="Int32" Nullable="false" />
+          <Property Name="Message" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="isDelivered" Type="Boolean" />
+          <Property Name="isMonthly" Type="Boolean" Nullable="false" />
+          <Property Name="To_Address" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Date" Type="DateTime" Precision="0" />
+          <NavigationProperty Name="usr" Relationship="ddiarydbModel.FK_SMS_Master_SMS_Master" FromRole="SMS_Master" ToRole="usr" />
+        </EntityType>
+        <EntityType Name="Smtp_Mail_Master">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Port_No" Type="Int32" Nullable="false" />
+          <Property Name="From_Email_Address" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="Credential_Email_Address" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="Credential_Password" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="Display_name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="Host_name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="EnableSSL" Type="Boolean" />
+          <Property Name="IsActive" Type="Boolean" />
+        </EntityType>
+        <EntityType Name="symptom">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="d_id" Type="Int64" />
+          <Property Name="name" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="user_id" Type="Int64" />
+        </EntityType>
+        <EntityType Name="tblAddress">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="State_Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Country_Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="City_Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="Treatment_Image_Master">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Treat_crno" Type="Int32" Nullable="false" />
+          <Property Name="Image_Path" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="Treatment_Master" Relationship="ddiarydbModel.FK_Treatment_Image_Master_Treatment_Master" FromRole="Treatment_Image_Master" ToRole="Treatment_Master" />
+        </EntityType>
+        <EntityType Name="Treatment_Master">
+          <Key>
+            <PropertyRef Name="Treat_crno" />
+          </Key>
+          <Property Name="Treat_date" Type="DateTime" Precision="0" />
+          <Property Name="Treat_crno" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="SPO_two" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Remarks" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="Patient_temp" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+          <Property Name="Patient_pulse" Type="String" MaxLength="50" FixedLength="true" Unicode="false" />
+          <Property Name="Patient_image" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="Patient_complain" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="Patient_Id" Type="Int32" />
+          <Property Name="Patient_BP" Type="String" MaxLength="50" FixedLength="true" Unicode="false" />
+          <Property Name="Medicine" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="Counsultancyfee" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="Advice" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="Status" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Referred_Doctor_Name" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="Referred_Hospital_Detail" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="Patient_Report_Detail" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="User_Id" Type="Int32" />
+          <Property Name="Is_Paid" Type="Boolean" Nullable="false" />
+          <Property Name="Follow_Date" Type="DateTime" Precision="3" />
+          <Property Name="paid_Amount" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="bill_Amount" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="symptoms_id" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Injury_Photos_Master" Relationship="ddiarydbModel.FK_Injury_Photos_Master_Treatment_Master" FromRole="Treatment_Master" ToRole="Injury_Photos_Master" />
+          <NavigationProperty Name="Patient_Master" Relationship="ddiarydbModel.FK_Treatment_Master_Patient_Master" FromRole="Treatment_Master" ToRole="Patient_Master" />
+          <NavigationProperty Name="Patient_Master1" Relationship="ddiarydbModel.Patient_Id" FromRole="Treatment_Master" ToRole="Patient_Master" />
+          <NavigationProperty Name="Treatment_Image_Master" Relationship="ddiarydbModel.FK_Treatment_Image_Master_Treatment_Master" FromRole="Treatment_Master" ToRole="Treatment_Image_Master" />
+          <NavigationProperty Name="usr" Relationship="ddiarydbModel.FK_Treatment_Master_usr" FromRole="Treatment_Master" ToRole="usr" />
+        </EntityType>
+        <EntityType Name="usr">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Email" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="Firstname" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="Gender" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Lastname" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="passwd" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="AccountId" Type="Int32" />
+          <Property Name="IsActive" Type="Boolean" />
+          <Property Name="token_id" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="date" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="Doctor_Master" Relationship="ddiarydbModel.FK_Doctor_Master_Login_Master" FromRole="usr" ToRole="Doctor_Master" />
+          <NavigationProperty Name="Injury_Photos_Master" Relationship="ddiarydbModel.FK_Injury_Photos_Master_usr" FromRole="usr" ToRole="Injury_Photos_Master" />
+          <NavigationProperty Name="monthly_sms" Relationship="ddiarydbModel.fk_monthly_sms_usr" FromRole="usr" ToRole="monthly_sms" />
+          <NavigationProperty Name="Package_Assigned" Relationship="ddiarydbModel.fk_package_assigned_usr" FromRole="usr" ToRole="Package_Assigned" />
+          <NavigationProperty Name="Package_Requested" Relationship="ddiarydbModel.fk_package_requested_usr" FromRole="usr" ToRole="Package_Requested" />
+          <NavigationProperty Name="Patient_Master" Relationship="ddiarydbModel.FK_Patient_Master_usr" FromRole="usr" ToRole="Patient_Master" />
+          <NavigationProperty Name="Report_Problems_Mst" Relationship="ddiarydbModel.FK_Report_Problems_Mst_usr" FromRole="usr" ToRole="Report_Problems_Mst" />
+          <NavigationProperty Name="SecurityAccount" Relationship="ddiarydbModel.ref_usr_SecurityAccount" FromRole="usr" ToRole="SecurityAccount" />
+          <NavigationProperty Name="SMS_Master" Relationship="ddiarydbModel.FK_SMS_Master_SMS_Master" FromRole="usr" ToRole="SMS_Master" />
+          <NavigationProperty Name="Treatment_Master" Relationship="ddiarydbModel.FK_Treatment_Master_usr" FromRole="usr" ToRole="Treatment_Master" />
+        </EntityType>
+        <Association Name="FK_Doctor_Master_Login_Master">
+          <End Type="ddiarydbModel.usr" Role="usr" Multiplicity="1" />
+          <End Type="ddiarydbModel.Doctor_Master" Role="Doctor_Master" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="usr">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Doctor_Master">
+              <PropertyRef Name="User_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Injury_Photos_Master_Treatment_Master">
+          <End Type="ddiarydbModel.Treatment_Master" Role="Treatment_Master" Multiplicity="0..1" />
+          <End Type="ddiarydbModel.Injury_Photos_Master" Role="Injury_Photos_Master" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Treatment_Master">
+              <PropertyRef Name="Treat_crno" />
+            </Principal>
+            <Dependent Role="Injury_Photos_Master">
+              <PropertyRef Name="Treatment_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Injury_Photos_Master_usr">
+          <End Type="ddiarydbModel.usr" Role="usr" Multiplicity="0..1" />
+          <End Type="ddiarydbModel.Injury_Photos_Master" Role="Injury_Photos_Master" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="usr">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Injury_Photos_Master">
+              <PropertyRef Name="User_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_monthly_sms_usr">
+          <End Type="ddiarydbModel.usr" Role="usr" Multiplicity="1" />
+          <End Type="ddiarydbModel.monthly_sms" Role="monthly_sms" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="usr">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="monthly_sms">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_package_assigned_package_master">
+          <End Type="ddiarydbModel.Package_Master" Role="Package_Master" Multiplicity="1" />
+          <End Type="ddiarydbModel.Package_Assigned" Role="Package_Assigned" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Package_Master">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Package_Assigned">
+              <PropertyRef Name="Package_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_package_assigned_usr">
+          <End Type="ddiarydbModel.usr" Role="usr" Multiplicity="1" />
+          <End Type="ddiarydbModel.Package_Assigned" Role="Package_Assigned" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="usr">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Package_Assigned">
+              <PropertyRef Name="User_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_package_requested_package_master">
+          <End Type="ddiarydbModel.Package_Master" Role="Package_Master" Multiplicity="1" />
+          <End Type="ddiarydbModel.Package_Requested" Role="Package_Requested" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Package_Master">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Package_Requested">
+              <PropertyRef Name="Package_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_package_requested_usr">
+          <End Type="ddiarydbModel.usr" Role="usr" Multiplicity="1" />
+          <End Type="ddiarydbModel.Package_Requested" Role="Package_Requested" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="usr">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Package_Requested">
+              <PropertyRef Name="User_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Patient_Master_usr">
+          <End Type="ddiarydbModel.usr" Role="usr" Multiplicity="0..1" />
+          <End Type="ddiarydbModel.Patient_Master" Role="Patient_Master" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="usr">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Patient_Master">
+              <PropertyRef Name="User_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Treatment_Master_Patient_Master">
+          <End Type="ddiarydbModel.Patient_Master" Role="Patient_Master" Multiplicity="0..1" />
+          <End Type="ddiarydbModel.Treatment_Master" Role="Treatment_Master" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Patient_Master">
+              <PropertyRef Name="Patient_Id" />
+            </Principal>
+            <Dependent Role="Treatment_Master">
+              <PropertyRef Name="Patient_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="Patient_Id">
+          <End Type="ddiarydbModel.Patient_Master" Role="Patient_Master" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="ddiarydbModel.Treatment_Master" Role="Treatment_Master" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Patient_Master">
+              <PropertyRef Name="Patient_Id" />
+            </Principal>
+            <Dependent Role="Treatment_Master">
+              <PropertyRef Name="Patient_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Report_Problems_Mst_usr">
+          <End Type="ddiarydbModel.usr" Role="usr" Multiplicity="0..1" />
+          <End Type="ddiarydbModel.Report_Problems_Mst" Role="Report_Problems_Mst" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="usr">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Report_Problems_Mst">
+              <PropertyRef Name="User_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="ref_ScrtyAccnt_ScrtyR_C93DD2C4">
+          <End Type="ddiarydbModel.SecurityRole" Role="SecurityRole" Multiplicity="0..1" />
+          <End Type="ddiarydbModel.SecurityAccount" Role="SecurityAccount" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SecurityRole">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="SecurityAccount">
+              <PropertyRef Name="RoleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="ref_usr_SecurityAccount">
+          <End Type="ddiarydbModel.SecurityAccount" Role="SecurityAccount" Multiplicity="0..1" />
+          <End Type="ddiarydbModel.usr" Role="usr" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SecurityAccount">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="usr">
+              <PropertyRef Name="AccountId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SMS_Master_SMS_Master">
+          <End Type="ddiarydbModel.usr" Role="usr" Multiplicity="1" />
+          <End Type="ddiarydbModel.SMS_Master" Role="SMS_Master" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="usr">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="SMS_Master">
+              <PropertyRef Name="User_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Treatment_Image_Master_Treatment_Master">
+          <End Type="ddiarydbModel.Treatment_Master" Role="Treatment_Master" Multiplicity="1" />
+          <End Type="ddiarydbModel.Treatment_Image_Master" Role="Treatment_Image_Master" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Treatment_Master">
+              <PropertyRef Name="Treat_crno" />
+            </Principal>
+            <Dependent Role="Treatment_Image_Master">
+              <PropertyRef Name="Treat_crno" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Treatment_Master_usr">
+          <End Type="ddiarydbModel.usr" Role="usr" Multiplicity="0..1" />
+          <End Type="ddiarydbModel.Treatment_Master" Role="Treatment_Master" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="usr">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Treatment_Master">
+              <PropertyRef Name="User_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="ddiarydbModelStoreContainer" CdmEntityContainer="ddiarydbEntities">
+          <EntitySetMapping Name="OTPVerifications">
+            <EntityTypeMapping TypeName="ddiarydbModel.OTPVerification">
+              <MappingFragment StoreEntitySet="OTPVerification">
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="IsEmailSend" ColumnName="IsEmailSend" />
+                <ScalarProperty Name="IsSMSSend" ColumnName="IsSMSSend" />
+                <ScalarProperty Name="OTP" ColumnName="OTP" />
+                <ScalarProperty Name="EmailId" ColumnName="EmailId" />
+                <ScalarProperty Name="MobileNo" ColumnName="MobileNo" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="account_table">
+            <EntityTypeMapping TypeName="ddiarydbModel.account_table">
+              <MappingFragment StoreEntitySet="account_table">
+                <ScalarProperty Name="Doctor_id" ColumnName="Doctor_id" />
+                <ScalarProperty Name="Treat_crno" ColumnName="Treat_crno" />
+                <ScalarProperty Name="transaction_type" ColumnName="transaction_type" />
+                <ScalarProperty Name="remarks" ColumnName="remarks" />
+                <ScalarProperty Name="date" ColumnName="date" />
+                <ScalarProperty Name="amount" ColumnName="amount" />
+                <ScalarProperty Name="patient_id" ColumnName="patient_id" />
+                <ScalarProperty Name="account_id" ColumnName="account_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="application_version">
+            <EntityTypeMapping TypeName="ddiarydbModel.application_version">
+              <MappingFragment StoreEntitySet="application_version">
+                <ScalarProperty Name="version_date" ColumnName="version_date" />
+                <ScalarProperty Name="isForceful" ColumnName="isForceful" />
+                <ScalarProperty Name="version" ColumnName="version" />
+                <ScalarProperty Name="version_id" ColumnName="version_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Appointments">
+            <EntityTypeMapping TypeName="ddiarydbModel.Appointment">
+              <MappingFragment StoreEntitySet="Appointment">
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="SessionId" ColumnName="SessionId" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="Relation" ColumnName="Relation" />
+                <ScalarProperty Name="PatientMobile" ColumnName="PatientMobile" />
+                <ScalarProperty Name="PatientName" ColumnName="PatientName" />
+                <ScalarProperty Name="DoctorId" ColumnName="DoctorId" />
+                <ScalarProperty Name="DateEnd" ColumnName="DateEnd" />
+                <ScalarProperty Name="DateStart" ColumnName="DateStart" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Diseases">
+            <EntityTypeMapping TypeName="ddiarydbModel.Disease">
+              <MappingFragment StoreEntitySet="Disease">
+                <ScalarProperty Name="disease_name" ColumnName="disease_name" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Doctor_Master">
+            <EntityTypeMapping TypeName="ddiarydbModel.Doctor_Master">
+              <MappingFragment StoreEntitySet="Doctor_Master">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="Gender" ColumnName="Gender" />
+                <ScalarProperty Name="Clinic_name" ColumnName="Clinic_name" />
+                <ScalarProperty Name="Doctor_address" ColumnName="Doctor_address" />
+                <ScalarProperty Name="Doctor_city" ColumnName="Doctor_city" />
+                <ScalarProperty Name="Doctor_contact" ColumnName="Doctor_contact" />
+                <ScalarProperty Name="Doctor_country" ColumnName="Doctor_country" />
+                <ScalarProperty Name="Doctor_degree" ColumnName="Doctor_degree" />
+                <ScalarProperty Name="Doctor_email" ColumnName="Doctor_email" />
+                <ScalarProperty Name="Doctor_exp" ColumnName="Doctor_exp" />
+                <ScalarProperty Name="Doctor_id" ColumnName="Doctor_id" />
+                <ScalarProperty Name="Doctor_name" ColumnName="Doctor_name" />
+                <ScalarProperty Name="Doctor_photo" ColumnName="Doctor_photo" />
+                <ScalarProperty Name="Doctor_state" ColumnName="Doctor_state" />
+                <ScalarProperty Name="User_id" ColumnName="User_id" />
+                <ScalarProperty Name="Reg_date" ColumnName="Reg_date" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DoctorShifts">
+            <EntityTypeMapping TypeName="ddiarydbModel.DoctorShift">
+              <MappingFragment StoreEntitySet="DoctorShifts">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="AfternoonEnd" ColumnName="AfternoonEnd" />
+                <ScalarProperty Name="AfternoonStart" ColumnName="AfternoonStart" />
+                <ScalarProperty Name="MorningEnd" ColumnName="MorningEnd" />
+                <ScalarProperty Name="MorningStart" ColumnName="MorningStart" />
+                <ScalarProperty Name="DoctorId" ColumnName="DoctorId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Injury_Photos_Master">
+            <EntityTypeMapping TypeName="ddiarydbModel.Injury_Photos_Master">
+              <MappingFragment StoreEntitySet="Injury_Photos_Master">
+                <ScalarProperty Name="User_Id" ColumnName="User_Id" />
+                <ScalarProperty Name="Is_Active" ColumnName="Is_Active" />
+                <ScalarProperty Name="Injury_Photos" ColumnName="Injury_Photos" />
+                <ScalarProperty Name="Treatment_Id" ColumnName="Treatment_Id" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Login_Master">
+            <EntityTypeMapping TypeName="ddiarydbModel.Login_Master">
+              <MappingFragment StoreEntitySet="Login_Master">
+                <ScalarProperty Name="intUserId" ColumnName="intUserId" />
+                <ScalarProperty Name="stEmail" ColumnName="stEmail" />
+                <ScalarProperty Name="stPassword" ColumnName="stPassword" />
+                <ScalarProperty Name="stPhoneNo" ColumnName="stPhoneNo" />
+                <ScalarProperty Name="stUserName" ColumnName="stUserName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Login_Track">
+            <EntityTypeMapping TypeName="ddiarydbModel.Login_Track">
+              <MappingFragment StoreEntitySet="Login_Track">
+                <ScalarProperty Name="App_Version" ColumnName="App_Version" />
+                <ScalarProperty Name="IsSuccess" ColumnName="IsSuccess" />
+                <ScalarProperty Name="Login_Date" ColumnName="Login_Date" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="User_Id" ColumnName="User_Id" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Mail_Track">
+            <EntityTypeMapping TypeName="ddiarydbModel.Mail_Track">
+              <MappingFragment StoreEntitySet="Mail_Track">
+                <ScalarProperty Name="IsSuccess" ColumnName="IsSuccess" />
+                <ScalarProperty Name="Verify_Code" ColumnName="Verify_Code" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="User_Id" ColumnName="User_Id" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="medicine_table">
+            <EntityTypeMapping TypeName="ddiarydbModel.medicine_table">
+              <MappingFragment StoreEntitySet="medicine_table">
+                <ScalarProperty Name="Medicine" ColumnName="Medicine" />
+                <ScalarProperty Name="Doctor_id" ColumnName="Doctor_id" />
+                <ScalarProperty Name="medicine_id" ColumnName="medicine_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="monthly_sms">
+            <EntityTypeMapping TypeName="ddiarydbModel.monthly_sms">
+              <MappingFragment StoreEntitySet="monthly_sms">
+                <ScalarProperty Name="sms_remaining_count" ColumnName="sms_remaining_count" />
+                <ScalarProperty Name="sms_count" ColumnName="sms_count" />
+                <ScalarProperty Name="date" ColumnName="date" />
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Package_Assigned">
+            <EntityTypeMapping TypeName="ddiarydbModel.Package_Assigned">
+              <MappingFragment StoreEntitySet="Package_Assigned">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="Package_Remaining_Count" ColumnName="Package_Remaining_Count" />
+                <ScalarProperty Name="Package_Count" ColumnName="Package_Count" />
+                <ScalarProperty Name="Last_Date" ColumnName="Last_Date" />
+                <ScalarProperty Name="Date" ColumnName="Date" />
+                <ScalarProperty Name="User_id" ColumnName="User_id" />
+                <ScalarProperty Name="Package_Id" ColumnName="Package_Id" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Package_Master">
+            <EntityTypeMapping TypeName="ddiarydbModel.Package_Master">
+              <MappingFragment StoreEntitySet="Package_Master">
+                <ScalarProperty Name="isActive" ColumnName="isActive" />
+                <ScalarProperty Name="Days" ColumnName="Days" />
+                <ScalarProperty Name="No_Of_Sms" ColumnName="No_Of_Sms" />
+                <ScalarProperty Name="Price" ColumnName="Price" />
+                <ScalarProperty Name="Package_Name" ColumnName="Package_Name" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Package_Requested">
+            <EntityTypeMapping TypeName="ddiarydbModel.Package_Requested">
+              <MappingFragment StoreEntitySet="Package_Requested">
+                <ScalarProperty Name="isActive" ColumnName="isActive" />
+                <ScalarProperty Name="Date" ColumnName="Date" />
+                <ScalarProperty Name="Package_Id" ColumnName="Package_Id" />
+                <ScalarProperty Name="User_Id" ColumnName="User_Id" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Patient_Master">
+            <EntityTypeMapping TypeName="ddiarydbModel.Patient_Master">
+              <MappingFragment StoreEntitySet="Patient_Master">
+                <ScalarProperty Name="age" ColumnName="age" />
+                <ScalarProperty Name="note" ColumnName="note" />
+                <ScalarProperty Name="User_Id" ColumnName="User_Id" />
+                <ScalarProperty Name="Reg_Date" ColumnName="Reg_Date" />
+                <ScalarProperty Name="Patient_Country" ColumnName="Patient_Country" />
+                <ScalarProperty Name="Patient_Id" ColumnName="Patient_Id" />
+                <ScalarProperty Name="Patient_address" ColumnName="Patient_address" />
+                <ScalarProperty Name="Patient_city" ColumnName="Patient_city" />
+                <ScalarProperty Name="Patient_contact" ColumnName="Patient_contact" />
+                <ScalarProperty Name="Patient_email" ColumnName="Patient_email" />
+                <ScalarProperty Name="Patient_name" ColumnName="Patient_name" />
+                <ScalarProperty Name="Patient_photo" ColumnName="Patient_photo" />
+                <ScalarProperty Name="Patient_state" ColumnName="Patient_state" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="prescription_table">
+            <EntityTypeMapping TypeName="ddiarydbModel.prescription_table">
+              <MappingFragment StoreEntitySet="prescription_table">
+                <ScalarProperty Name="no_of_tablet" ColumnName="no_of_tablet" />
+                <ScalarProperty Name="isNight" ColumnName="isNight" />
+                <ScalarProperty Name="isEvening" ColumnName="isEvening" />
+                <ScalarProperty Name="isNoon" ColumnName="isNoon" />
+                <ScalarProperty Name="isMorning" ColumnName="isMorning" />
+                <ScalarProperty Name="note" ColumnName="note" />
+                <ScalarProperty Name="medicine_name" ColumnName="medicine_name" />
+                <ScalarProperty Name="Treat_crno" ColumnName="Treat_crno" />
+                <ScalarProperty Name="Doctor_id" ColumnName="Doctor_id" />
+                <ScalarProperty Name="Patient_Id" ColumnName="Patient_Id" />
+                <ScalarProperty Name="prescription_id" ColumnName="prescription_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Report_Problems_Mst">
+            <EntityTypeMapping TypeName="ddiarydbModel.Report_Problems_Mst">
+              <MappingFragment StoreEntitySet="Report_Problems_Mst">
+                <ScalarProperty Name="User_Id" ColumnName="User_Id" />
+                <ScalarProperty Name="Problem_Detail" ColumnName="Problem_Detail" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SecurityAccounts">
+            <EntityTypeMapping TypeName="ddiarydbModel.SecurityAccount">
+              <MappingFragment StoreEntitySet="SecurityAccount">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="LoginName" ColumnName="LoginName" />
+                <ScalarProperty Name="passwd" ColumnName="passwd" />
+                <ScalarProperty Name="RoleId" ColumnName="RoleId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SecurityRoles">
+            <EntityTypeMapping TypeName="ddiarydbModel.SecurityRole">
+              <MappingFragment StoreEntitySet="SecurityRole">
+                <ScalarProperty Name="HomeView" ColumnName="HomeView" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IsAdministrator" ColumnName="IsAdministrator" />
+                <ScalarProperty Name="nme" ColumnName="nme" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Send_Mail">
+            <EntityTypeMapping TypeName="ddiarydbModel.Send_Mail">
+              <MappingFragment StoreEntitySet="Send_Mail">
+                <ScalarProperty Name="AccountPassword" ColumnName="AccountPassword" />
+                <ScalarProperty Name="DisplayName" ColumnName="DisplayName" />
+                <ScalarProperty Name="EnableSSL" ColumnName="EnableSSL" />
+                <ScalarProperty Name="FromAddress" ColumnName="FromAddress" />
+                <ScalarProperty Name="HostName" ColumnName="HostName" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="OutgoingPort" ColumnName="OutgoingPort" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SMS_Master">
+            <EntityTypeMapping TypeName="ddiarydbModel.SMS_Master">
+              <MappingFragment StoreEntitySet="SMS_Master">
+                <ScalarProperty Name="Date" ColumnName="Date" />
+                <ScalarProperty Name="To_Address" ColumnName="To_Address" />
+                <ScalarProperty Name="isMonthly" ColumnName="isMonthly" />
+                <ScalarProperty Name="isDelivered" ColumnName="isDelivered" />
+                <ScalarProperty Name="Message" ColumnName="Message" />
+                <ScalarProperty Name="User_id" ColumnName="User_id" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Smtp_Mail_Master">
+            <EntityTypeMapping TypeName="ddiarydbModel.Smtp_Mail_Master">
+              <MappingFragment StoreEntitySet="Smtp_Mail_Master">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="EnableSSL" ColumnName="EnableSSL" />
+                <ScalarProperty Name="Host_name" ColumnName="Host_name" />
+                <ScalarProperty Name="Display_name" ColumnName="Display_name" />
+                <ScalarProperty Name="Credential_Password" ColumnName="Credential_Password" />
+                <ScalarProperty Name="Credential_Email_Address" ColumnName="Credential_Email_Address" />
+                <ScalarProperty Name="From_Email_Address" ColumnName="From_Email_Address" />
+                <ScalarProperty Name="Port_No" ColumnName="Port_No" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="symptoms">
+            <EntityTypeMapping TypeName="ddiarydbModel.symptom">
+              <MappingFragment StoreEntitySet="symptoms">
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="d_id" ColumnName="d_id" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblAddresses">
+            <EntityTypeMapping TypeName="ddiarydbModel.tblAddress">
+              <MappingFragment StoreEntitySet="tblAddress">
+                <ScalarProperty Name="City_Name" ColumnName="City_Name" />
+                <ScalarProperty Name="Country_Name" ColumnName="Country_Name" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="State_Name" ColumnName="State_Name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Treatment_Image_Master">
+            <EntityTypeMapping TypeName="ddiarydbModel.Treatment_Image_Master">
+              <MappingFragment StoreEntitySet="Treatment_Image_Master">
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="Image_Path" ColumnName="Image_Path" />
+                <ScalarProperty Name="Treat_crno" ColumnName="Treat_crno" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Treatment_Master">
+            <EntityTypeMapping TypeName="ddiarydbModel.Treatment_Master">
+              <MappingFragment StoreEntitySet="Treatment_Master">
+                <ScalarProperty Name="symptoms_id" ColumnName="symptoms_id" />
+                <ScalarProperty Name="bill_Amount" ColumnName="bill_Amount" />
+                <ScalarProperty Name="paid_Amount" ColumnName="paid_Amount" />
+                <ScalarProperty Name="Follow_Date" ColumnName="Follow_Date" />
+                <ScalarProperty Name="Is_Paid" ColumnName="Is_Paid" />
+                <ScalarProperty Name="User_Id" ColumnName="User_Id" />
+                <ScalarProperty Name="Patient_Report_Detail" ColumnName="Patient_Report_Detail" />
+                <ScalarProperty Name="Referred_Hospital_Detail" ColumnName="Referred_Hospital_Detail" />
+                <ScalarProperty Name="Referred_Doctor_Name" ColumnName="Referred_Doctor_Name" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="Advice" ColumnName="Advice" />
+                <ScalarProperty Name="Counsultancyfee" ColumnName="Counsultancyfee" />
+                <ScalarProperty Name="Medicine" ColumnName="Medicine" />
+                <ScalarProperty Name="Patient_BP" ColumnName="Patient_BP" />
+                <ScalarProperty Name="Patient_Id" ColumnName="Patient_Id" />
+                <ScalarProperty Name="Patient_complain" ColumnName="Patient_complain" />
+                <ScalarProperty Name="Patient_image" ColumnName="Patient_image" />
+                <ScalarProperty Name="Patient_pulse" ColumnName="Patient_pulse" />
+                <ScalarProperty Name="Patient_temp" ColumnName="Patient_temp" />
+                <ScalarProperty Name="Remarks" ColumnName="Remarks" />
+                <ScalarProperty Name="SPO_two" ColumnName="SPO_two" />
+                <ScalarProperty Name="Treat_crno" ColumnName="Treat_crno" />
+                <ScalarProperty Name="Treat_date" ColumnName="Treat_date" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="usrs">
+            <EntityTypeMapping TypeName="ddiarydbModel.usr">
+              <MappingFragment StoreEntitySet="usr">
+                <ScalarProperty Name="date" ColumnName="date" />
+                <ScalarProperty Name="token_id" ColumnName="token_id" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="AccountId" ColumnName="AccountId" />
+                <ScalarProperty Name="passwd" ColumnName="passwd" />
+                <ScalarProperty Name="Lastname" ColumnName="Lastname" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Gender" ColumnName="Gender" />
+                <ScalarProperty Name="Firstname" ColumnName="Firstname" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="7ffdf1e35c8c403a8c1b568b9565d1b7" Name="Diagram1" ZoomLevel="77">
+        <EntityTypeShape EntityType="ddiarydbModel.account_table" Width="1.5" PointX="0.75" PointY="0.75" />
+        <EntityTypeShape EntityType="ddiarydbModel.application_version" Width="1.5" PointX="2.75" PointY="0.75" />
+        <EntityTypeShape EntityType="ddiarydbModel.Appointment" Width="1.5" PointX="2.75" PointY="3.75" />
+        <EntityTypeShape EntityType="ddiarydbModel.Disease" Width="1.5" PointX="4.75" PointY="0.75" />
+        <EntityTypeShape EntityType="ddiarydbModel.Doctor_Master" Width="1.5" PointX="7.5" PointY="13.25" />
+        <EntityTypeShape EntityType="ddiarydbModel.DoctorShift" Width="1.5" PointX="4.75" PointY="3.75" />
+        <EntityTypeShape EntityType="ddiarydbModel.Injury_Photos_Master" Width="1.5" PointX="12" PointY="14.25" />
+        <EntityTypeShape EntityType="ddiarydbModel.Login_Master" Width="1.5" PointX="6.75" PointY="0.75" />
+        <EntityTypeShape EntityType="ddiarydbModel.Login_Track" Width="1.5" PointX="6.75" PointY="3.75" />
+        <EntityTypeShape EntityType="ddiarydbModel.Mail_Track" Width="1.5" PointX="0.75" PointY="7.75" />
+        <EntityTypeShape EntityType="ddiarydbModel.medicine_table" Width="1.5" PointX="2.75" PointY="7.75" />
+        <EntityTypeShape EntityType="ddiarydbModel.monthly_sms" Width="1.5" PointX="7.5" PointY="24.5" />
+        <EntityTypeShape EntityType="ddiarydbModel.Package_Assigned" Width="1.5" PointX="10.5" PointY="18.875" />
+        <EntityTypeShape EntityType="ddiarydbModel.Package_Master" Width="1.5" PointX="8.25" PointY="31.125" />
+        <EntityTypeShape EntityType="ddiarydbModel.Package_Requested" Width="1.5" PointX="7.5" PointY="19.25" />
+        <EntityTypeShape EntityType="ddiarydbModel.Patient_Master" Width="1.5" PointX="7.5" PointY="8.5" />
+        <EntityTypeShape EntityType="ddiarydbModel.prescription_table" Width="1.5" PointX="4.75" PointY="7.75" />
+        <EntityTypeShape EntityType="ddiarydbModel.Report_Problems_Mst" Width="1.5" PointX="7.5" PointY="34.5" />
+        <EntityTypeShape EntityType="ddiarydbModel.SecurityAccount" Width="1.5" PointX="3" PointY="16.25" />
+        <EntityTypeShape EntityType="ddiarydbModel.SecurityRole" Width="1.5" PointX="0.75" PointY="16.375" />
+        <EntityTypeShape EntityType="ddiarydbModel.Send_Mail" Width="1.5" PointX="8.75" PointY="0.75" />
+        <EntityTypeShape EntityType="ddiarydbModel.SMS_Master" Width="1.5" PointX="7.5" PointY="27.5" />
+        <EntityTypeShape EntityType="ddiarydbModel.Smtp_Mail_Master" Width="1.5" PointX="8.75" PointY="4.75" />
+        <EntityTypeShape EntityType="ddiarydbModel.symptom" Width="1.5" PointX="10.75" PointY="0.75" />
+        <EntityTypeShape EntityType="ddiarydbModel.tblAddress" Width="1.5" PointX="0.75" PointY="10.75" />
+        <EntityTypeShape EntityType="ddiarydbModel.Treatment_Image_Master" Width="1.5" PointX="12" PointY="11.125" />
+        <EntityTypeShape EntityType="ddiarydbModel.Treatment_Master" Width="1.5" PointX="9.75" PointY="10.875" />
+        <EntityTypeShape EntityType="ddiarydbModel.usr" Width="1.5" PointX="5.25" PointY="15" />
+        <AssociationConnector Association="ddiarydbModel.FK_Doctor_Master_Login_Master" />
+        <AssociationConnector Association="ddiarydbModel.FK_Injury_Photos_Master_Treatment_Master" />
+        <AssociationConnector Association="ddiarydbModel.FK_Injury_Photos_Master_usr" />
+        <AssociationConnector Association="ddiarydbModel.fk_monthly_sms_usr" />
+        <AssociationConnector Association="ddiarydbModel.fk_package_assigned_package_master" />
+        <AssociationConnector Association="ddiarydbModel.fk_package_assigned_usr" />
+        <AssociationConnector Association="ddiarydbModel.fk_package_requested_package_master" />
+        <AssociationConnector Association="ddiarydbModel.fk_package_requested_usr" />
+        <AssociationConnector Association="ddiarydbModel.FK_Patient_Master_usr" />
+        <AssociationConnector Association="ddiarydbModel.FK_Treatment_Master_Patient_Master" />
+        <AssociationConnector Association="ddiarydbModel.Patient_Id" />
+        <AssociationConnector Association="ddiarydbModel.FK_Report_Problems_Mst_usr" />
+        <AssociationConnector Association="ddiarydbModel.ref_ScrtyAccnt_ScrtyR_C93DD2C4" />
+        <AssociationConnector Association="ddiarydbModel.ref_usr_SecurityAccount" />
+        <AssociationConnector Association="ddiarydbModel.FK_SMS_Master_SMS_Master" />
+        <AssociationConnector Association="ddiarydbModel.FK_Treatment_Image_Master_Treatment_Master" />
+        <AssociationConnector Association="ddiarydbModel.FK_Treatment_Master_usr" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

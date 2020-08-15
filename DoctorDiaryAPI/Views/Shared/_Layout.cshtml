@@ -1,0 +1,469 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/css")
+
+    <style>
+
+        #regForm {
+            background-color: #ffffff;
+            margin: 1.2rem auto;
+            font-family: Raleway;
+            padding: 1rem;
+            width: 90%;
+            min-width: 300px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        input {
+            width: 100%;
+            font-size: 17px;
+            font-family: Raleway;
+            border: 1px solid #aaaaaa;
+        }
+
+        /* Mark input boxes that gets an error on validation: */
+        input.invalid {
+            background-color: #ffdddd;
+        }
+
+        /* Hide all steps by default: */
+        .tab {
+            display: none;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 17px;
+            font-family: Raleway;
+            cursor: pointer;
+        }
+
+            button:hover {
+                opacity: 0.8;
+            }
+
+        #prevBtn {
+            background-color: #bbbbbb;
+        }
+
+        /* Make circles that indicate the steps of the form: */
+        .step {
+            height: 15px;
+            width: 15px;
+            margin: 0 2px;
+            background-color: #bbbbbb;
+            border: none;
+            border-radius: 50%;
+            display: inline-block;
+            opacity: 0.5;
+        }
+
+            .step.active {
+                opacity: 1;
+            }
+
+            /* Mark the steps that are finished and valid: */
+            .step.finish {
+                background-color: #4CAF50;
+            }
+    </style>
+
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    <div class="main-wrapper">
+
+        <header class="header">
+            <nav class="navbar navbar-expand-lg header-nav">
+                <div class="navbar-header">
+                    <a id="mobile_btn" href="javascript:void(0);">
+                        <span class="bar-icon">
+                            <span class="bar-icon">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </span>
+                    </a>
+                    <a href="index.html" class="navbar-brand logo">
+                        <img src="~/Content/assets/img/logo.png" class="img-fluid" alt="Logo">
+                    </a>
+                </div>
+                <div class="main-menu-wrapper">
+                    <div class="menu-header">
+                        <a href="index.html" class="menu-logo">
+                            <img src="~/Content/assets/img/logo.png" class="img-fluid" alt="Logo">
+                        </a>
+                        <a id="menu_close" class="menu-close" href="javascript:void(0);">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    </div>
+                    <ul class="main-nav">
+                        <li class="active">
+                            @Html.ActionLink("Home", "Index", "Home")
+                        </li>
+                        <li>
+                            <a href="#" data-toggle="modal" data-target="#modalRegister">Appointment</a>
+                        </li>
+                    </ul>
+                </div>
+                <ul class="nav header-navbar-rht">
+                    <li class="nav-item contact-item">
+                        <div class="header-contact-img">
+                            <i class="far fa-hospital"></i>
+                        </div>
+                        <div class="header-contact-detail">
+                            <p class="contact-header">Contact</p>
+                            <p class="contact-info-header"> +1 315 369 5943</p>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link header-login" href="login.html">login / Signup </a>
+                    </li>
+                </ul>
+            </nav>
+        </header>
+
+
+        @RenderBody()
+
+        <div class="modal fade" id="modalRegister" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Verify Mobile no.</h4>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close" data-original-title="" title=""><span aria-hidden="true">×</span></button>
+                    </div>
+                    <div class="modal-body">
+                        @using (Html.BeginForm("Dashboard", "Home", FormMethod.Post, new { id = "regForm" }))
+                        {
+
+            <div class="tab mobile">
+                <div class="form-group">
+                    <label for="PatientMobile">Mobile No.</label>
+                    <input id="PatientMobile" class="form-control" oninput="this.className = ''" name="PatientMobile">
+                    <p id="msgMobile"><small></small></p>
+                </div>
+            </div>
+                            <div class="tab OTP">
+                                <div class="form-group">
+                                    <label for="OTP">OTP</label>
+                                    <input id="OTP" class="form-control" oninput="this.className = ''" name="OTP">
+                                    <p id="msgOTP"><small>Waitting...</small></p>
+                                </div>
+                            </div>
+                                            <br />
+                                                            <div style="overflow:auto;">
+                                                                <div style="float:right;">
+                                                                    <button type="button" id="prevBtn" onclick="nextPrev(-1)" class="btn btn-primary">Previous</button>
+                                                                    <button type="button" id="nextBtn" onclick="nextPrev(1)" class="btn btn-primary">Verify</button>
+                                                                </div>
+                                                            </div> <!-- Circles which indicates the steps of the form: -->
+                                                                            <div style="text-align:center;margin-top:40px;">
+                                                                                <span class="step"></span>
+                                                                                <span class="step"></span>
+                                                                            </div>}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+    <footer class="footer">
+
+        <!-- Footer Top -->
+        <div class="footer-top">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-3 col-md-6">
+
+                        <!-- Footer Widget -->
+                        <div class="footer-widget footer-about">
+                            <div class="footer-logo">
+                                <img src="~/Content/assets/img/footer-logo.png" alt="logo">
+                            </div>
+                            <div class="footer-about-content">
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. </p>
+                                <div class="social-icon">
+                                    <ul>
+                                        <li>
+                                            <a href="#" target="_blank"><i class="fab fa-facebook-f"></i> </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" target="_blank"><i class="fab fa-twitter"></i> </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                                        </li>
+                                        <li>
+                                            <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                                        </li>
+                                        <li>
+                                            <a href="#" target="_blank"><i class="fab fa-dribbble"></i> </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /Footer Widget -->
+
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
+
+                        <!-- Footer Widget -->
+                        <div class="footer-widget footer-menu">
+                            <h2 class="footer-title">For Patients</h2>
+                            <ul>
+                                <li><a href="search.html">Search for Doctors</a></li>
+                                <li><a href="login.html">Login</a></li>
+                                <li><a href="register.html">Register</a></li>
+                                <li><a href="booking.html">Booking</a></li>
+                                <li><a href="patient-dashboard.html">Patient Dashboard</a></li>
+                            </ul>
+                        </div>
+                        <!-- /Footer Widget -->
+
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
+
+                        <!-- Footer Widget -->
+                        <div class="footer-widget footer-menu">
+                            <h2 class="footer-title">For Doctors</h2>
+                            <ul>
+                                <li><a href="appointments.html">Appointments</a></li>
+                                <li><a href="chat.html">Chat</a></li>
+                                <li><a href="login.html">Login</a></li>
+                                <li><a href="doctor-register.html">Register</a></li>
+                                <li><a href="doctor-dashboard.html">Doctor Dashboard</a></li>
+                            </ul>
+                        </div>
+                        <!-- /Footer Widget -->
+
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
+
+                        <!-- Footer Widget -->
+                        <div class="footer-widget footer-contact">
+                            <h2 class="footer-title">Contact Us</h2>
+                            <div class="footer-contact-info">
+                                <div class="footer-address">
+                                    <span><i class="fas fa-map-marker-alt"></i></span>
+                                    <p> 3556  Beech Street, San Francisco,<br> California, CA 94108 </p>
+                                </div>
+                                <p>
+                                    <i class="fas fa-phone-alt"></i>
+                                    +1 315 369 5943
+                                </p>
+                                <p class="mb-0">
+                                    <i class="fas fa-envelope"></i>
+                                    doccure@example.com
+                                </p>
+                            </div>
+                        </div>
+                        <!-- /Footer Widget -->
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!-- /Footer Top -->
+        <!-- Footer Bottom -->
+        <div class="footer-bottom">
+            <div class="container-fluid">
+
+                <!-- Copyright -->
+                <div class="copyright">
+                    <div class="row">
+                        <div class="col-md-6 col-lg-6">
+                            <div class="copyright-text">
+                                <p class="mb-0">&copy; @DateTime.Now.Year Doccure. All rights reserved.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-6">
+
+                            <!-- Copyright Menu -->
+                            <div class="copyright-menu">
+                                <ul class="policy-menu">
+                                    <li><a href="term-condition.html">Terms and Conditions</a></li>
+                                    <li><a href="privacy-policy.html">Policy</a></li>
+                                </ul>
+                            </div>
+                            <!-- /Copyright Menu -->
+
+                        </div>
+                    </div>
+                </div>
+                <!-- /Copyright -->
+
+            </div>
+        </div>
+        <!-- /Footer Bottom -->
+
+    </footer>
+
+
+
+    @Scripts.Render("~/Content/js")
+
+    <script>
+        var currentTab = 0; // Current tab is set to be the first tab (0)
+        showTab(currentTab); // Display the current tab
+
+        function showTab(n) {
+            // This function will display the specified tab of the form...
+            var x = document.getElementsByClassName("tab");
+            x[n].style.display = "block";
+            //... and fix the Previous/Next buttons:
+            if (n == 0) {
+                document.getElementById("prevBtn").style.display = "none";
+            } else {
+                document.getElementById("prevBtn").style.display = "inline";
+            }
+            if (n == (x.length - 1)) {
+                document.getElementById("nextBtn").innerHTML = "Submit";
+            } else {
+                document.getElementById("nextBtn").innerHTML = "Next";
+            }
+            //... and run a function that will display the correct step indicator:
+            fixStepIndicator(n)
+        }
+
+        function nextPrev(n) {
+            // This function will figure out which tab to display
+            var x = document.getElementsByClassName("tab");
+            // Exit the function if any field in the current tab is invalid:
+            if (n == 1 && !validateForm()) return false;
+            // Hide the current tab:
+            x[currentTab].style.display = "none";
+
+            if (x[currentTab].className == "tab mobile") {
+
+                var mobile = $("#PatientMobile").val();
+
+                if ((mobile != null || mobile != undefined) && mobile.length > 9) {
+                    $.ajax({
+                        url: "/Home/SendOTP",
+                        method: "GET",
+                        data: { mobile: mobile },
+                        dataType: "json",
+                        success: function (res) {
+
+                            var data = JSON.parse(res);
+
+                            if (data.status_code == 1) {
+                                $("#msgOTP").html("Successfull, OTP sent to entered mobile no.");
+                            }
+                            else {
+                                $("#msgOTP").html(data.message);
+                            }
+                        },
+                        error: function (err) {
+                            alert(err);
+                        }
+                    });
+                }
+                else {
+                    $("#msgMobile").html("Enter valid mobile no.");
+                    return false;
+                }
+            }
+
+            if (x[currentTab].className == "tab OTP") {
+
+                var mobile = $("#PatientMobile").val();
+                var otp = $("#OTP").val();
+
+                if ((otp != null || otp != undefined) && otp.length > 3) {
+                    $.ajax({
+                        url: "/Home/VerifyMobile",
+                        method: "GET",
+                        data: { mobile: mobile, OTP: otp },
+                        dataType: "json",
+                        success: function (res) {
+
+                            var data = JSON.parse(res);
+
+                            if (data.status_code == 1) {
+                                $("#msgOTP").html("Successfull, OTP sent to entered mobile no.");
+                            }
+                            else {
+                                $("#msgOTP").html(data.message);
+                            }
+                        },
+                        error: function (err) {
+                            alert(err);
+                        }
+                    });
+                }
+                else {
+                    $("#msgOTP").html("OTP must have 4 digits.");
+                    return false;
+                }
+            }
+
+            // Increase or decrease the current tab by 1:
+            currentTab = currentTab + n;
+            // if you have reached the end of the form...
+            if (currentTab >= x.length) {
+
+                // ... the form gets submitted:
+                document.getElementById("regForm").submit();
+
+                $('#modalRegister').modal('toggle');
+
+                return false;
+            }
+            // Otherwise, display the correct tab:
+            showTab(currentTab);
+        }
+
+        function validateForm() {
+            // This function deals with validation of the form fields
+            var x, y, i, valid = true;
+            x = document.getElementsByClassName("tab");
+            y = x[currentTab].getElementsByTagName("input");
+            // A loop that checks every input field in the current tab:
+            for (i = 0; i < y.length; i++) {
+                // If a field is empty...
+                if (y[i].value == "") {
+                    // add an "invalid" class to the field:
+                    y[i].className += " invalid";
+                    // and set the current valid status to false
+                    valid = false;
+                }
+            }
+            // If the valid status is true, mark the step as finished and valid:
+            if (valid) {
+                document.getElementsByClassName("step")[currentTab].className += " finish";
+            }
+            return valid; // return the valid status
+        }
+
+        function fixStepIndicator(n) {
+            // This function removes the "active" class of all steps...
+            var i, x = document.getElementsByClassName("step");
+            for (i = 0; i < x.length; i++) {
+                x[i].className = x[i].className.replace(" active", "");
+            }
+            //... and adds the "active" class on the current step:
+            x[n].className += " active";
+        }
+    </script>
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>

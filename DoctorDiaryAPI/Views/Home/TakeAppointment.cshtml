@@ -1,0 +1,464 @@
+﻿@model DoctorDiaryAPI.Appointment
+
+@{
+    ViewBag.Title = "TakeAppointment";
+}
+
+
+
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <h2 class="breadcrumb-title">Schedule Timings</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content" style="transform: none; min-height: 199px;">
+    <div class="container-fluid" style="transform: none;">
+        <div class="row justify-content-md-center p-2" style="transform: none;">
+            <div class="col-md-8 col-lg-8 col-xl-12">
+
+                @using (Html.BeginForm("TakeAppointment", "Home", FormMethod.Post, new { id = "regForm" }))
+                {
+                    @Html.HiddenFor(x => x.PatientMobile)
+
+                    <div class="tab regFormTab row justify-content-md-center">
+                        <div class="card col-md-8 offset-md-2">
+                            <div class="card-body">
+                                <h4 class="card-title my-2">Fill Details</h4>
+                                <div class="service-fields mb-3">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="form-group">
+                                                <label for="PatientName">Name: <span class="text-danger">*</span></label>
+                                                @Html.EditorFor(x => x.PatientName, new { @class = "form-control", type = "text", placeholder = "Your Name *", required = "required" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="service-fields mb-3">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label for="Patient">Relation with Patient: <span class="text-danger">*</span></label>
+                                                <select class="form-control select select2-hidden-accessible" id="Relation" name="Relation" required="required" data-validation-required-message="Please select relation.">
+                                                    <option value="Self" selected="selected">Self</option>
+                                                    <option value="Child">Child</option>
+                                                    <option value="Wife">Wife</option>
+                                                    <option value="Gardian">Gardian</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="tab regFormTab row justify-content-md-center">
+                        <div class="card col-md-8 offset-md-2">
+                            <div class="card-body">
+                                <h4 class="card-title my-2">Schedule Timings</h4>
+                                <div class="profile-box">
+                                    <div class="row">
+
+                                        <div class="col-lg-4">
+                                            <div class="form-group">
+                                                <label>Doctor: </label>
+                                                @Html.DropDownListFor(x => x.DoctorId, new SelectList(ViewBag.Doctors, "Doctor_id", "Doctor_name"), "Select Doctor", new { @class = "form-control select select2-hidden-accessible", onchange = "TimeSlots()" })
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-4">
+                                            <div class="form-group">
+                                                <label>Date: </label>
+                                                @*<input type="text" id="DateStart" name="DateStart" required="required" class="form-control datetimepicker" placeholder="Select Date">*@
+                                                <input type="date" id="DateStart" name="DateStart" required="required" class="form-control" onchange="TimeSlots()">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="card schedule-widget mb-0">
+
+                                                <!-- Schedule Content -->
+                                                <div class="tab-content schedule-cont">
+
+                                                    <!-- Monday Slot -->
+                                                    <div id="slot_monday" class="tab-pane fade show active">
+                                                        <h4 class="card-title d-flex justify-content-between">
+                                                            <span>Time Slots</span>
+                                                        </h4>
+
+                                                        <p id="error" class="text-danger"></p>
+
+                                                        <!-- Slot List -->
+                                                        <div id="time_slots" class="doc-times">
+
+                                                        </div>
+                                                        <!-- /Slot List -->
+
+                                                    </div>
+                                                    <!-- /Monday Slot -->
+
+                                                </div>
+                                                <!-- /Schedule Content -->
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row justify-content-md-center social-login">
+                        <button type="button" id="prevBtn" onclick="nextPrev(-1)" class="btn btn-primary mr-2">Previous</button>
+                        <button type="button" id="nextBtn" onclick="nextPrev(1)" class="btn btn-primary">Next</button>
+                    </div>
+                    <!-- Circles which indicates the steps of the form: -->
+                    <div style="text-align:center;margin-top:40px;">
+                        <span class="step"></span>
+                        <span class="step"></span>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts{
+
+    <script>
+        $(function () {
+
+            document.getElementById("error").innerHTML = "";
+
+            //alert($('#Date').val());
+            //$('#Date').datepicker({
+            //    format: "dd-mm-yyyy",
+            //    startDate: new Date(),
+            //    endDate: new Date()
+            //});
+
+            //var setD = new Date();
+
+            //$('input[name="Date"]').daterangepicker({
+            //    singleDatePicker: true,
+            //    showDropdowns: false,
+            //    format: "dd-mm-yyyy",
+            //    startDate: moment(),
+            //    endDate: moment().add(10)
+            //});
+
+            //$('input[name="DateStart"]').on('dp.', function (e) { $('input[name="DateStart"]').val(e.date._i); TimeSlots() })
+
+        });
+
+        var currentTab = 0; // Current tab is set to be the first tab (0)
+        showTab(currentTab); // Display the current tab
+
+        function showTab(n) {
+            // This function will display the specified tab of the form...
+            var x = document.getElementsByClassName("regFormTab");
+            x[n].style.display = "block";
+            //... and fix the Previous/Next buttons:
+            if (n == 0) {
+                document.getElementById("prevBtn").style.display = "none";
+            } else {
+                document.getElementById("prevBtn").style.display = "inline";
+            }
+            if (n == 1) {
+                document.getElementById("nextBtn").innerHTML = "Submit";
+            } else {
+                document.getElementById("nextBtn").innerHTML = "Next";
+            }
+            //... and run a function that will display the correct step indicator:
+            fixStepIndicator(n)
+        }
+
+        function nextPrev(n) {
+            // This function will figure out which tab to display
+            var x = document.getElementsByClassName("regFormTab");
+            // Exit the function if any field in the current tab is invalid:
+            if (n == 1 && !validateForm()) return false;
+            // Hide the current tab:
+            //x[currentTab].style.display = "none";
+            // Increase or decrease the current tab by 1:
+            currentTab = currentTab + n;
+            // if you have reached the end of the form...
+            if (currentTab >= x.length) {
+                // ... the form gets submitted:
+
+                var y = "";
+
+                $.each($("input[name='SessionId']:checked"), function () {
+
+                    y = $(this).val();
+
+                });
+
+
+                if (y == "") {
+                    $("#error").html("Please select time slot.");
+
+                }
+                else {
+                    document.getElementById("regForm").submit();
+                }
+                return false;
+            }
+            // Otherwise, display the correct tab:
+            showTab(currentTab);
+        }
+
+        function validateForm() {
+            // This function deals with validation of the form fields
+            var x, y, i, valid = true;
+            x = document.getElementsByClassName("regFormTab");
+            y = x[currentTab].getElementsByTagName("input");
+            // A loop that checks every input field in the current tab:
+            for (i = 0; i < y.length; i++) {
+                // If a field is empty...
+                if (y[i].value == "") {
+                    // add an "invalid" class to the field:
+                    y[i].className += " invalid";
+                    // and set the current valid status to false
+                    valid = false;
+                }
+            }
+            // If the valid status is true, mark the step as finished and valid:
+            if (valid) {
+                document.getElementsByClassName("step")[currentTab].className += " finish";
+            }
+            return valid; // return the valid status
+        }
+
+        function fixStepIndicator(n) {
+            // This function removes the "active" class of all steps...
+            var i, x = document.getElementsByClassName("step");
+            for (i = 0; i < x.length; i++) {
+                x[i].className = x[i].className.replace(" active", "");
+            }
+            //... and adds the "active" class on the current step:
+            x[n].className += " active";
+        }
+
+        function TimeSlots() {
+            //alert($('input[name="DateStart"]').val());
+
+            var Id = $('select[name="DoctorId"]').val();
+
+            if (parseInt(Id) > 0) {
+
+                var date = $('input[name="DateStart"]').val();
+
+                if (date.length > 0) {
+
+
+            var ts = document.getElementById("time_slots");
+            //var ms = document.getElementById("morning-shift");
+            //var as = document.getElementById("afternoon-shift");
+
+                    ts.innerHTML = "";
+            //        ms.innerHTML = "";
+            //as.innerHTML = "";
+
+            $.ajax({
+                url: "/Home/GetDoctorsShift",
+                method: "GET",
+                data: { id: parseInt(Id), dateString: date },
+                dataType: "json",
+                success: function (data) {
+
+                    var data = JSON.parse(data);
+
+                    //alert(JSON.stringify(data.bookedSlot));
+
+                    var bookedSlots = [];
+                    if (data.bookedSlot.length > 0) {
+
+                        for (var i = 0; i < data.bookedSlot.length; i++) {
+                            bookedSlots.push(data.bookedSlot[i].substring(8, 10) + ':' + data.bookedSlot[i].substring(10, 12));
+                        }
+
+                    }
+                    var morningSlot = [];
+                    var afternoonSlot = [];
+                    var startTime = new Date();
+                    var endTime = new Date();
+                    var st, et = [];
+                    var str, num = "";
+
+                    if (data.docShifts.MorningStart.length > 0) {
+                        st = data.docShifts.MorningStart.split(':');
+                        et = data.docShifts.MorningEnd.split(':');
+                        startTime.setHours(st[0]);
+                        startTime.setMinutes(st[1]);
+                        startTime.setSeconds(st[2]);
+
+                        endTime.setHours(et[0]);
+                        endTime.setMinutes(et[1]);
+                        endTime.setSeconds(et[2]);
+
+                        num = startTime.getHours().toString();
+
+                        str = (num.length < 2) ? "0" + num : num;
+
+                        num = startTime.getMinutes().toString();
+
+                        str += ":" + ((num.length < 2) ? "0" + num : num);
+
+                        morningSlot.push(str);
+
+                        while (startTime < endTime) {
+
+                            startTime.setMinutes(startTime.getMinutes() + data.docShifts.ObTime);
+
+                            num = startTime.getHours().toString();
+
+                            str = (num.length < 2) ? "0" + num : num;
+
+                            num = startTime.getMinutes().toString();
+
+                            str += ":" + ((num.length < 2) ? "0" + num : num);
+                            //data.docShifts += ":" + ((startTime.getSeconds().length < 2) ? "0" + startTime.getSeconds() : startTime.getSeconds());
+
+                            //morningSlot.push(startTime.getHours() + ":" + startTime.getMinutes() + ":" + startTime.getSeconds());
+                            morningSlot.push(str);
+                        }
+                    }
+
+                    startTime = new Date();
+                    endTime = new Date();
+                    st, et = [];
+                    str, num = "";
+
+                    if (data.docShifts.AfternoorStart.length > 0) {
+                        st = data.docShifts.AfternoorStart.split(':');
+                        et = data.docShifts.AfternoonEnd.split(':');
+                        startTime.setHours(st[0]);
+                        startTime.setMinutes(st[1]);
+                        startTime.setSeconds(st[2]);
+
+                        endTime.setHours(et[0]);
+                        endTime.setMinutes(et[1]);
+                        endTime.setSeconds(et[2]);
+
+                        num = startTime.getHours().toString();
+
+                        str = (num.length < 2) ? "0" + num : num;
+
+                        num = startTime.getMinutes().toString();
+
+                        str += ":" + ((num.length < 2) ? "0" + num : num);
+                        afternoonSlot.push(str);
+
+                        while (startTime < endTime) {
+
+                            startTime.setMinutes(startTime.getMinutes() + data.docShifts.ObTime);
+
+                            num = startTime.getHours().toString();
+
+                            str = (num.length < 2) ? "0" + num : num;
+
+                            num = startTime.getMinutes().toString();
+
+                            str += ":" + ((num.length < 2) ? "0" + num : num);
+                            //data.docShifts += ":" + ((startTime.getSeconds().length < 2) ? "0" + startTime.getSeconds() : startTime.getSeconds());
+
+                            //afternoonSlot.push(startTime.getHours() + ":" + startTime.getMinutes() + ":" + startTime.getSeconds());
+                            afternoonSlot.push(str);
+                        }
+                    }
+
+                    var div = document.createElement("DIV");
+                    div.setAttribute("class", "btn-group btn-group-toggle d-flex flex-wrap ");
+                    div.setAttribute("data-toggle", "buttons");
+
+                    div.innerHTML = "";
+
+                    if (morningSlot.length > 0) {
+
+                        str, num = "";
+                        st, et = [];
+
+                        for (var i = 0; i < (morningSlot.length - 1); i++) {
+
+                            if (bookedSlots.indexOf(morningSlot[i]) > -1) {
+                                div.innerHTML += '<label class="btn btn-secondary m-1" disabled>'
+                                    + '<input type="radio" name="@Html.NameFor(x=>x.SessionId)"'
+                                    + 'value = "' + morningSlot[i] + '-' + morningSlot[i + 1] + '" disabled> '
+                                    + morningSlot[i] + ' am - ' + morningSlot[i + 1] + ' am</label>';
+                            }
+                            else {
+                                div.innerHTML += '<label class="btn btn-outline-secondary m-1">'
+                                    + '<input type="radio" name="@Html.NameFor(x=>x.SessionId)"'
+                                    + 'value = "' + morningSlot[i] + '-' + morningSlot[i + 1] + '"> '
+                                    + morningSlot[i] + ' am - ' + morningSlot[i + 1] + ' am</label>';
+                            }
+
+                        }
+
+                        //ms.appendChild(div);
+                    }
+
+                    //var d = document.createElement("DIV");
+                    //d.setAttribute("class", "btn-group btn-group-toggle d-flex flex-wrap");
+                    //d.setAttribute("data-toggle", "buttons");
+
+                    if (afternoonSlot.length > 0) {
+
+                        //d.innerHTML = "";
+                        str, num = "";
+                        st, et = [];
+
+                        for (var i = 0; i < (afternoonSlot.length - 1); i++) {
+                            st = afternoonSlot[i].split(":");
+                            et = afternoonSlot[i + 1].split(":");
+
+                            num = (parseInt(st[0]) - 12);
+                            str = ((num.length < 2) ? "0" + num : num) + ':' + st[1];
+
+                            num = (parseInt(et[0]) - 12);
+                            str += " pm - " + ((num.length < 2) ? "0" + num : num) + ':' + et[1] +' pm';
+
+                            if (bookedSlots.indexOf(afternoonSlot[i]) > -1) {
+                                div.innerHTML += '<label class="btn btn-secondary m-1" disabled>'
+                                    + '<input type="radio" name="@Html.NameFor(x=>x.SessionId)"'
+                                    + 'value = "' + afternoonSlot[i] + '-' + afternoonSlot[i + 1] + '" disabled> '
+                                    + str + '</label>';
+                            }
+                            else {
+                                div.innerHTML += '<label class="btn btn-outline-secondary m-1">'
+                                    + '<input type="radio" name="@Html.NameFor(x=>x.SessionId)"'
+                                    + 'value = "' + afternoonSlot[i] + '-' + afternoonSlot[i + 1] + '" > '
+                                    + str + '</label>';
+                            }
+                        }
+
+                        //as.appendChild(d);
+                        ts.appendChild(div);
+                    }
+                    //alert(JSON.stringify(morningSlot));
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+
+
+                }
+            }
+        }
+    </script>
+}
