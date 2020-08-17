@@ -28,7 +28,7 @@
                     <div class="tab regFormTab row justify-content-md-center">
                         <div class="card col-md-8 offset-md-2">
                             <div class="card-body">
-                                <h4 class="card-title my-2">Fill Details</h4>
+                                <h2 class="card-title my-2">Fill Details</h2>
                                 <div class="service-fields mb-3">
                                     <div class="row">
                                         <div class="col-lg-12">
@@ -65,7 +65,7 @@
                     <div class="tab regFormTab row justify-content-md-center">
                         <div class="card col-md-8 offset-md-2">
                             <div class="card-body">
-                                <h4 class="card-title my-2">Schedule Timings</h4>
+                                <h2 class="card-title my-2">Schedule Timings</h2>
                                 <div class="profile-box">
                                     <div class="row">
 
@@ -190,7 +190,7 @@
             // This function will figure out which tab to display
             var x = document.getElementsByClassName("regFormTab");
             // Exit the function if any field in the current tab is invalid:
-            if (n == 1 && !validateForm()) return false;
+            if (n == 0 && !validateForm()) return false;
             // Hide the current tab:
             //x[currentTab].style.display = "none";
             // Increase or decrease the current tab by 1:
@@ -210,7 +210,7 @@
 
                 if (y == "") {
                     $("#error").html("Please select time slot.");
-
+                    return false;
                 }
                 else {
                     document.getElementById("regForm").submit();

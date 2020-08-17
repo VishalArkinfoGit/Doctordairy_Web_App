@@ -28,6 +28,7 @@ namespace DoctorDiaryAPI
                             "~/Content/assets/plugins/select2/js/select2.min.js",
                             "~/Content/assets/js/moment.min.js",
                             "~/Content/assets/js/bootstrap-datetimepicker.min.js",
+                            "~/Content/assets/plugins/daterangepicker/daterangepicker.js",
                             "~/Content/assets/js/script.js"));
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
@@ -37,6 +38,7 @@ namespace DoctorDiaryAPI
                       "~/Content/assets/css/bootstrap-datetimepicker.min.css",
                       "~/Content/assets/plugins/select2/css/select2.min.css",
                       "~/Content/assets/css/style.css",
+                      "~/Content/assets/plugins/daterangepicker/daterangepicker.css",
                       "~/Content/Site.css"));
         }
     }

@@ -30,11 +30,26 @@
                             <i class="fas fa-check"></i>
                             <h3>Appointment booked Successfully!</h3>
                             <p>
-                                Appointment booked with <strong>Dr. @TempData["DoctorName"]</strong><br> on <strong>
+                                Appointment booked with <br /><strong>Dr. @TempData["DoctorName"]</strong> on <strong>
+                                    <br />
                                     @Model.DateStart.ToString("dd MMM yyyy") @Model.DateStart.ToString("hh:mm tt") to @Model.DateEnd.ToString("hh:mm tt")
                                 </strong>
                             </p>
-                            <span>Status: @Model.Status</span>
+                            <span>
+                                Status:
+                                @if (Model.Status == "Pending")
+                                {
+                                    <span class="bg-warning-light px-2">@Model.Status</span>
+                                }
+                                else if (Model.Status == "Accept")
+                                {
+                                    <span class="bg-success-light px-2">@Model.Status</span>
+                                }
+                                else if (Model.Status == "Cancel")
+                                {
+                                    <span class="bg-danger-light px-2">@Model.Status</span>
+                                }
+                            </span>
                         </div>
                     </div>
                 </div>

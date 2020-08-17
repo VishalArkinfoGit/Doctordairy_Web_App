@@ -1,0 +1,196 @@
+﻿@model DoctorDiaryAPI.Models.DoctorAppointmentViewModel
+@{
+    ViewBag.Title = "Appointment";
+    DateTime fromDate = DateTime.Now;
+    DateTime toDate = DateTime.Now;
+    if (Request.Params["fromDate"] != null)
+    {
+        fromDate = Convert.ToDateTime(Request.Params["fromDate"]);
+    }
+    else
+    {
+        fromDate = DateTime.Now;
+    }
+    if (Request.Params["toDate"] != null)
+    {
+        toDate = Convert.ToDateTime(Request.Params["toDate"]);
+    }
+    else
+    {
+        toDate = fromDate;
+    }
+
+}
+
+
+
+<div class="content">
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-md-5 col-lg-4 col-xl-3 theiaStickySidebar">
+
+                <!-- Profile Sidebar -->
+                <div class="profile-sidebar">
+                    <div class="widget-profile pro-widget-content">
+                        <div class="profile-info-widget">
+                            <a href="#" class="booking-doc-img">
+                                <img src="@Model.Doctor.Doctor_photo.ToString()" alt="User Image">
+                            </a>
+                            <div class="profile-det-info">
+                                <h3>Dr. @Model.Doctor.Doctor_name</h3>
+                                @Html.HiddenFor(x => x.Doctor.Doctor_id)
+                                <div class="patient-details">
+                                    <h5 class="mb-0">@Model.Doctor.Doctor_degree</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-widget">
+                        <nav class="dashboard-menu">
+                            <ul>
+                                <li>
+
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                <!-- /Profile Sidebar -->
+
+            </div>
+
+            <div class="col-md-7 col-lg-8 col-xl-9">
+                <div class="row">
+                    <div class="col-12 col-sm-4 col-md-6">
+                        @if (fromDate != toDate)
+                        {
+                            <h4 class="mb-1">@fromDate.ToString("dd MMMM yyyy") to @toDate.ToString("dd MMMM yyyy")</h4>
+                        }
+                        else
+                        {
+                            <h4 class="mb-1">@fromDate.ToString("dd MMMM yyyy")</h4>
+                        }
+                    </div>
+                    <div class="col-12 col-sm-8 col-md-6 text-sm-right">
+                        <div id="bookingrange" class="bookingrange btn btn-white btn-sm mb-3">
+                            <i class="far fa-calendar-alt mr-2"></i>
+                            @if (fromDate != toDate)
+                            {
+                                <span>@fromDate.ToString("MMMM dd, yyyy") to @toDate.ToString("MMMM dd, yyyy")</span>
+                            }
+                            else
+                            {
+                                <span>@fromDate.ToString("MMMM dd, yyyy")</span>
+                            }
+                            <i class="fas fa-chevron-down ml-2"></i>
+                        </div>
+                        <input type="hidden" id="SelectedDate" value="" />
+                    </div>
+                </div>
+
+                <div class="appointments">
+
+                    @if (Model.Appointments != null)
+                    {
+                        foreach (var item in Model.Appointments)
+                        {
+                            <div class="appointment-list">
+                                <div class="profile-info-widget">
+                                    <a href="patient-profile.html" class="booking-doc-img">
+                                        <img src="~/Content/assets/img/patients/patient.jpg" alt="User Image">
+                                    </a>
+                                    <div class="profile-det-info">
+                                        <h3><a href="patient-profile.html">@item.PatientName</a></h3>
+                                        <div class="patient-details">
+                                            <h5><i class="fas fa-map-marker-alt"></i> @item.Relation</h5>
+                                            <h5><i class="far fa-clock"></i> @item.DateStart.ToString("dd MMM yyyy") @item.DateStart.ToString("hh:mm tt") to @item.DateEnd.ToString("hh:mm tt")</h5>
+                                            <h5>
+                                                <i class="fas fa-envelope"></i> Status:
+                                                @if (item.Status == "Pending")
+                                                {
+                                                    <span class="bg-warning-light px-2">@item.Status</span>
+                                                }
+                                                else if (item.Status == "Accept")
+                                                {
+                                                    <span class="bg-success-light px-2">@item.Status</span>
+                                                }
+                                                else if (item.Status == "Cancel")
+                                                {
+                                                    <span class="bg-danger-light px-2">@item.Status</span>
+                                                }
+                                            </h5>
+                                            <h5 class="mb-0"><i class="fas fa-phone"></i> @item.PatientMobile</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="appointment-action">
+
+                                    @if (item.Status == "Pending")
+                                    {
+                                        <a href="javascript:ChangeStatus(@item.Id, 'Accept');" class="btn btn-sm bg-success-light">
+                                            <i class="fas fa-check"></i> Accept
+                                        </a>
+                                        <a href="javascript:ChangeStatus(@item.Id, 'Cancel');" class="btn btn-sm bg-danger-light">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </a>
+                                    }
+                                    else if (item.Status == "Accept")
+                                    {
+                                        <a href="javascript:ChangeStatus(@item.Id, 'Pending');" class="btn btn-sm bg-warning-light">
+                                            <i class="fa fa-spinner"></i> Pending
+                                        </a>
+                                        <a href="javascript:ChangeStatus(@item.Id, 'Cancel');" class="btn btn-sm bg-danger-light">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </a>
+                                    }
+                                    else if (item.Status == "Cancel")
+                                    {
+                                        <a href="javascript:ChangeStatus(@item.Id, 'Pending');" class="btn btn-sm bg-warning-light">
+                                            <i class="fa fa-spinner"></i> Pending
+                                        </a>
+                                        <a href="javascript:ChangeStatus(@item.Id, 'Accept');" class="btn btn-sm bg-success-light">
+                                            <i class="fas fa-check"></i> Accept
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="appointment-list">
+                            <p>No any Appointment(s) for this date(s)</p>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts{
+    <script>
+        function ChangeStatus(id, status) {
+            var DoctorId = $("#Doctor_Doctor_id").val();
+            window.location.href = '/Home/Appointment?DoctorId=' + DoctorId + '&AppointmentId=' + id + "&status=" + status;
+        }
+
+        $('.bookingrange').on('apply.daterangepicker', function (ev, picker) {
+            var SelectedDate = $("#SelectedDate").val();
+            var DoctorId = $("#Doctor_Doctor_id").val();
+
+            if (SelectedDate.length == 10) {
+                window.location.href = '/Home/Appointment?DoctorId=' + DoctorId + '&fromDate=' + SelectedDate;
+            }
+            else if (SelectedDate.length > 10) {
+                var dates = SelectedDate.split('-');
+                window.location.href = '/Home/Appointment?DoctorId=' + DoctorId + '&fromDate=' + dates[0] + '&toDate=' + dates[1];
+            }
+        });
+
+    </script>
+}

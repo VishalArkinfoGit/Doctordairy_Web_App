@@ -6,6 +6,7 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using DoctorDiaryAPI;
+using DoctorDiaryAPI.Models;
 
 namespace DoctorDiaryAPI.Controllers
 {
@@ -175,41 +176,130 @@ namespace DoctorDiaryAPI.Controllers
         {
             return View(appointment);
         }
+
+        public ActionResult Appointment(int DoctorId = 0, int AppointmentId = 0, string status = "", string fromDate = "", string toDate = "")
+        {
+
+            DoctorAppointmentViewModel data = new DoctorAppointmentViewModel();
+
+            if (AppointmentId > 0)
+            {
+                using (var db = new ddiarydbEntities())
+                {
+                    var appointment = (from s in db.Appointments
+                                       where s.Id == AppointmentId
+                                       select s).FirstOrDefault();
+
+                    appointment.Status = status;
+                    db.Entry(appointment).State = System.Data.Entity.EntityState.Modified;
+                    db.SaveChanges();
+                }
+            }
+
+            using (var db = new ddiarydbEntities())
+            {
+                var doctor = new Doctor_Master();
+
+                doctor = (from s in db.Doctor_Master
+                          where s.Doctor_id == DoctorId
+                          select s).FirstOrDefault();
+
+                var appointment = new List<Appointment>();
+
+                var FROMDATE = DateTime.Now;
+                var TODATE = DateTime.Now;
+
+                if (fromDate == "" && toDate == "")
+                {
+                    FROMDATE = DateTime.Now;
+                    TODATE = DateTime.Now;
+                }
+                else if (fromDate.Length > 0 && toDate == "")
+                {
+                    FROMDATE = Convert.ToDateTime(fromDate);
+                    TODATE = Convert.ToDateTime(fromDate);
+                }
+                else
+                {
+                    FROMDATE = Convert.ToDateTime(fromDate);
+                    TODATE = Convert.ToDateTime(toDate);
+                }
+
+                TimeSpan ssts = new TimeSpan(0, 0, 0);
+                FROMDATE = FROMDATE.Date + ssts;
+
+                TimeSpan ests = new TimeSpan(23, 59, 59);
+                TODATE = TODATE.Date + ests;
+
+
+                try
+                {
+                    appointment = (from s in db.Appointments
+                                   where s.DoctorId == DoctorId && s.DateStart >= FROMDATE && s.DateEnd <= TODATE
+                                   select s).ToList<Appointment>();
+
+                }
+                catch (Exception)
+                {
+                    appointment = null;
+                }
+
+                if (doctor != null)
+                {
+                    data.Doctor = doctor;
+                    data.Appointments = appointment;
+                }
+            }
+
+            return View(data);
+        }
+
         public JsonResult GetDoctors()
         {
             var data = "";
 
             using (var db = new ddiarydbEntities())
             {
-                if (db.DoctorShifts.Any())
-                {
-                    //var d = from s in db.DoctorShifts
-                    //        join doc in db.Doctor_Master on s.DoctorId equals doc.Doctor_id
-                    //        select new
-                    //        {
-                    //            DoctorId = doc.Doctor_id,
-                    //            DoctorName = doc.Doctor_name,
-                    //            Address = doc.Doctor_address,
-                    //            ObTime = 10,
-                    //            MorningStart = s.MorningStart,
-                    //            MorningEnd = s.MorningEnd,
-                    //            AfternoorStart = s.AfternoonStart,
-                    //            AfternoonEnd = s.AfternoonEnd
-                    //        };
+                //if (db.DoctorShifts.Any())
+                //{
+                //    //var d = from s in db.DoctorShifts
+                //    //        join doc in db.Doctor_Master on s.DoctorId equals doc.Doctor_id
+                //    //        select new
+                //    //        {
+                //    //            DoctorId = doc.Doctor_id,
+                //    //            DoctorName = doc.Doctor_name,
+                //    //            Address = doc.Doctor_address,
+                //    //            ObTime = 10,
+                //    //            MorningStart = s.MorningStart,
+                //    //            MorningEnd = s.MorningEnd,
+                //    //            AfternoorStart = s.AfternoonStart,
+                //    //            AfternoonEnd = s.AfternoonEnd
+                //    //        };
 
-                    //data = JsonConvert.SerializeObject(d);
+                //    //data = JsonConvert.SerializeObject(d);
 
-                    var d = from s in db.DoctorShifts
-                            join doc in db.Doctor_Master on s.DoctorId equals doc.Doctor_id
-                            select new
-                            {
-                                DoctorId = doc.Doctor_id,
-                                DoctorName = doc.Doctor_name,
-                                Address = doc.Doctor_address
-                            };
+                //    var d = from s in db.DoctorShifts
+                //            join doc in db.Doctor_Master on s.DoctorId equals doc.Doctor_id
+                //            select new
+                //            {
+                //                DoctorId = doc.Doctor_id,
+                //                DoctorName = doc.Doctor_name,
+                //                Address = doc.Doctor_address
+                //            };
 
-                    data = JsonConvert.SerializeObject(d);
-                }
+                //    data = JsonConvert.SerializeObject(d);
+                //}
+
+                var d = from doc in db.Doctor_Master
+                        where doc.IsActive == true
+                        select new
+                        {
+                            DoctorId = doc.Doctor_id,
+                            DoctorName = doc.Doctor_name,
+                            Address = doc.Doctor_address
+                        };
+
+                data = JsonConvert.SerializeObject(d);
             }
 
             return Json(data, JsonRequestBehavior.AllowGet);
