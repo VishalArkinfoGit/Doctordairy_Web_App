@@ -4288,6 +4288,7 @@ namespace DoctorDiaryAPI.Controllers
         public string Patient_address { get; set; }
         public string note { get; set; }
         public string age { get; set; }
+        public DateTime Reg_Date { get; set; }
 
         public virtual List<csTreat> ModeltreatmentList { get; set; }
 
