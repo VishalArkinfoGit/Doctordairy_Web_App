@@ -12,116 +12,78 @@ namespace DoctorDiaryAPI.Controllers
 {
     public class HomeController : Controller
     {
+
         public ActionResult Index()
         {
-            TempData.Clear();
             return View();
         }
 
-        public ActionResult Dashboard()
-        {
-            TempData.Clear();
-            return View();
-        }
+        #region Appointment Booking
 
-        [HttpPost]
-        public ActionResult Dashboard(Appointment appointment)
-        {
-            TempData["Mobile"] = appointment.PatientMobile;
-
-            return RedirectToAction("TakeAppointment");
-        }
-
-        public JsonResult GenerateOTP()
-        {
-            string Result = string.Empty;
-            string strMessage = string.Empty;
-            string strNumber = string.Empty;
-
-            strMessage = GenerateMsg();
-            WebRequest request = WebRequest.Create("https://sms.com:27677/corporate_sms2/api/sendsms.jsp?msisdn=SimNumber&password=PWD&to=" + strNumber + "&text=" + strMessage + "&mask=Masking Name");
-            request.Method = "POST";
-            //request.ContentType = "text/xml";
-            request.ContentType = "text/xml;charset=UTF-8";
-            //request.ContentType = "application/x-www-form-urlencoded";
-            WebResponse response = request.GetResponse();
-            if (((HttpWebResponse)response).StatusDescription.Equals("OK"))
-            {
-                Result = "Message Send Successfully";
-            }
-            response.Close();
-
-
-            return Json(Result, JsonRequestBehavior.AllowGet);
-        }
-
-        private string GenerateMsg()
-        {
-            string alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            string small_alphabets = "abcdefghijklmnopqrstuvwxyz";
-            string numbers = "1234567890";
-            string message = string.Empty;
-
-            string characters = numbers;
-            //if (rbType.SelectedItem.Value == "1")
-            //{
-            //    characters += alphabets + small_alphabets + numbers;
-            //}
-
-            string otp = string.Empty;
-            for (int i = 0; i < 8; i++)
-            {
-                string character = string.Empty;
-                do
-                {
-                    int index = new Random().Next(0, characters.Length);
-                    character = characters.ToCharArray()[index].ToString();
-                } while (otp.IndexOf(character) != -1);
-                otp += character;
-            }
-
-            message = "Your OTP is " + otp;
-            return message;
-        }
+        /// <summary>
+        /// Purpose: Display View for book an appointment
+        /// Created By: Vishal Chudasama on 25 Aug 2020
+        /// </summary>
+        /// <returns> Booking View </returns>
+        /// <param name="id"> Doctor Id </param>
 
         [HttpGet]
-        public ActionResult TakeAppointment()
+        public ActionResult Booking(string id)
         {
-            if (TempData.ContainsKey("Mobile"))
-            {
-                var appointment = new Appointment()
-                {
-                    PatientMobile = TempData["Mobile"].ToString(),
-                    DateStart = DateTime.Now.Date
-                };
-                using (var db = new ddiarydbEntities())
-                {
-                    if (db.DoctorShifts.Any())
-                    {
-                        var doctors = db.Doctor_Master.Where(x => x.Doctor_id > 0).Take(50).ToList();
+            int Doctor_Id = int.Parse(new EncryptDecrypt().Decrypt(id));
 
-                        ViewBag.Doctors = doctors;
-                    }
-                    else
+            AppointmentViewModel appointment = new AppointmentViewModel();
+
+            using (var db = new ddiarydbEntities())
+            {
+                var doctor = db.Doctor_Master.Where(x => x.Doctor_id == Doctor_Id).FirstOrDefault();
+
+                if (doctor != null)
+                {
+                    appointment.Doctor = new DoctorViewModel().DoctorModel_to_ViewModel(doctor);
+
+                    string file = appointment.Doctor.Doctor_photo != null ? (@"" + appointment.Doctor.Doctor_photo) : @"c:\temp\test.txt";
+
+                    if (!System.IO.File.Exists(file))
                     {
-                        ViewBag.Doctors = null;
+                        var temp = appointment.Doctor.Doctor_name.Split(' ');
+                        if (temp.Length > 1)
+                        {
+                            appointment.Doctor.Doctor_photo = temp[0].Substring(0, 1) + temp[1].Substring(0, 1);
+                        }
+                        else
+                        {
+                            appointment.Doctor.Doctor_photo = temp[0].Substring(0, 1);
+                        }
+
                     }
                 }
+                else
+                {
+                    appointment.Doctor = null;
+                }
+            }
 
-                return View(appointment);
-            }
-            else
-            {
-                return RedirectToAction("Index");
-            }
+            appointment.DateStart = DateTime.Now;
+            appointment.Relation = "Self";
+
+            return View(appointment);
         }
 
-        [HttpPost]
-        public ActionResult TakeAppointment(Appointment appointment)
-        {
-            TempData.Clear();
 
+        /// <summary>
+        /// Purpose: Save Details of an appointment
+        /// Created By: Vishal Chudasama on 25 Aug 2020
+        /// </summary>
+        /// <returns> Appointment Details </returns>
+        /// <param name="appointment"> Appointment Details </param>
+
+        [HttpPost]
+        [ActionName("Booking")]
+        public ActionResult Booking(AppointmentViewModel appointment)
+        {
             appointment.CreatedDate = DateTime.Now;
+            appointment.UpdatedDate = DateTime.Now;
             appointment.Status = "Pending";
 
             var startend = appointment.SessionId.Split('-');
@@ -140,208 +102,327 @@ namespace DoctorDiaryAPI.Controllers
             {
                 using (var db = new ddiarydbEntities())
                 {
-                    db.Appointments.Add(appointment);
-                    db.SaveChanges();
+                    Appointment obj = new MappingService().Map<AppointmentViewModel, Appointment>(appointment);
+                    obj.DoctorId = int.Parse(new EncryptDecrypt().Decrypt(appointment.Doctor.DoctorId_Encrypt));
 
-                    var doctor = db.Doctor_Master.Where(x => x.Doctor_id == appointment.DoctorId).FirstOrDefault();
+                    //db.Appointments.Add(obj);
+                    //db.SaveChanges();
+                    AppointmentAPIController aController = new AppointmentAPIController();
+                    ReturnObject temp = aController.Insert_Appointment(obj);
 
-                    TempData["DoctorName"] = doctor.Doctor_name;
+                    try
+                    {
+                        if (temp != null)
+                        {
+                            Appointment a = (Appointment)temp.data1;
+
+                            var doctor = db.Doctor_Master.Where(x => x.Doctor_id == obj.DoctorId).FirstOrDefault();
+
+                            TempData["DoctorName"] = doctor.Doctor_name;
+
+
+                            string id = new EncryptDecrypt().Encrypt(a.Id.ToString());
+
+                            return Redirect("AppointmentDetails?id=" + id);
+                        }
+
+                        return Redirect("Booking?id=" + appointment.Doctor.DoctorId_Encrypt);
+                    }
+                    catch (Exception)
+                    {
+                        ModelState.AddModelError(string.Empty, "Something Wrong.!");
+                        return View(appointment);
+                    }
                 }
 
-
-                return RedirectToAction("RegisterAppointment", appointment);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, "Something Wrong.!");
                 return View(appointment);
             }
         }
 
-        public ActionResult About()
+        #endregion
+
+
+        #region Appointment Details
+
+        /// <summary>
+        /// Purpose: Display an appointment details
+        /// Created By: Vishal Chudasama on 25 Aug 2020
+        /// </summary>
+        /// <returns> Appointment Details View </returns>
+        /// <param name="id"> Appointment Id </param>
+
+        [HttpGet]
+        [ActionName("AppointmentDetails")]
+        public ActionResult AppointmentDetails(string id)
         {
-            ViewBag.Message = "Your application description page.";
+            int aid = int.Parse(new EncryptDecrypt().Decrypt(id));
 
-            return View();
-        }
+            Appointment appointment = new Appointment();
 
-        public ActionResult Contact()
-        {
-            ViewBag.Message = "Your contact page.";
-
-            return View();
-        }
-
-        public ActionResult RegisterAppointment(Appointment appointment)
-        {
-            return View(appointment);
-        }
-
-        public ActionResult Appointment(int DoctorId = 0, int AppointmentId = 0, string status = "", string fromDate = "", string toDate = "")
-        {
-
-            DoctorAppointmentViewModel data = new DoctorAppointmentViewModel();
-
-            if (AppointmentId > 0)
+            if (aid > 0)
             {
                 using (var db = new ddiarydbEntities())
                 {
-                    var appointment = (from s in db.Appointments
-                                       where s.Id == AppointmentId
-                                       select s).FirstOrDefault();
+                    appointment = (from s in db.Appointments
+                                   where s.Id == aid
+                                   select s).FirstOrDefault();
 
-                    appointment.Status = status;
-                    db.Entry(appointment).State = System.Data.Entity.EntityState.Modified;
-                    db.SaveChanges();
+
+                    var doctor = db.Doctor_Master.Where(x => x.Doctor_id == appointment.DoctorId).FirstOrDefault();
+
+                    TempData["DoctorName"] = doctor.Doctor_name;
                 }
+
             }
+
+            return View(appointment);
+        }
+
+
+        /// <summary>
+        /// Purpose: Display appointments details using Doctor id, Appointment Id, Date - From and To
+        ///          Update status of Appointment
+        /// Created By: Vishal Chudasama on 25 Aug 2020
+        /// </summary>
+        /// <returns> Appointment Details </returns>
+        /// <param name="id"> Doctor Id </param>
+        /// <param name="AppointmentId"> Appointment Id </param>
+        /// <param name="status"> Appointment status </param>
+        /// <param name="fromDate"> From Date </param>
+        /// <param name="toDate"> To Date </param>
+
+
+        [HttpGet]
+        [ActionName("Appointment")]
+        public ActionResult Appointment(string id = "", int AppointmentId = 0, string status = "", string fromDate = "", string toDate = "", string msg = "")
+        {
+            int DoctorId = int.Parse(new EncryptDecrypt().Decrypt(id));
+
+            DoctorAppointmentViewModel data = new DoctorAppointmentViewModel();
+
+            AppointmentAPIController aController = new AppointmentAPIController();
+            ReturnObject ro = new ReturnObject();
 
             using (var db = new ddiarydbEntities())
             {
-                var doctor = new Doctor_Master();
+                var doctor = db.Doctor_Master.Where(x => x.Doctor_id == DoctorId).FirstOrDefault();
 
-                doctor = (from s in db.Doctor_Master
-                          where s.Doctor_id == DoctorId
-                          select s).FirstOrDefault();
-
-                var appointment = new List<Appointment>();
-
-                var FROMDATE = DateTime.Now;
-                var TODATE = DateTime.Now;
-
-                if (fromDate == "" && toDate == "")
+                if (AppointmentId > 0)
                 {
-                    FROMDATE = DateTime.Now;
-                    TODATE = DateTime.Now;
-                }
-                else if (fromDate.Length > 0 && toDate == "")
-                {
-                    FROMDATE = Convert.ToDateTime(fromDate);
-                    TODATE = Convert.ToDateTime(fromDate);
-                }
-                else
-                {
-                    FROMDATE = Convert.ToDateTime(fromDate);
-                    TODATE = Convert.ToDateTime(toDate);
+                    ro = aController.Update_Appointment(AppointmentId, status, msg);
                 }
 
-                TimeSpan ssts = new TimeSpan(0, 0, 0);
-                FROMDATE = FROMDATE.Date + ssts;
+                var appointments = new List<Appointment>();
 
-                TimeSpan ests = new TimeSpan(23, 59, 59);
-                TODATE = TODATE.Date + ests;
+                ro = aController.Get_Appointments(0, DoctorId, fromDate, toDate);
 
 
                 try
                 {
-                    appointment = (from s in db.Appointments
-                                   where s.DoctorId == DoctorId && s.DateStart >= FROMDATE && s.DateEnd <= TODATE
-                                   select s).ToList<Appointment>();
-
+                    appointments = (List<Appointment>)ro.data2;
                 }
                 catch (Exception)
                 {
-                    appointment = null;
+                    appointments = null;
                 }
 
                 if (doctor != null)
                 {
-                    data.Doctor = doctor;
-                    data.Appointments = appointment;
+
+                    string file = doctor.Doctor_photo != null ? (@"" + doctor.Doctor_photo) : @"c:\temp\test.txt";
+
+                    if (!System.IO.File.Exists(file))
+                    {
+                        var temp = doctor.Doctor_name.Split(' ');
+                        if (temp.Length > 1)
+                        {
+                            doctor.Doctor_photo = temp[0].Substring(0, 1) + temp[1].Substring(0, 1);
+                        }
+                        else
+                        {
+                            doctor.Doctor_photo = temp[0].Substring(0, 1);
+                        }
+
+                    }
+
+                    data.Doctor = new DoctorViewModel().DoctorModel_to_ViewModel(doctor);
+
+                    data.Appointments = new List<AppointmentViewModel>();
+                    foreach (var item in appointments)
+                    {
+                        var temp = item.PatientName.Split(' ');
+                        if (temp.Length > 1)
+                        {
+                            item.SessionId = temp[0].Substring(0, 1) + temp[1].Substring(0, 1);
+                        }
+                        else
+                        {
+                            item.SessionId = temp[0].Substring(0, 1);
+                        }
+
+                        data.Appointments.Add(new AppointmentViewModel().AppointmentModel_to_ViewModel(item));
+
+                    }
+
                 }
             }
 
             return View(data);
         }
 
-        public JsonResult GetDoctors()
+        #endregion
+
+        #region Doctor 
+
+        /// <summary>
+        /// Purpose: Display an Doctor Details
+        /// Created By: Vishal Chudasama on 25 Aug 2020
+        /// </summary>
+        /// <returns> Doctor Details </returns>
+        /// <param name="id"> Doctor Id </param>
+
+        [HttpGet]
+        [ActionName("DoctorProfile")]
+        public ActionResult DoctorProfile(string id)
         {
-            var data = "";
+            int DoctorId = int.Parse(new EncryptDecrypt().Decrypt(id));
+
+            DoctorViewModel data = new DoctorViewModel();
 
             using (var db = new ddiarydbEntities())
             {
-                //if (db.DoctorShifts.Any())
-                //{
-                //    //var d = from s in db.DoctorShifts
-                //    //        join doc in db.Doctor_Master on s.DoctorId equals doc.Doctor_id
-                //    //        select new
-                //    //        {
-                //    //            DoctorId = doc.Doctor_id,
-                //    //            DoctorName = doc.Doctor_name,
-                //    //            Address = doc.Doctor_address,
-                //    //            ObTime = 10,
-                //    //            MorningStart = s.MorningStart,
-                //    //            MorningEnd = s.MorningEnd,
-                //    //            AfternoorStart = s.AfternoonStart,
-                //    //            AfternoonEnd = s.AfternoonEnd
-                //    //        };
+                Doctor_Master doctor = db.Doctor_Master.Where(x => x.Doctor_id == DoctorId).FirstOrDefault();
 
-                //    //data = JsonConvert.SerializeObject(d);
+                string file = doctor.Doctor_photo != null ? (@"" + doctor.Doctor_photo) : @"c:\temp\test.txt";
 
-                //    var d = from s in db.DoctorShifts
-                //            join doc in db.Doctor_Master on s.DoctorId equals doc.Doctor_id
-                //            select new
-                //            {
-                //                DoctorId = doc.Doctor_id,
-                //                DoctorName = doc.Doctor_name,
-                //                Address = doc.Doctor_address
-                //            };
-
-                //    data = JsonConvert.SerializeObject(d);
-                //}
-
-                var d = from doc in db.Doctor_Master
-                        where doc.IsActive == true
-                        select new
-                        {
-                            DoctorId = doc.Doctor_id,
-                            DoctorName = doc.Doctor_name,
-                            Address = doc.Doctor_address
-                        };
-
-                data = JsonConvert.SerializeObject(d);
-            }
-
-            return Json(data, JsonRequestBehavior.AllowGet);
-        }
-        public JsonResult GetDoctorsShift(int id, string dateString)
-        {
-            var data = "";
-
-            using (var db = new ddiarydbEntities())
-            {
-                if (db.DoctorShifts.Any())
+                if (!System.IO.File.Exists(file))
                 {
-                    var docShifts = (from s in db.DoctorShifts
-                                     where s.DoctorId == id
-                                     select new
-                                     {
-                                         DoctorId = s.DoctorId,
-                                         ObTime = 10,
-                                         MorningStart = s.MorningStart,
-                                         MorningEnd = s.MorningEnd,
-                                         AfternoorStart = s.AfternoonStart,
-                                         AfternoonEnd = s.AfternoonEnd
-                                     }).FirstOrDefault();
-
-                    var DATE = DateTime.Parse(dateString);
-
-                    var bookedSlot = (from a in db.Appointments
-                                      where a.DoctorId == id && (a.DateStart.Day == DATE.Day) && (a.DateStart.Month == DATE.Month) && (a.DateStart.Year == DATE.Year)
-                                      select a.SessionId).ToList();
-
-                    var x = new
+                    var temp = doctor.Doctor_name.Split(' ');
+                    if (temp.Length > 1)
                     {
-                        docShifts,
-                        bookedSlot
-                    };
+                        doctor.Doctor_photo = temp[0].Substring(0, 1) + temp[1].Substring(0, 1);
+                    }
+                    else
+                    {
+                        doctor.Doctor_photo = temp[0].Substring(0, 1);
+                    }
 
-                    data = JsonConvert.SerializeObject(x);
                 }
+
+                data = new DoctorViewModel().DoctorModel_to_ViewModel(doctor);
+            }
+
+            return View(data);
+        }
+
+        /// <summary>
+        /// Purpose: Find Doctor
+        /// Created By: Vishal Chudasama on 25 Aug 2020
+        /// </summary>
+        /// <returns> Doctor Details in List </returns>
+        /// <param name="str"> Doctor Name </param>
+
+        public JsonResult GetDoctors(string str = "")
+        {
+            var data = "";
+            AppointmentAPIController aController = new AppointmentAPIController();
+            ReturnObject ro = new ReturnObject();
+
+            if (str.Length > 2)
+            {
+                var list = new List<DoctorViewModel>();
+
+                ro = aController.FindDoctorsByString(str);
+
+                List<Doctor_Master> datalist = new List<Doctor_Master>();
+                try
+                {
+                    datalist = (List<Doctor_Master>)ro.data1;
+
+                    foreach (var doctor in datalist)
+                    {
+                        list.Add(new DoctorViewModel()
+                        {
+                            Doctor_id = 0,
+                            Doctor_name = doctor.Doctor_name,
+                            Doctor_address = doctor.Doctor_address,
+                            DoctorId_Encrypt = new EncryptDecrypt().Encrypt(doctor.Doctor_id.ToString())
+                        });
+                    }
+
+                }
+                catch (Exception)
+                {
+                    datalist = null;
+                }
+
+                data = JsonConvert.SerializeObject(list);
+
             }
 
             return Json(data, JsonRequestBehavior.AllowGet);
         }
+
+        /// <summary>
+        /// Purpose: Find Doctors Shift
+        /// Created By: Vishal Chudasama on 25 Aug 2020
+        /// </summary>
+        /// <returns> Doctor Shift Details </returns>
+        /// <param name="id"> Doctor Id </param>
+
+        public JsonResult GetDoctorsShift(string DoctorId, string dateString)
+        {
+            int id = int.Parse(new EncryptDecrypt().Decrypt(DoctorId));
+
+            var data = "";
+            AppointmentAPIController aController = new AppointmentAPIController();
+            ReturnObject ro = new ReturnObject();
+
+
+            ro = aController.Get_DoctorsShift(id);
+
+            try
+            {
+                var docShifts = ro.data1;
+
+                var DATE = DateTime.Parse(dateString);
+
+                ro = aController.Get_DoctorBookedSlot(id, DATE);
+
+                var bookedSlot = ro.data1;
+
+                var x = new
+                {
+                    docShifts,
+                    bookedSlot
+                };
+
+                data = JsonConvert.SerializeObject(x);
+            }
+            catch (Exception)
+            {
+                var x = "";
+
+                data = JsonConvert.SerializeObject(x);
+            }
+
+            return Json(data, JsonRequestBehavior.AllowGet);
+        }
+
+        #endregion
+
+        #region Message
+
+        /// <summary>
+        /// Purpose: Send OTP
+        /// Created By: Vishal Chudasama on 25 Aug 2020
+        /// </summary>
+        /// <returns> OTP </returns>
+        /// <param name="mobile"> Mobile No. </param>
 
         public JsonResult SendOTP(string mobile)
         {
@@ -352,25 +433,25 @@ namespace DoctorDiaryAPI.Controllers
                 using (ddiarydbEntities db = new ddiarydbEntities())
                 {
 
-                    var result = db.OTPVerifications.FirstOrDefault(x => x.MobileNo == mobile);
-                    if (result != null)
-                    {
-                        //returnData.message = "Successfull";
-                        //returnData.status_code = Convert.ToInt32(Status.Sucess);
-                        //returnData.data1 = result.OTP;
+                    //var result = db.OTPVerifications.FirstOrDefault(x => x.MobileNo == mobile);
+                    //if (result != null)
+                    //{
+                    //    //returnData.message = "Successfull";
+                    //    //returnData.status_code = Convert.ToInt32(Status.Sucess);
+                    //    //returnData.data1 = result.OTP;
 
-                        returnData = new DoctorController().SendOTP("", mobile, result.OTP);
-                    }
-                    else
-                    {
-                        string OTP = "";
+                    //    returnData = new DoctorController().SendOTP("", mobile, result.OTP);
+                    //}
+                    //else
+                    //{
+                    string OTP = "";
 
-                        Random r = new Random();
+                    Random r = new Random();
 
-                        OTP = r.Next(1000, 9999).ToString();
+                    OTP = r.Next(1000, 9999).ToString();
 
-                        returnData = new DoctorController().SendOTP("", mobile, OTP);
-                    }
+                    returnData = new DoctorController().SendOTP("", mobile, OTP);
+                    //}
                 }
             }
             catch (Exception ex)
@@ -383,6 +464,15 @@ namespace DoctorDiaryAPI.Controllers
 
             return Json(JsonConvert.SerializeObject(returnData), JsonRequestBehavior.AllowGet);
         }
+
+
+        /// <summary>
+        /// Purpose: Verify Mobile No.
+        /// Created By: Vishal Chudasama on 25 Aug 2020
+        /// </summary>
+        /// <returns> OTP Verify or not </returns>
+        /// <param name="mobile"> Mobile No. </param>
+        /// <param name="OTP"> OTP </param>
 
         public JsonResult VerifyMobile(string mobile, string OTP)
         {
@@ -422,5 +512,69 @@ namespace DoctorDiaryAPI.Controllers
             }
             return Json(JsonConvert.SerializeObject(returnData), JsonRequestBehavior.AllowGet);
         }
+
+        #endregion
+
+        /// <summary>
+        /// Purpose: Find Patient details By Mobile Number
+        /// Created By: Vishal Chudasama on 25 Aug 2020
+        /// </summary>
+        /// <returns> Patient details </returns>
+        /// <param name="mobile"> mobile number </param>
+
+        public JsonResult FindPatientByMobile(string mobile)
+        {
+            ReturnObject returnData = new ReturnObject();
+
+            AppointmentAPIController aController = new AppointmentAPIController();
+
+            returnData = aController.FindPatientByMobile(mobile);
+
+            var data = new
+            {
+                status_code = returnData.status_code,
+                data1 = ((returnData.data1 != null) ? JsonConvert.SerializeObject(returnData.data1) : "")
+            };
+
+            return Json(JsonConvert.SerializeObject(data), JsonRequestBehavior.AllowGet);
+
+        }
+
+        #region Encrypt and Decrypt
+
+        /// <summary>
+        /// Purpose: Encrypt entered value
+        /// Created By: Vishal Chudasama on 25 Aug 2020
+        /// </summary>
+        /// <returns> Encrypted string </returns>
+        /// <param name="value"> Anything in String format to encrypt </param>
+
+        public JsonResult EncryptData(string value)
+        {
+            EncryptDecrypt ed = new EncryptDecrypt();
+            string encryptedString = ed.Encrypt(value);
+
+            return Json(JsonConvert.SerializeObject(encryptedString), JsonRequestBehavior.AllowGet);
+        }
+
+
+        /// <summary>
+        /// Purpose: Decrypt entered value
+        /// Created By: Vishal Chudasama on 25 Aug 2020
+        /// </summary>
+        /// <returns> Decrypted or Original value </returns>
+        /// <param name="str"> Encrypted string in String format to decrypt </param>
+
+        public int DecryptData(string str)
+        {
+            EncryptDecrypt ed = new EncryptDecrypt();
+            string decryptedString = ed.Decrypt(str);
+
+            int id = int.Parse(decryptedString);
+
+            return id;
+        }
+
+        #endregion
     }
 }

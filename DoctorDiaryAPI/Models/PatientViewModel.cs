@@ -5,9 +5,9 @@ using System.Web;
 
 namespace DoctorDiaryAPI.Models
 {
-    public class DoctorAppointmentViewModel
+    public class PatientViewModel
     {
-        public DoctorViewModel Doctor { get; set; }
+        public Patient_Master Patient { get; set; }
         public List<AppointmentViewModel> Appointments { get; set; }
     }
 }

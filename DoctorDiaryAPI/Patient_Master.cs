@@ -55,6 +55,12 @@ public partial class Patient_Master
 
     public Nullable<decimal> age { get; set; }
 
+    public string gender { get; set; }
+
+    public string relation { get; set; }
+
+    public Nullable<bool> IsActive { get; set; }
+
 
 
     public virtual usr usr { get; set; }

@@ -22,15 +22,19 @@ public partial class DoctorShift
 
     public int DoctorId { get; set; }
 
-    public System.TimeSpan MorningStart { get; set; }
+    public string MorningStart { get; set; }
 
-    public System.TimeSpan MorningEnd { get; set; }
+    public string MorningEnd { get; set; }
 
-    public System.TimeSpan AfternoonStart { get; set; }
+    public string AfternoonStart { get; set; }
 
-    public System.TimeSpan AfternoonEnd { get; set; }
+    public string AfternoonEnd { get; set; }
 
-    public bool IsActive { get; set; }
+    public int Slot { get; set; }
+
+    public System.DateTime CreatedDate { get; set; }
+
+    public System.DateTime UpdatedDate { get; set; }
 
 }
 

@@ -26,6 +26,8 @@ public partial class Appointment
 
     public int DoctorId { get; set; }
 
+    public int PatientId { get; set; }
+
     public string PatientName { get; set; }
 
     public string PatientMobile { get; set; }
@@ -37,6 +39,8 @@ public partial class Appointment
     public string SessionId { get; set; }
 
     public System.DateTime CreatedDate { get; set; }
+
+    public System.DateTime UpdatedDate { get; set; }
 
 }
 

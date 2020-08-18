@@ -15,22 +15,20 @@ namespace DoctorDiaryAPI
 using System;
     using System.Collections.Generic;
     
-public partial class Login_Track
+public partial class DoctorPatientMapping_Master
 {
 
     public int Id { get; set; }
 
-    public Nullable<int> User_Id { get; set; }
+    public int DoctorId { get; set; }
 
-    public string Email { get; set; }
+    public int PatientId { get; set; }
 
-    public System.DateTime Login_Date { get; set; }
+    public bool IsActive { get; set; }
 
-    public bool IsSuccess { get; set; }
+    public System.DateTime CreatedDate { get; set; }
 
-    public string App_Version { get; set; }
-
-    public string OS { get; set; }
+    public System.DateTime UpdatedDate { get; set; }
 
 }
 

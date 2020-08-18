@@ -90,6 +90,8 @@ public partial class ddiarydbEntities : DbContext
 
     public virtual DbSet<usr> usrs { get; set; }
 
+    public virtual DbSet<DoctorPatientMapping_Master> DoctorPatientMapping_Master { get; set; }
+
 }
 
 }

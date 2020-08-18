@@ -1,0 +1,701 @@
+﻿@model DoctorDiaryAPI.Models.AppointmentViewModel
+
+@{
+    ViewBag.Title = "Appointment";
+    var data = Model;
+}
+
+
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <nav aria-label="breadcrumb" class="page-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Booking</li>
+                    </ol>
+                </nav>
+                <h2 class="breadcrumb-title">Booking</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="content">
+    <div class="container">
+        @using (Html.BeginForm("Booking", "Home", FormMethod.Post, new { id = "formBooking" }))
+        {
+
+            <div class="row">
+                <div class="col-12">
+
+                    @if (Model.Doctor != null)
+                    {
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="doctor-widget">
+                                    <div class="doc-info-left">
+                                        <div class="doctor-img">
+
+                                            @if (Model.Doctor.Doctor_photo.Length < 3)
+                                            {
+                                                <span class="avatar-title rounded border border-white" style="font-size: 5rem;">@Model.Doctor.Doctor_photo</span>
+                                            }
+                                            else
+                                            {
+                                                <img src="@Model.Doctor.Doctor_photo" class="img-fluid" alt="User Image">
+                                            }
+
+                                        </div>
+                                        <div class="doc-info-cont">
+                                            <h4 class="doc-name">Dr. @Model.Doctor.Doctor_name</h4>
+                                            <p class="doc-speciality">@Model.Doctor.Doctor_degree</p>
+                                            <div class="clinic-details">
+                                                <p class="doc-location"><i class="fas fa-map-marker-alt"></i> @Model.Doctor.Doctor_address, @Model.Doctor.Doctor_city, @Model.Doctor.Doctor_country </p>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="doc-info-right">
+                                        <div class="clinic-booking">
+                                            <a href="/Home/DoctorProfile?id=@Model.Doctor.DoctorId_Encrypt" class="btn view-btn">View Profile</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="row" style="transform: none;">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+
+                                    <!-- Checkout Form -->
+
+                                    @Html.HiddenFor(x => x.Doctor.DoctorId_Encrypt)
+
+                                    @Html.AntiForgeryToken()
+                                    <hr />
+                                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                                    <h4 class="card-title">Personal Information</h4>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Mobile no</label>
+                                                @Html.EditorFor(model => model.PatientMobile, new { htmlAttributes = new { @class = "form-control" } })
+                                                <small id="msgPatientMobile" class="text-danger"></small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Patient name</label>
+                                                @Html.EditorFor(model => model.PatientName, new { htmlAttributes = new { @class = "form-control" } })
+                                                <small id="msgPatientName" class="text-danger"></small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="Patient">Relation with Patient: <span class="text-danger">*</span></label>
+                                                <select class="form-control select select2-hidden-accessible" id="selRelation" required="required" data-validation-required-message="Please select relation.">
+                                                    <option value="Self">Self</option>
+                                                    <option value="Child">Child</option>
+                                                    <option value="Wife">Wife</option>
+                                                    <option value="Gardian">Gardian</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+                                                @Html.HiddenFor(x => x.Relation)
+                                                <small id="msgRelation" class="text-danger"></small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Date</label>
+                                                <input id="SelectDate" name="SelectDate" class="form-control" type="text">
+                                                @Html.HiddenFor(x => x.DateStart)
+                                                <small id="msgDateStart" class="text-danger"></small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @*<div class="exist-customer text-right">Verify mobile no. <a href="#">Click here</a></div>*@
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="card booking-schedule schedule-widget">
+
+                                <!-- Schedule Header -->
+                                <div class="card-header">
+                                    <h4 class="card-title">Schedule Timings</h4><br />
+                                    @*Booked : <span class="btn btn-info"> </span><br />
+                                        Available : <span class="btn btn-outline-primary"> </span>*@
+                                    @*<p class="text-right">Timing Slot Duration: </p>*@
+                                </div>
+                                <!-- /Schedule Header -->
+                                <!-- Schedule Content -->
+                                <div class="schedule-cont">
+                                    <div class="row">
+                                        <div class="col-md-12">
+
+                                            <!-- Time Slot -->
+                                            <div class="time-slot">
+
+                                                <p id="msgSessionId" class="text-danger mb-2"></p>
+
+                                                <div id="time_slots" class="doc-times">
+
+                                                </div>
+
+                                            </div>
+                                            <!-- /Time Slot -->
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- /Schedule Content -->
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Section -->
+                    <div class="submit-section proceed-btn text-right">
+                        <button type="submit" class="btn btn-primary submit-btn">Submit</button>
+                    </div>
+                    <!-- /Submit Section -->
+
+                </div>
+            </div>
+
+        }
+    </div>
+
+</div>
+
+<div class="modal fade" id="modalVerifyMobile" tabindex="-1" role="dialog" aria-labelledby="modalVerifyMobileLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Verify Mobile no.</h4>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close" data-original-title="" title=""><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>OTP</label>
+                            <input id="OTP" class="form-control" value="" />
+                            <br />
+                            <small id="msgOTP" class="text-info">Wait....</small>
+                            <br />
+                        </div>
+                    </div>
+                    <div class="col-md-12" style="overflow:auto;">
+                        <div style="float:right;">
+                            <button type="button" onclick="VerifyMobile()" class="btn btn-outline-info">Resend</button>
+                            <button type="button" onclick="VerifyOTP()" class="btn btn-primary">Verify</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+
+        $(document).ready(function () {
+
+            $('#OTP').val("");
+            $('#msgOTP').html("");
+
+            $("#formBooking :input").prop("disabled", true);
+            $('#PatientMobile').prop("disabled", false);
+
+            $('#PatientMobile').change(function () {
+
+                $("#msgPatientMobile").html("");
+
+                $("#formBooking :input").prop("disabled", true);
+                $('#PatientMobile').prop("disabled", false);
+
+                var mobile = this.value;
+                var mobile_regx = "^([1-9]{1})([0-9]{1})([0-9]{8})$";
+
+                if ((mobile != "") && mobile.length == 10) {
+
+                    $("#msgPatientMobile").html("");
+
+                    $.ajax({
+                        url: "/Home/FindPatientByMobile",
+                        method: "GET",
+                        data: { mobile: mobile },
+                        dataType: "json",
+                        success: function (res) {
+
+                            var data = JSON.parse(res);
+
+                            $("#formBooking :input").prop("disabled", false);
+
+                            if (data.status_code == 1) {
+
+                                var patient = JSON.parse(data.data1);
+
+                                if (patient != null) {
+
+                                    $('#PatientName').val(patient.Patient_name);
+                                    $('#Relation').val(patient.relation);
+
+                                }
+                            }
+                        },
+                        error: function (err) {
+                            //alert(err);
+                        }
+                    });
+
+                }
+                else if (!mobile.match(mobile_regx)) {
+                    valid = false;
+                    $("#msgPatientMobile").html("Please enter valid mobile no.");
+                    $('#PatientMobile').focus();
+                }
+                else {
+                    $("#msgPatientMobile").html("Mobile No. is Required.");
+                    $('#PatientMobile').focus();
+                }
+            });
+
+
+            var name = $('#PatientName').val();
+            var mobile = $('#PatientMobile').val();
+
+            var date = $('#DateStart').val();
+            var relation = $('#Relation').val();
+
+            var objDate = date.split(' ')[0];
+
+            var dmy = objDate.split('-');
+
+            date = moment(dmy[2]+'/'+dmy[1]+'/'+dmy[0]).format('MM/DD/YYYY');
+
+            $('input[name="SelectDate"]').daterangepicker({
+                singleDatePicker: true,
+                showDropdowns: true,
+                format: 'DD/MM/YYYY',
+                startDate: moment(date).format('MM/DD/YYYY'),
+                minDate: moment(),
+                //maxDate: moment().add(10, 'day'),
+                minYear: parseInt(moment().format('YYYY')),
+                maxYear: parseInt(moment().format('YYYY'), 1)
+            }, function (start, end, label) {
+                $('#DateStart').val(start.format('DD/MM/YYYY'));
+                ScheduleTimings();
+            });
+
+            $('#selRelation').on('select2:select', function (e) {
+                var data = e.params.data;
+                $('#Relation').val(data.id);
+            });
+
+            $("input[type='button']").click(function () {
+                var radioValue = $("input[name='SessionId']:checked").val();
+                if (radioValue) {
+                    alert(radioValue);
+                }
+            });
+
+            ScheduleTimings();
+
+            $('#formBooking').submit(function (evt) {
+
+
+                var date = $('#DateStart').val() ?? "";
+                var relation = $('#Relation').val() ?? "";
+
+                var name = $('#PatientName').val() ?? "";
+                var mobile = $('#PatientMobile').val() ?? "";
+                var otp = $('#OTP').val() ?? "";
+
+                var timeslot = $("input[name='SessionId']:checked").val() ?? "";
+
+
+                var otp = $('#OTP').val();
+                $('#msgOTP').html("").attr("class","");
+
+                var valid = true;
+                var name_regx = "^[a-zA-Z/]+(([',. -][a-zA-Z/ ])?[a-zA-Z/]*)*$";
+                //var mobile_regx = "^([89]{1})([234789]{1})([0-9]{8})$";
+                var mobile_regx = "^([1-9]{1})([0-9]{1})([0-9]{8})$";
+
+
+                if (date.length < 9) {
+                    valid = false;
+                    $("#msgDateStart").html("Please Select Date.");
+                    $('input[name="SelectDate"]').focus();
+                }
+                else {
+                    $("#msgDateStart").html("");
+                }
+
+                if (relation.length < 4) {
+                    valid = false;
+                    $("#msgRelation").html("Please Select Relation.");
+                    $('#selRelation').focus();
+                }
+                else {
+                    $("#msgRelation").html("");
+                }
+
+                if (name.length == 0) {
+                    valid = false;
+                    $("#msgPatientName").html("Patient name is Required.");
+                    $('#PatientName').focus();
+                }
+                else if (!name.match(name_regx)) {
+                    valid = false;
+                    $("#msgPatientName").html("Please enter valid name.");
+                    $('#PatientName').focus();
+                }
+                else {
+                    $("#msgPatientName").html("");
+                }
+
+                if (mobile.length == 0) {
+                    valid = false;
+                    $("#msgPatientMobile").html("Mobile No. is Required.");
+                    $('#PatientMobile').focus();
+                }
+                else if (!mobile.match(mobile_regx)) {
+                    valid = false;
+                    $("#msgPatientMobile").html("Please enter valid mobile no.");
+                    $('#PatientMobile').focus();
+                }
+                else {
+                    $("#msgPatientMobile").html("");
+                }
+
+                if (timeslot.length == 0) {
+                    valid = false;
+                    $("#msgSessionId").html("Please Select Time Slot.");
+                    $("input[name='SessionId']").focus();
+                }
+                else {
+                    $("#msgSessionId").html("");
+                }
+
+                if (valid) {
+
+                    if (otp == "") {
+                        evt.preventDefault();
+                        VerifyMobile();
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                }
+                else {
+                    evt.preventDefault();
+                    return false;
+                }
+            });
+        });
+
+        function VerifyMobile() {
+
+            var mobile = $('#PatientMobile').val() ?? "";
+
+            $('#OTP').val("");
+
+            $('#msgOTP').html("Wait...").attr("class", "text-info");
+
+            $("#modalVerifyMobile").modal('show');
+
+            $.ajax({
+                url: "/Home/SendOTP",
+                method: "GET",
+                data: { mobile: mobile },
+                dataType: "json",
+                success: function (res) {
+
+                    var data = JSON.parse(res);
+
+                    if (data.status_code == 1) {
+                        $("#msgOTP").html(data.message + ", OTP sent to entered mobile no.").attr("class", "text-success");
+                    }
+                    else {
+                        $("#msgOTP").html(data.message).attr("class", "text-danger");
+                    }
+                },
+                error: function (err) {
+                    //alert(err);
+                }
+            });
+        }
+
+        function VerifyOTP() {
+
+            var mobile = $('#PatientMobile').val() ?? "";
+            var otp = $("#OTP").val();
+
+            if ((otp != "") && otp.length == 4) {
+                $.ajax({
+                    url: "/Home/VerifyMobile",
+                    method: "GET",
+                    data: { mobile: mobile, OTP: otp },
+                    dataType: "json",
+                    success: function (res) {
+
+                        var data = JSON.parse(res);
+
+                        if (data.status_code == 1) {
+                            $("#modalVerifyMobile").modal('hide');
+                            document.getElementById("formBooking").submit();
+                        }
+                        else {
+                            $("#msgOTP").html(data.message).attr("class", "text-danger");
+                        }
+                    },
+                    error: function (err) {
+                        //alert(err);
+                    }
+                });
+            }
+            else if(otp.length > 4) {
+                $("#msgOTP").html("OTP have 4 digits.").attr("class", "text-danger");
+                return false;
+            }
+            else {
+                $("#msgOTP").html("Please enter OTP.").attr("class", "text-danger");
+                return false;
+            }
+        }
+
+        function ScheduleTimings() {
+
+            var id = $('input[name="Doctor.DoctorId_Encrypt"]').val();
+
+                var date = $('input[name="DateStart"]').val();
+
+                if (date.length > 0) {
+
+                    var objDate = date.split(' ')[0];
+
+            var ts = document.getElementById("time_slots");
+
+                    ts.innerHTML = "";
+
+            $.ajax({
+                url: "/Home/GetDoctorsShift",
+                method: "GET",
+                data: { DoctorId: id, dateString: date },
+                dataType: "json",
+                success: function (data) {
+
+                    var data = JSON.parse(data);
+
+                    var bookedSlots = [];
+                    if (data.bookedSlot.length > 0) {
+
+                        for (var i = 0; i < data.bookedSlot.length; i++) {
+                            bookedSlots.push(data.bookedSlot[i].substring(8, 10) + ':' + data.bookedSlot[i].substring(10, 12));
+                        }
+
+                    }
+                    var morningSlot = [];
+                    var afternoonSlot = [];
+                    var startTime = new Date();
+                    var endTime = new Date();
+                    var st, et = [];
+                    var str, num = "";
+
+                    if (data.docShifts.MorningStart.length > 0) {
+                        st = data.docShifts.MorningStart.split(':');
+                        et = data.docShifts.MorningEnd.split(':');
+                        startTime.setHours(st[0]);
+                        startTime.setMinutes(st[1]);
+                        //startTime.setSeconds(st[2]);
+
+                        endTime.setHours(et[0]);
+                        endTime.setMinutes(et[1]);
+                        //endTime.setSeconds(et[2]);
+
+                        num = startTime.getHours().toString();
+
+                        str = (num.length < 2) ? "0" + num : num;
+
+                        num = startTime.getMinutes().toString();
+
+                        str += ":" + ((num.length < 2) ? "0" + num : num);
+
+                        morningSlot.push(str);
+
+                        while (startTime < endTime) {
+
+                            if (i === 3) {
+                                continue;
+                            }
+
+                            startTime.setMinutes(startTime.getMinutes() + data.docShifts.ObTime);
+
+                            num = startTime.getHours().toString();
+
+                            str = (num.length < 2) ? "0" + num : num;
+
+                            num = startTime.getMinutes().toString();
+
+                            str += ":" + ((num.length < 2) ? "0" + num : num);
+
+                            morningSlot.push(str);
+                        }
+                    }
+
+                    startTime = new Date();
+                    endTime = new Date();
+                    st, et = [];
+                    str, num = "";
+
+                    if (data.docShifts.AfternoorStart.length > 0) {
+                        st = data.docShifts.AfternoorStart.split(':');
+                        et = data.docShifts.AfternoonEnd.split(':');
+                        startTime.setHours(st[0]);
+                        startTime.setMinutes(st[1]);
+                        //startTime.setSeconds(st[2]);
+
+                        endTime.setHours(et[0]);
+                        endTime.setMinutes(et[1]);
+                        //endTime.setSeconds(et[2]);
+
+                        num = startTime.getHours().toString();
+
+                        str = (num.length < 2) ? "0" + num : num;
+
+                        num = startTime.getMinutes().toString();
+
+                        str += ":" + ((num.length < 2) ? "0" + num : num);
+                        afternoonSlot.push(str);
+
+                        while (startTime < endTime) {
+
+                            startTime.setMinutes(startTime.getMinutes() + data.docShifts.ObTime);
+
+                            num = startTime.getHours().toString();
+
+                            str = (num.length < 2) ? "0" + num : num;
+
+                            num = startTime.getMinutes().toString();
+
+                            str += ":" + ((num.length < 2) ? "0" + num : num);
+
+                            afternoonSlot.push(str);
+                        }
+                    }
+
+                    var div = document.createElement("DIV");
+                    div.setAttribute("class", "btn-group btn-group-toggle d-flex flex-wrap justify-content-center");
+                    div.setAttribute("data-toggle", "buttons");
+
+                    var row1 = document.createElement("DIV");
+                    row1.setAttribute("class", "row p-2 d-flex");
+                    row1.innerHTML = '<h5 class="card-title col-12">Morning</h5>';
+
+                    if (morningSlot.length > 0) {
+
+                        str, num = "";
+                        st, et = [];
+
+                        for (var i = 0; i < (morningSlot.length - 1); i++) {
+
+                            st = morningSlot[i].split(":");
+                            et = morningSlot[i + 1].split(":");
+
+                            num = parseInt(st[0]);
+                            str = ((num.length < 2) ? "0" + num : num) + ':' + st[1] + ' am - ';
+
+                            num = parseInt(et[0]);
+                            if (num > 12) {
+                                num = num - 12;
+                                str += ((num.length < 2) ? "0" + num : num) + ':' + et[1] + ' pm';
+                            }
+                            else {
+                                str += ((num.length < 2) ? "0" + num : num) + ':' + et[1] + ' am';
+                            }
+
+                            if (bookedSlots.indexOf(morningSlot[i]) > -1) {
+                                row1.innerHTML += '<label class="btn btn-outline-light mx-1 my-2 flex-fill" disabled>'
+                                    + '<input type="radio" name="@Html.NameFor(x=>x.SessionId)"'
+                                    + 'value = "' + morningSlot[i] + '-' + morningSlot[i + 1] + '" disabled> '
+                                    + str + '</label>';
+                            }
+                            else {
+                                row1.innerHTML += '<label class="btn btn-outline-info mx-1 my-2 flex-fill">'
+                                    + '<input type="radio" name="@Html.NameFor(x=>x.SessionId)"'
+                                    + 'value = "' + morningSlot[i] + '-' + morningSlot[i + 1] + '"> '
+                                    + str + '</label>';
+                            }
+
+                        }
+
+                    }
+
+                    div.append(row1);
+
+                    var row2 = document.createElement("DIV");
+                    row2.setAttribute("class", "row p-2 d-flex");
+                    row2.innerHTML = '<h5 class="card-title col-12">Afternoon</h5>';
+
+                    if (afternoonSlot.length > 0) {
+
+                        str, num = "";
+                        st, et = [];
+
+                        for (var i = 0; i < (afternoonSlot.length - 1); i++) {
+                            st = afternoonSlot[i].split(":");
+                            et = afternoonSlot[i + 1].split(":");
+
+                            num = (parseInt(st[0]) - 12);
+                            str = ((num.length < 2) ? "0" + num : num) + ':' + st[1];
+
+                            num = (parseInt(et[0]) - 12);
+                            str += " pm - " + ((num.length < 2) ? "0" + num : num) + ':' + et[1] +' pm';
+
+                            if (bookedSlots.indexOf(afternoonSlot[i]) > -1) {
+                                row2.innerHTML += '<label class="btn btn-outline-light mx-1 my-2 flex-fill" disabled>'
+                                    + '<input type="radio" name="@Html.NameFor(x=>x.SessionId)"'
+                                    + 'value = "' + afternoonSlot[i] + '-' + afternoonSlot[i + 1] + '" disabled> '
+                                    + str + '</label>';
+                            }
+                            else {
+                                row2.innerHTML += '<label class="btn btn-outline-info mx-1 my-2 flex-fill">'
+                                    + '<input type="radio" name="@Html.NameFor(x=>x.SessionId)"'
+                                    + 'value = "' + afternoonSlot[i] + '-' + afternoonSlot[i + 1] + '" > '
+                                    + str + '</label>';
+                            }
+                        }
+
+                    }
+
+                    div.append(row2);
+
+                    ts.appendChild(div);
+
+                },
+                error: function (err) {
+                    //alert(err);
+                }
+            });
+
+
+                }
+        }
+    </script>
+}

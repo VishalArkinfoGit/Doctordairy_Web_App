@@ -1,0 +1,159 @@
+﻿@model DoctorDiaryAPI.Models.PatientViewModel
+
+@{
+    ViewBag.Title = "Details";
+}
+
+
+
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <nav aria-label="breadcrumb" class="page-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Profile</li>
+                    </ol>
+                </nav>
+                <h2 class="breadcrumb-title">Profile</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-md-5 col-lg-4 col-xl-3 theiaStickySidebar dct-dashbd-lft">
+
+                <!-- Profile Widget -->
+                <div class="card widget-profile pat-widget-profile">
+                    <div class="card-body">
+                        <div class="pro-widget-content">
+                            <div class="profile-info-widget">
+                                <div class="doctor-img" style="width: 100%;">
+                                    @if (Model.Patient.Patient_photo.Length < 3)
+                                    {
+                                        <span class="avatar-title rounded border border-white" style="font-size: 5rem;">@Model.Patient.Patient_photo</span>
+                                    }
+                                    else
+                                    {
+                                        <img src="@Model.Patient.Patient_photo" class="img-fluid" alt="User Image">
+                                    }
+                                </div>
+                                <div class="profile-det-info">
+                                    <h3>@Model.Patient.Patient_name</h3>
+
+                                    <div class="patient-details">
+                                        <h5><b>Patient ID :</b> @Model.Patient.Patient_Id</h5>
+                                        <h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> @Model.Patient.Patient_city, @Model.Patient.Patient_Country</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="patient-info">
+                            <ul>
+                                <li>Phone <span>@Model.Patient.Patient_contact</span></li>
+                                <li>Age <span>@Model.Patient.age Years, @Model.Patient.gender</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Profile Widget -->
+
+            </div>
+
+            <div class="col-md-7 col-lg-8 col-xl-9 dct-appoinment">
+
+                <div class="card card-table mb-0">
+                    <div class="card-body">
+                        @if (Model.Appointments != null)
+                        {
+
+                            <div class="table-responsive">
+                                <table class="table table-hover table-center mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Doctor</th>
+                                            <th>Appt Date</th>
+                                            <th>Booking Date</th>
+                                            <th>Relation</th>
+                                            <th>Status</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.Appointments)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <h2 class="table-avatar">
+                                                        <a href="doctor-profile.html">Dr. @item.Doctor.Doctor_name <span>@item.Doctor.Doctor_degree</span></a>
+                                                    </h2>
+                                                </td>
+                                                <td>@item.DateStart.ToString("dd MMM yyyy") <span class="d-block text-info">@item.DateStart.ToString("hh:mm tt") to @item.DateEnd.ToString("hh:mm tt")</span></td>
+                                                <td>@item.CreatedDate.ToString("dd MMM yyyy")</td>
+                                                <td>@item.Relation</td>
+                                                <td>
+                                                    @if (item.Status == "Pending")
+                                                    {
+                                                        <span class="badge badge-pill bg-warning-light">@item.Status</span>
+                                                    }
+                                                    else if (item.Status == "Accept")
+                                                    {
+                                                        <span class="badge badge-pill bg-success-light">@item.Status</span>
+                                                    }
+                                                    else if (item.Status == "Cancel")
+                                                    {
+                                                        <span class="badge badge-pill bg-danger-light">@item.Status</span>
+                                                    }
+                                                </td>
+                                                <td class="text-right">
+                                                    <div class="table-action">
+                                                        @if (item.DateStart > DateTime.Now)
+                                                        {
+                                                            if (item.Status == "Pending")
+                                                            {
+                                                                <a href="javascript:ChangeStatus(@item.Id, 'Cancel');" class="btn btn-sm bg-danger-light">
+                                                                    <i class="far fa-trash-alt"></i> Cancel
+                                                                </a>
+                                                            }
+                                                        }
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <p>No any Appointment(s)</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+@section Scripts{
+    <script>
+
+        function ChangeStatus(id, status) {
+
+            if (status == "Cancel") {
+                window.location.href = '/Patient/Edit?id=' + id + "&status=" + status;
+            }
+        }
+
+    </script>
+}

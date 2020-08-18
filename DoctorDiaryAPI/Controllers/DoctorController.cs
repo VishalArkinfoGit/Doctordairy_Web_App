@@ -19,6 +19,7 @@ using System.Collections.Specialized;
 using AutoMapper;
 using System.Web.Script.Serialization;
 using Newtonsoft.Json;
+using System.Data.Entity;
 
 namespace DoctorDiaryAPI.Controllers
 {
@@ -1960,6 +1961,17 @@ namespace DoctorDiaryAPI.Controllers
                 db.Doctor_Master.Add(dm);
                 db.SaveChanges();
                 db.Entry(dm).Reload();
+
+                if (dm.Doctor_id > 0)
+                {
+                    var unique = new EncryptDecrypt().Encrypt(dm.Doctor_id.ToString());
+                    dm.Url = "/Home/Booking?id=" + unique;
+
+                    db.Entry(dm).State = EntityState.Modified;
+                    db.SaveChanges();
+                    db.Entry(dm).Reload();
+                }
+
                 returnData.data1 = dm.Doctor_id;
                 returnData.message = "Successfull";
                 returnData.status_code = Convert.ToInt32(Status.Sucess);
@@ -2013,6 +2025,20 @@ namespace DoctorDiaryAPI.Controllers
                 dm.IsActive = bool.Parse(doc.IsActive);
                 db.Entry(dm).State = System.Data.Entity.EntityState.Modified;
                 db.SaveChanges();
+
+                //Doctor Shift
+                if (doc.doctorShift != null)
+                {
+                    //var temp = Insert_DoctorShift(cUser.doctorShift);
+
+                    doc.doctorShift.DoctorId = dm.Doctor_id;
+                    doc.doctorShift.CreatedDate = DateTime.Now;
+
+                    DoctorShift temp = new MappingService().Map<csDoctorShift, DoctorShift>(doc.doctorShift);
+
+                    db.DoctorShifts.Add(temp);
+                    db.SaveChanges();
+                }
 
                 returnData.message = "Successfull";
                 returnData.status_code = Convert.ToInt32(Status.Sucess);
@@ -2385,6 +2411,7 @@ namespace DoctorDiaryAPI.Controllers
                         {
                             items = SendTransaction(tr.prescription);
                         }
+
                         if (items != null)
                         {
                             foreach (csPrescription obj in items)
@@ -3498,128 +3525,19 @@ namespace DoctorDiaryAPI.Controllers
         {
             ReturnObject returnData = new ReturnObject();
             List<PatientCounts> pts = new List<PatientCounts>();
-            try
+
+            using (var transaction = db.Database.BeginTransaction())
             {
-                var usrchk = db.usrs.Where(x => x.Email == cUser.Email).FirstOrDefault();
-                if (usrchk != null)
+                try
                 {
-                    returnData.data1 = "Email Already Exists";
-                    returnData.message = "Successfull";
-                    returnData.status_code = Convert.ToInt32(Status.AlreadyExists);
-                    return returnData;
-                }
-                //insert user
-                usr us = new usr();
-                us.Email = cUser.Email;
-                us.Firstname = cUser.Firstname;
-                us.Gender = cUser.Gender;
-                us.Lastname = cUser.Lastname;
-                us.passwd = cUser.passwd;
-                us.IsActive = cUser.IsActive == "true" ? true : false;
-                us.token_id = cUser.token_id;
-                db.usrs.Add(us);
-                db.SaveChanges();
-                us.Doctor_Master = null;
-                //db.Entry(us).Reload();
-
-                Doctor_Master dm = new Doctor_Master();
-
-                if (us.Id > 0)
-                {
-                    dm.Reg_date = DateTime.Now;
-                    dm.User_id = us.Id;
-                    dm.Gender = cUser.Gender;
-                    dm.Doctor_state = cUser.Doctor_state;
-                    dm.Doctor_name = cUser.Firstname + " " + cUser.Lastname;
-                    dm.Doctor_email = cUser.Email;
-                    dm.Doctor_country = cUser.Doctor_country;
-                    dm.Doctor_contact = cUser.Doctor_contact;
-                    dm.Doctor_city = cUser.Doctor_city;
-                    dm.Doctor_address = cUser.Doctor_address;
-                    dm.Gender = cUser.Gender;
-                    dm.IsActive = cUser.IsActive == "true" ? true : false;//bool.Parse(cUser.IsActive);
-                    db.Doctor_Master.Add(dm);
-                    db.SaveChanges();
-                    db.Entry(dm).Reload();
-
-                    //dm.usr = null;
-
-                    Login_Track lt = new Login_Track();
-                    lt.User_Id = us.Id;
-                    lt.Email = us.Email;
-                    lt.Login_Date = DateTime.Now;
-                    lt.IsSuccess = true;
-                    lt.App_Version = cUser.app_version;
-                    db.Login_Track.Add(lt);
-                    db.SaveChanges();
-
-                    if (cUser.Doctor_country.Equals("India"))
+                    var usrchk = db.usrs.Where(x => x.Email == cUser.Email).FirstOrDefault();
+                    if (usrchk != null)
                     {
-                        monthly_sms ms = new monthly_sms();
-                        ms.user_id = us.Id;
-                        ms.date = DateTime.Now;
-                        ms.sms_count = 50;
-                        ms.sms_remaining_count = 50;
-                        db.monthly_sms.Add(ms);
-                        db.SaveChanges();
+                        returnData.data1 = "Email Already Exists";
+                        returnData.message = "Successfull";
+                        returnData.status_code = Convert.ToInt32(Status.AlreadyExists);
+                        return returnData;
                     }
-
-
-                }
-                returnData.data1 = db.usrs.Select(x => new { x.AccountId, x.Email, x.Firstname, x.Lastname, x.Gender, x.IsActive, x.passwd, x.token_id, x.Id }).FirstOrDefault(x => x.Id == us.Id);
-                returnData.data2 = db.Doctor_Master.Select(x => new { x.User_id, x.Clinic_name, x.Doctor_address, x.Doctor_city, x.Doctor_contact, x.Doctor_email, x.Doctor_country, x.Doctor_exp, x.Doctor_id, x.Doctor_name, x.Doctor_photo, x.Doctor_state, x.Gender, x.Reg_date, x.IsActive }).FirstOrDefault(x => x.User_id == dm.Doctor_id);
-
-                returnData.message = "Successfull";
-                returnData.status_code = Convert.ToInt32(Status.Sucess);
-                return returnData;
-            }
-            catch (Exception ex)
-            {
-                ErrHandler.WriteError(ex.Message, ex);
-                returnData.data1 = ex;
-                returnData.message = "Oops something went wrong! ";
-                returnData.status_code = Convert.ToInt32(Status.Failed);
-                return returnData;
-            }
-
-        }
-
-        /// <summary>
-        /// Purpose: Check User is available or not
-        /// Created By: Vishal Chudasama on 18 Aug 2020
-        /// </summary>
-        /// <param>User</param>
-        /// <returns>Message, User, Doctor, Last Login Details</returns>
-        
-        [HttpPost]
-        [ActionName("User_Available")]
-        public ReturnObject SignUpUsingSocialMedia(csUser cUser)
-        {
-            ReturnObject returnData = new ReturnObject();
-
-            try
-            {
-                var User = db.usrs.Where(x => x.Email == cUser.Email).FirstOrDefault();
-                var Doctor = db.Doctor_Master.Where(x => x.User_id == User.Id).FirstOrDefault();
-
-                if (User != null && Doctor != null)
-                {
-                    Login_Track Login = db.Login_Track.Where(x => x.Email == User.Email).OrderByDescending(x => x.Login_Date).FirstOrDefault();
-
-                    if (Login != null)
-                    {
-                        returnData.data3 = Login;
-                    }
-
-                    returnData.message = "You are allready register with this email.";
-                    returnData.data1 = User;
-                    returnData.data2 = Doctor;
-                    returnData.status_code = Convert.ToInt32(Status.AlreadyExists);
-
-                    return returnData;
-                }
-                else
-                {
                     //insert user
                     usr us = new usr();
                     us.Email = cUser.Email;
@@ -3629,13 +3547,15 @@ namespace DoctorDiaryAPI.Controllers
                     us.passwd = cUser.passwd;
                     us.IsActive = cUser.IsActive == "true" ? true : false;
                     us.token_id = cUser.token_id;
+                    us.Provider = cUser.Provider;
+                    us.ProviderId = cUser.ProviderId;
                     db.usrs.Add(us);
                     db.SaveChanges();
                     us.Doctor_Master = null;
                     //db.Entry(us).Reload();
 
                     Doctor_Master dm = new Doctor_Master();
-                    
+
                     if (us.Id > 0)
                     {
                         dm.Reg_date = DateTime.Now;
@@ -3654,7 +3574,31 @@ namespace DoctorDiaryAPI.Controllers
                         db.SaveChanges();
                         db.Entry(dm).Reload();
 
+                        if (dm.Doctor_id > 0)
+                        {
+                            var unique = new EncryptDecrypt().Encrypt(dm.Doctor_id.ToString());
+                            dm.Url = "/Home/Booking?id=" + unique;
+
+                            db.Entry(dm).State = EntityState.Modified;
+                            db.SaveChanges();
+                            db.Entry(dm).Reload();
+                        }
+
                         //dm.usr = null;
+
+                        //Doctor Shift
+                        if (cUser.doctorShift != null)
+                        {
+                            //var temp = Insert_DoctorShift(cUser.doctorShift);
+
+                            cUser.doctorShift.DoctorId = dm.Doctor_id;
+                            cUser.doctorShift.CreatedDate = DateTime.Now;
+
+                            DoctorShift temp = new MappingService().Map<csDoctorShift, DoctorShift>(cUser.doctorShift);
+
+                            db.DoctorShifts.Add(temp);
+                            db.SaveChanges();
+                        }
 
                         Login_Track lt = new Login_Track();
                         lt.User_Id = us.Id;
@@ -3676,27 +3620,31 @@ namespace DoctorDiaryAPI.Controllers
                             db.SaveChanges();
                         }
 
-                        returnData.data3 = lt;
-                        returnData.data2 = dm;
+
                     }
 
-                    returnData.data1 = us;
+                    transaction.Commit();
+
+                    returnData.data1 = db.usrs.Select(x => new { x.AccountId, x.Email, x.Firstname, x.Lastname, x.Gender, x.IsActive, x.passwd, x.token_id, x.Id }).FirstOrDefault(x => x.Id == us.Id);
+                    returnData.data2 = db.Doctor_Master.Select(x => new { x.User_id, x.Clinic_name, x.Doctor_address, x.Doctor_city, x.Doctor_contact, x.Doctor_email, x.Doctor_country, x.Doctor_exp, x.Doctor_id, x.Doctor_name, x.Doctor_photo, x.Doctor_state, x.Gender, x.Reg_date, x.IsActive }).FirstOrDefault(x => x.User_id == dm.Doctor_id);
+
                     returnData.message = "Successfull";
                     returnData.status_code = Convert.ToInt32(Status.Sucess);
                     return returnData;
                 }
-            }
-            catch (Exception ex)
-            {
-                ErrHandler.WriteError(ex.Message, ex);
-                returnData.data1 = ex;
-                returnData.message = "Oops something went wrong! ";
-                returnData.status_code = Convert.ToInt32(Status.Failed);
-                return returnData;
-            }
+                catch (Exception ex)
+                {
+                    // roll back all database operations, if any thing goes wrong
+                    transaction.Rollback();
 
+                    ErrHandler.WriteError(ex.Message, ex);
+                    returnData.data1 = ex;
+                    returnData.message = "Oops something went wrong! ";
+                    returnData.status_code = Convert.ToInt32(Status.Failed);
+                    return returnData;
+                }
+            }
         }
-
 
         public Image byteArrayToImage(byte[] byteArrayIn)
         {
@@ -3735,75 +3683,96 @@ namespace DoctorDiaryAPI.Controllers
             OTPVerification result = new OTPVerification();
             try
             {
-                using (ddiarydbEntities db = new ddiarydbEntities())
+                if (!string.IsNullOrEmpty(OTP) && OTP.Length > 0)
                 {
-                    //This portion check user otp is already available or not for perticular user. it is get based on email and mobile no
-                    //var result = db.OTPVerifications.FirstOrDefault(x => x.EmailId.ToLower() == EmailId.ToLower() || x.MobileNo == MobileNo);
-
-                    if (EmailId.Length > 0)
+                    using (ddiarydbEntities db = new ddiarydbEntities())
                     {
-                        result = db.OTPVerifications.FirstOrDefault(x => x.EmailId.ToLower() == EmailId.ToLower());
-                    }
+                        //This portion check user otp is already available or not for perticular user. it is get based on email and mobile no
+                        //var result = db.OTPVerifications.FirstOrDefault(x => x.EmailId.ToLower() == EmailId.ToLower() || x.MobileNo == MobileNo);
 
-                    if (MobileNo.Length > 0)
-                    {
-                        result = db.OTPVerifications.FirstOrDefault(x => x.MobileNo == MobileNo);
-                    }
-
-
-                    if (result != null)
-                    {
-                        currentId = Convert.ToInt32(result.Id);
-                        result.UpdatedDate = DateTime.Now;
-                    }
-                    else   //OTP is null no record found for user then create new OTP and send to user.
-                    {
-                        model.EmailId = EmailId;
-                        model.MobileNo = MobileNo;
-                        model.OTP = OTP;
-                        model.CreatedDate = DateTime.Now;
-                    }
-
-                    //Send Email on Email
-                    if (!string.IsNullOrEmpty(EmailId))
-                    {
-                        string body = "Dear user," + Environment.NewLine + " Thank you for using our app." + Environment.NewLine + "Your verification code is: " + OTP;
-                        var isSend = Email.MailSend(EmailId, "Doctor Diary App OTP Verification code", body, "", "");
-                        if (isSend)
+                        if (!string.IsNullOrEmpty(EmailId) && EmailId.Length > 0)
                         {
-                            model.IsEmailSend = isSend;
-                            if (result != null)
-                                result.IsEmailSend = isSend;
+                            result = db.OTPVerifications.FirstOrDefault(x => x.EmailId.ToLower() == EmailId.ToLower());
                         }
-                    }
-
-                    //Send SMS on mobile number 
-                    if (!string.IsNullOrEmpty(MobileNo))
-                    {
-                        string sms = "Dear user," + Environment.NewLine + " Thank you for using our app." + Environment.NewLine + "Your verification code is: " + OTP;
-                        var isSMSSend = SmsSend.Send(MobileNo, sms);
-                        if (isSMSSend)
+                        else if (!string.IsNullOrEmpty(MobileNo) && MobileNo.Length > 0)
                         {
-                            model.IsSMSSend = isSMSSend;
-                            if (result != null)
-                                result.IsSMSSend = isSMSSend;
+                            result = db.OTPVerifications.FirstOrDefault(x => x.MobileNo == MobileNo);
                         }
-                    }
+                        else
+                        {
+                            returnData.message = "Enter Email or Mobile no.";
+                            returnData.status_code = Convert.ToInt32(Status.Failed);
+                            return returnData;
+                        }
 
-                    if (currentId > 0)
-                    {
-                        db.Entry<OTPVerification>(result).State = System.Data.Entity.EntityState.Modified;
-                        db.SaveChanges();
-                    }
-                    else
-                    {
-                        db.OTPVerifications.Add(model);
-                        db.SaveChanges();
-                    }
+                        if (result != null)
+                        {
+                            currentId = Convert.ToInt32(result.Id);
+                            result.UpdatedDate = DateTime.Now;
+                        }
+                        else   //OTP is null no record found for user then create new OTP and send to user.
+                        {
+                            model.EmailId = EmailId;
+                            model.MobileNo = MobileNo;
+                            model.OTP = OTP;
+                            model.CreatedDate = DateTime.Now;
+                            model.UpdatedDate = DateTime.Now;
+                        }
 
-                    returnData.message = "Successfull";
-                    returnData.status_code = Convert.ToInt32(Status.Sucess);
-                    returnData.data1 = OTP;
+                        //Send Email on Email
+                        if (!string.IsNullOrEmpty(EmailId))
+                        {
+                            string body = "Dear user," + Environment.NewLine + " Thank you for using our app." + Environment.NewLine + "Your verification code is: " + OTP;
+                            var isSend = Email.MailSend(EmailId, "Doctor Diary App OTP Verification code", body, "", "");
+                            if (isSend)
+                            {
+                                model.IsEmailSend = isSend;
+                                if (result != null)
+                                    result.IsEmailSend = isSend;
+                            }
+                        }
+
+                        //Send SMS on mobile number 
+                        if (!string.IsNullOrEmpty(MobileNo))
+                        {
+                            string sms = "Dear user," + Environment.NewLine + " Thank you for using our app." + Environment.NewLine + "Your verification code is: " + OTP;
+                            var isSMSSend = SmsSend.Send(MobileNo, sms);
+                            if (isSMSSend)
+                            {
+                                model.IsSMSSend = isSMSSend;
+                                if (result != null)
+                                    result.IsSMSSend = isSMSSend;
+                            }
+                        }
+
+                        if (currentId > 0)
+                        {
+                            result.OTP = OTP;
+                            result.UpdatedDate = DateTime.Now;
+                            db.Entry<OTPVerification>(result).State = System.Data.Entity.EntityState.Modified;
+                            db.SaveChanges();
+
+                            result.OTP = "";
+                            returnData.data1 = result;
+                        }
+                        else
+                        {
+                            db.OTPVerifications.Add(model);
+                            db.SaveChanges();
+
+                            model.OTP = "";
+                            returnData.data1 = model;
+                        }
+
+                        returnData.message = "Successfull";
+                        returnData.status_code = Convert.ToInt32(Status.Sucess);
+                        return returnData;
+                    }
+                }
+                else
+                {
+                    returnData.message = "Oops something went wrong! ";
+                    returnData.status_code = Convert.ToInt32(Status.Failed);
                     return returnData;
                 }
             }
@@ -3817,6 +3786,226 @@ namespace DoctorDiaryAPI.Controllers
             }
         }
         #endregion
+
+
+        /// <summary>
+        /// Purpose: Check User is available or not
+        /// Created By: Vishal Chudasama on 18 Aug 2020
+        /// </summary>
+        /// <param>User</param>
+        /// <returns>Message, User, Doctor, Last Login Details</returns>
+
+        [HttpPost]
+        [ActionName("SignUpUsingSocialMedia")]
+        public ReturnObject SignUpUsingSocialMedia(csUser cUser)
+        {
+            ReturnObject returnData = new ReturnObject();
+
+            using (var transaction = db.Database.BeginTransaction())
+            {
+                try
+                {
+                    var User = db.usrs.Where(x => x.Email == cUser.Email).FirstOrDefault();
+
+                    if (User != null)
+                    {
+                        var Doctor = db.Doctor_Master.Where(x => x.User_id == User.Id).FirstOrDefault();
+
+                        Login_Track Login = db.Login_Track.Where(x => x.Email == User.Email).OrderByDescending(x => x.Login_Date).FirstOrDefault();
+
+                        if (Login != null)
+                        {
+                            returnData.data3 = Login;
+                        }
+
+                        returnData.message = "You are allready register with this email.";
+                        returnData.data1 = User;
+                        returnData.data2 = Doctor;
+                        returnData.status_code = Convert.ToInt32(Status.AlreadyExists);
+
+                        return returnData;
+                    }
+                    else
+                    {
+                        //insert user
+                        usr us = new usr();
+                        us.Email = cUser.Email;
+                        us.Firstname = cUser.Firstname;
+                        us.Gender = cUser.Gender;
+                        us.Lastname = cUser.Lastname;
+                        us.passwd = cUser.passwd;
+                        us.IsActive = cUser.IsActive == "true" ? true : false;
+                        us.token_id = cUser.token_id;
+                        us.Provider = cUser.Provider;
+                        us.ProviderId = cUser.ProviderId;
+                        db.usrs.Add(us);
+                        db.SaveChanges();
+                        us.Doctor_Master = null;
+                        //db.Entry(us).Reload();
+
+                        Doctor_Master dm = new Doctor_Master();
+
+                        if (us.Id > 0)
+                        {
+                            dm.Reg_date = DateTime.Now;
+                            dm.User_id = us.Id;
+                            dm.Gender = cUser.Gender;
+                            dm.Doctor_state = cUser.Doctor_state;
+                            dm.Doctor_name = cUser.Firstname + " " + cUser.Lastname;
+                            dm.Doctor_email = cUser.Email;
+                            dm.Doctor_country = cUser.Doctor_country;
+                            dm.Doctor_contact = cUser.Doctor_contact;
+                            dm.Doctor_city = cUser.Doctor_city;
+                            dm.Doctor_address = cUser.Doctor_address;
+                            dm.Gender = cUser.Gender;
+                            dm.IsActive = cUser.IsActive == "true" ? true : false;//bool.Parse(cUser.IsActive);
+                            db.Doctor_Master.Add(dm);
+                            db.SaveChanges();
+                            db.Entry(dm).Reload();
+
+                            if (dm.Doctor_id > 0)
+                            {
+                                var unique = new EncryptDecrypt().Encrypt(dm.Doctor_id.ToString());
+                                dm.Url = "/Home/Booking?id=" + unique;
+
+                                db.Entry(dm).State = EntityState.Modified;
+                                db.SaveChanges();
+                                db.Entry(dm).Reload();
+                            }
+
+                            //dm.usr = null;
+
+                            //Doctor Shift
+                            if (cUser.doctorShift != null)
+                            {
+                                //var temp = Insert_DoctorShift(cUser.doctorShift);
+
+                                cUser.doctorShift.DoctorId = dm.Doctor_id;
+                                cUser.doctorShift.CreatedDate = DateTime.Now;
+
+                                DoctorShift temp = new MappingService().Map<csDoctorShift, DoctorShift>(cUser.doctorShift);
+
+                                db.DoctorShifts.Add(temp);
+                                db.SaveChanges();
+                            }
+
+
+                            Login_Track lt = new Login_Track();
+                            lt.User_Id = us.Id;
+                            lt.Email = us.Email;
+                            lt.Login_Date = DateTime.Now;
+                            lt.IsSuccess = true;
+                            lt.App_Version = cUser.app_version;
+                            db.Login_Track.Add(lt);
+                            db.SaveChanges();
+
+                            if (cUser.Doctor_country != null)
+                            {
+                                if (cUser.Doctor_country.Equals("India"))
+                                {
+                                    monthly_sms ms = new monthly_sms();
+                                    ms.user_id = us.Id;
+                                    ms.date = DateTime.Now;
+                                    ms.sms_count = 50;
+                                    ms.sms_remaining_count = 50;
+                                    db.monthly_sms.Add(ms);
+                                    db.SaveChanges();
+                                }
+                            }
+
+                            returnData.data3 = lt;
+                            returnData.data2 = dm;
+                        }
+
+                        transaction.Commit();
+
+                        returnData.data1 = us;
+                        returnData.message = "Successfull";
+                        returnData.status_code = Convert.ToInt32(Status.Sucess);
+                        return returnData;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // roll back all database operations, if any thing goes wrong
+                    transaction.Rollback();
+
+                    ErrHandler.WriteError(ex.Message, ex);
+                    returnData.data1 = ex;
+                    returnData.message = "Oops something went wrong! ";
+                    returnData.status_code = Convert.ToInt32(Status.Failed);
+                    return returnData;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Created by Vishal Chudasama on 20 July 2020
+        /// Purpose : Create record in DoctorShift table
+        /// </summary>
+        /// <param name="id">Doctor Id</param>
+        /// <param name="morningShift">Time Start to End for Morning</param>
+        /// <param name="afternoonShift">Time Start to End for Afternoon</param>
+        /// <param name="slotMin">Slot Time in Minutes</param>
+        /// <returns>Return Success or Failed with Message</returns>
+
+        [HttpPost]
+        [ActionName("Insert_DoctorShift")]
+        public ReturnObject Insert_DoctorShift(csDoctorShift obj)
+        {
+            ReturnObject returnData = new ReturnObject();
+
+            using (var db = new ddiarydbEntities())
+            {
+                try
+                {
+                    csDoctorShift ds = new csDoctorShift();
+
+                    if (obj.DoctorId > 0)
+                    {
+                        DoctorShift temp = db.DoctorShifts.Where(x => x.DoctorId == obj.DoctorId).FirstOrDefault();
+
+                        if (temp != null)
+                        {
+                            ds = new MappingService().Map<DoctorShift, csDoctorShift>(temp);
+
+                            returnData.data1 = ds;
+                            returnData.message = "Allready Available!";
+                            returnData.status_code = Convert.ToInt32(Status.AlreadyExists);
+                        }
+                        else
+                        {
+                            temp = new DoctorShift();
+
+                            temp = new MappingService().Map<csDoctorShift, DoctorShift>(obj);
+                            temp.CreatedDate = DateTime.Now;
+
+                            db.DoctorShifts.Add(temp);
+                            db.SaveChanges();
+
+
+                            returnData.data1 = temp;
+                            returnData.message = "Successfull";
+                            returnData.status_code = Convert.ToInt32(Status.Sucess);
+                        }
+                    }
+                    else
+                    {
+                        returnData.message = "Enter Doctor id.";
+                        returnData.status_code = Convert.ToInt32(Status.Failed);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ErrHandler.WriteError(ex.Message, ex);
+                    returnData.data1 = ex;
+                    returnData.message = "Oops something went wrong! ";
+                    returnData.status_code = Convert.ToInt32(Status.Failed);
+                }
+            }
+
+            return returnData;
+        }
 
         #region Get Current user data
         /// <summary>
@@ -3912,6 +4101,17 @@ namespace DoctorDiaryAPI.Controllers
                 {
                     var modelPatient = Insert_Patient(modelList[i]);
                     modelList[i].Patient_Id = ((Patient_Master)modelPatient.data1).Patient_Id;
+
+                    //Add Account by Patient id - ModelPatientPayment 
+
+                    if (modelList[i].ModelPatientPayment != null)
+                    {
+                        modelList[i].ModelPatientPayment.patient_id = modelList[i].Patient_Id;
+                        var patientAccount = Insert_Account(modelList[i].ModelPatientPayment);
+                    }
+
+                    //End
+
                     for (int j = 0; j < modelList[i].ModeltreatmentList.Count(); j++)
                     {
                         modelList[i].ModeltreatmentList[j].Patient_Id = Convert.ToString(((Patient_Master)modelPatient.data1).Patient_Id);
@@ -4177,10 +4377,10 @@ namespace DoctorDiaryAPI.Controllers
                     if (treat.Treat_crno > 0)
                     {
                         List<csPrescription> items = null;// SendTransaction(tr.prescription);modelPrescriptions
-                        //if (model.prescription != null && model.prescription != "")
-                        //{
-                        //    items = SendTransaction(model.prescription);
-                        //}
+                                                          //if (model.prescription != null && model.prescription != "")
+                                                          //{
+                                                          //    items = SendTransaction(model.prescription);
+                                                          //}
                         if (model.modelPrescriptions != null)
                         {
                             foreach (csPrescription obj in model.modelPrescriptions)
@@ -4252,6 +4452,100 @@ namespace DoctorDiaryAPI.Controllers
                 return returnData;
             }
             return returnData;
+        }
+        #endregion
+
+        #region Send Prescription SMS
+
+        /// <summary>
+        /// Purpose: Send SMS with Priscription details to Patient
+        /// Created By: Vishal Chudasama on 22 Aug 2020
+        /// </summary>
+        /// <param>PrescriptionList</param>
+        /// <param>MobileNo</param>
+        /// <returns>Send or Not</returns>
+
+        public class paramSendPrescriptoin
+        {
+            public string patient_number { get; set; }
+            public List<csPrescription> PrescriptionMasterList { get; set; }
+        }
+
+
+        [HttpPost]
+        [ActionName("SendPrescriptoinSMS")]
+        public ReturnObject SendPrescriptoinSMS(paramSendPrescriptoin data)
+        {
+            ReturnObject result = new ReturnObject();
+
+            if (data.PrescriptionMasterList != null && !string.IsNullOrEmpty(data.patient_number))
+            {
+
+                try
+                {
+                    var patient = (from x in db.Patient_Master.AsEnumerable()
+                                   where x.Patient_Id == data.PrescriptionMasterList[0].Patient_Id
+                                   select x).FirstOrDefault();
+
+
+                    string sms = "Hello, " + patient.Patient_name + "\n";
+
+                    var doctorId = data.PrescriptionMasterList[0].Doctor_id;
+
+                    var doctor = (from x in db.Doctor_Master.AsEnumerable()
+                                  where x.Doctor_id == doctorId
+                                  select x).FirstOrDefault();
+
+                    sms += "Your prescription from Dr." + doctor.Doctor_name + " is mentioned below." + "\n";
+                    int med_count = 0;
+
+                    foreach (csPrescription obj in data.PrescriptionMasterList)
+                    {
+                        med_count++;
+                        sms += med_count + ". " + obj.medicine_name;
+
+                        sms += " (";
+                        sms += (obj.isMorning.ToLower() == "true") ? "1-" : "0-";
+                        sms += (obj.isNight.ToLower() == "true") ? "1-" : "0-";
+                        sms += (obj.isNoon.ToLower() == "true") ? "1-" : "0-";
+                        sms += (obj.isEvening.ToLower() == "true") ? "1" : "0";
+                        sms += ") ";
+
+                        sms += (obj.no_of_tablet.Equals("")) ? "" : "(" + obj.no_of_tablet + ")" + "\n";
+
+                        sms += obj.note.Equals("") ? "" : " (" + obj.note + ") " + "\n";
+
+                        sms += "From DoctorDiary.";
+                    }
+
+                    var isSMSSend = SmsSend.Send(data.patient_number, sms);
+                    if (isSMSSend)
+                    {
+                        result.message = "SMS sent successfully to your registered number";
+                        result.status_code = Convert.ToInt32(Status.Sucess);
+                    }
+                    else
+                    {
+                        result.message = "Oops something went wrong! ";
+                        result.status_code = Convert.ToInt32(Status.Failed);
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    ErrHandler.WriteError(ex.Message, ex);
+                    result.data1 = ex;
+                    result.message = "Oops something went wrong! ";
+                    result.status_code = Convert.ToInt32(Status.Failed);
+                }
+            }
+            else
+            {
+                result.message = "Oops something went wrong! ";
+                result.status_code = Convert.ToInt32(Status.Failed);
+            }
+
+            return result;
         }
         #endregion
 
@@ -4333,6 +4627,18 @@ namespace DoctorDiaryAPI.Controllers
             var model = mapper.Map<List<csAccount>>(modelList);
             return model;
         }
+        private DoctorShift ConvertDoctorShiftModel(csDoctorShift obj)
+        {
+            Config = new AutoMapper.MapperConfiguration(
+                cfg =>
+                {
+                    cfg.CreateMap<csDoctorShift, csDoctorShift>();
+                });
+            mapper = Config.CreateMapper();
+
+            return mapper.Map<DoctorShift>(obj);
+        }
+
         #endregion
 
     }
@@ -4408,7 +4714,9 @@ namespace DoctorDiaryAPI.Controllers
         public string Clinic_name { get; set; }
         public string Gender { get; set; }
         public string IsActive { get; set; }
+        public string Url { get; set; }
 
+        public csDoctorShift doctorShift { get; set; }
     }
     public class csTreat
     {
@@ -4475,6 +4783,7 @@ namespace DoctorDiaryAPI.Controllers
 
 
         public virtual List<csTreat> ModeltreatmentList { get; set; }
+        public virtual csAccount ModelPatientPayment { get; set; }
 
     }
     public class csSymptoms
@@ -4497,6 +4806,10 @@ namespace DoctorDiaryAPI.Controllers
         public string no_of_tablet { get; set; }
         public string send { get; set; }
 
+        public int Patient_Id { get; set; }
+        public int Doctor_id { get; set; }
+        public int Treat_crno { get; set; }
+
         // public string tablet_description { get; set; }
     }
     public class csUser
@@ -4515,6 +4828,10 @@ namespace DoctorDiaryAPI.Controllers
         public string Doctor_address { get; set; }
         public string token_id { get; set; }
         public string app_version { get; set; }
+        public string Provider { get; set; }
+        public string ProviderId { get; set; }
+
+        public csDoctorShift doctorShift { get; set; }
     }
 
     public class csTritmentImage
@@ -4537,6 +4854,27 @@ namespace DoctorDiaryAPI.Controllers
         public List<Disease> DiseaseMasterList { get; set; }
         public List<csAccount> AccountList { get; set; }
         public object data1 { get; set; }
+    }
+
+    public partial class csDoctorShift
+    {
+
+        public int Id { get; set; }
+
+        public int DoctorId { get; set; }
+
+        public string MorningStart { get; set; }
+
+        public string MorningEnd { get; set; }
+
+        public string AfternoonStart { get; set; }
+
+        public string AfternoonEnd { get; set; }
+
+        public int Slot { get; set; }
+
+        public DateTime CreatedDate { get; set; }
+
     }
     // GET api/Account/UserInfo
     #endregion

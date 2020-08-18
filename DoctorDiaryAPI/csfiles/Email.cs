@@ -14,7 +14,8 @@ namespace DoctorDiaryAPI
             try
             {
                 //var fromAddress = "ajaysinh.mail@gmail.com";  
-                var fromAddress = "harshal@arkinfosoft.com";
+                //var fromAddress = "harshal@arkinfosoft.com";
+                var fromAddress = "doctordairy@arkinfosoft.com";
                 var toAddress = ToAdd;
                 //const string fromPassword = "Ajay@123456";  
                 const string fromPassword = "Harshal@123";

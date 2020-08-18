@@ -50,6 +50,8 @@ public partial class Doctor_Master
 
     public Nullable<bool> IsActive { get; set; }
 
+    public string Url { get; set; }
+
 
 
     public virtual usr usr { get; set; }

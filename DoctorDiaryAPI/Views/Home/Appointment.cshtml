@@ -20,9 +20,27 @@
         toDate = fromDate;
     }
 
+    Request.Url.AbsoluteUri.Replace(Request.Url.Query, String.Empty);
+
 }
 
 
+
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <nav aria-label="breadcrumb" class="page-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Appointment</li>
+                    </ol>
+                </nav>
+                <h2 class="breadcrumb-title">Appointment</h2>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="content">
     <div class="container-fluid">
@@ -34,12 +52,20 @@
                 <div class="profile-sidebar">
                     <div class="widget-profile pro-widget-content">
                         <div class="profile-info-widget">
-                            <a href="#" class="booking-doc-img">
-                                <img src="@Model.Doctor.Doctor_photo.ToString()" alt="User Image">
-                            </a>
+                            <div class="doctor-img" style="width: 100%;">
+                                @if (Model.Doctor.Doctor_photo.Length < 3)
+                                {
+                                    <span class="avatar-title rounded border border-white" style="font-size: 5rem;">@Model.Doctor.Doctor_photo</span>
+                                }
+                                else
+                                {
+                                    <img src="@Model.Doctor.Doctor_photo" class="img-fluid" alt="User Image">
+                                }
+                            </div>
+                            <br />
                             <div class="profile-det-info">
                                 <h3>Dr. @Model.Doctor.Doctor_name</h3>
-                                @Html.HiddenFor(x => x.Doctor.Doctor_id)
+                                @Html.HiddenFor(x => x.Doctor.DoctorId_Encrypt)
                                 <div class="patient-details">
                                     <h5 class="mb-0">@Model.Doctor.Doctor_degree</h5>
                                 </div>
@@ -91,17 +117,24 @@
 
                 <div class="appointments">
 
-                    @if (Model.Appointments != null)
+                    @if (Model.Appointments.Count > 0)
                     {
                         foreach (var item in Model.Appointments)
                         {
                             <div class="appointment-list">
                                 <div class="profile-info-widget">
-                                    <a href="patient-profile.html" class="booking-doc-img">
-                                        <img src="~/Content/assets/img/patients/patient.jpg" alt="User Image">
-                                    </a>
+                                    <div class="doctor-img">
+                                        @if (item.SessionId.Length < 3)
+                                        {
+                                            <span class="avatar-title rounded border border-white" style="font-size: 5rem;">@item.SessionId</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="avatar-title rounded border border-white" style="font-size: 5rem;">?</span>
+                                        }
+                                    </div>
                                     <div class="profile-det-info">
-                                        <h3><a href="patient-profile.html">@item.PatientName</a></h3>
+                                        <h3>@item.PatientName</h3>
                                         <div class="patient-details">
                                             <h5><i class="fas fa-map-marker-alt"></i> @item.Relation</h5>
                                             <h5><i class="far fa-clock"></i> @item.DateStart.ToString("dd MMM yyyy") @item.DateStart.ToString("hh:mm tt") to @item.DateEnd.ToString("hh:mm tt")</h5>
@@ -125,33 +158,36 @@
                                     </div>
                                 </div>
                                 <div class="appointment-action">
+                                    @if (item.DateStart > DateTime.Now)
+                                    {
 
-                                    @if (item.Status == "Pending")
-                                    {
-                                        <a href="javascript:ChangeStatus(@item.Id, 'Accept');" class="btn btn-sm bg-success-light">
-                                            <i class="fas fa-check"></i> Accept
-                                        </a>
-                                        <a href="javascript:ChangeStatus(@item.Id, 'Cancel');" class="btn btn-sm bg-danger-light">
-                                            <i class="fas fa-times"></i> Cancel
-                                        </a>
-                                    }
-                                    else if (item.Status == "Accept")
-                                    {
-                                        <a href="javascript:ChangeStatus(@item.Id, 'Pending');" class="btn btn-sm bg-warning-light">
-                                            <i class="fa fa-spinner"></i> Pending
-                                        </a>
-                                        <a href="javascript:ChangeStatus(@item.Id, 'Cancel');" class="btn btn-sm bg-danger-light">
-                                            <i class="fas fa-times"></i> Cancel
-                                        </a>
-                                    }
-                                    else if (item.Status == "Cancel")
-                                    {
-                                        <a href="javascript:ChangeStatus(@item.Id, 'Pending');" class="btn btn-sm bg-warning-light">
-                                            <i class="fa fa-spinner"></i> Pending
-                                        </a>
-                                        <a href="javascript:ChangeStatus(@item.Id, 'Accept');" class="btn btn-sm bg-success-light">
-                                            <i class="fas fa-check"></i> Accept
-                                        </a>
+                                        if (item.Status == "Pending")
+                                        {
+                                            <a href="javascript:ChangeStatus(@item.Id, 'Accept');" class="btn btn-sm bg-success-light">
+                                                <i class="fas fa-check"></i> Accept
+                                            </a>
+                                            <a href="javascript:ChangeStatus(@item.Id, 'Cancel');" class="btn btn-sm bg-danger-light">
+                                                <i class="fas fa-times"></i> Cancel
+                                            </a>
+                                        }
+                                        else if (item.Status == "Accept")
+                                        {
+                                            @*<a href="javascript:ChangeStatus(@item.Id, 'Pending');" class="btn btn-sm bg-warning-light">
+                                                    <i class="fa fa-spinner"></i> Pending
+                                                </a>*@
+                                            <a href="javascript:ChangeStatus(@item.Id, 'Cancel');" class="btn btn-sm bg-danger-light">
+                                                <i class="fas fa-times"></i> Cancel
+                                            </a>
+                                        }
+                                        else if (item.Status == "Cancel")
+                                        {
+                                            @*<a href="javascript:ChangeStatus(@item.Id, 'Pending');" class="btn btn-sm bg-warning-light">
+                                                    <i class="fa fa-spinner"></i> Pending
+                                                </a>
+                                                <a href="javascript:ChangeStatus(@item.Id, 'Accept');" class="btn btn-sm bg-success-light">
+                                                    <i class="fas fa-check"></i> Accept
+                                                </a>*@
+                                        }
                                     }
                                 </div>
                             </div>
@@ -172,23 +208,76 @@
 
 </div>
 
+<div class="modal fade" id="cancleModal" tabindex="-1" role="dialog" aria-labelledby="cancleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">You want to add reasion for cancle appointment.</h4>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close" data-original-title="" title=""><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>Reasion (Optional)</label>
+                            <input type="hidden" id="cancleAppointmentId" />
+                            <input id="MSG" class="form-control" value="" />
+                        </div>
+                    </div>
+                    <div class="col-md-12" style="overflow:auto;">
+                        <div style="float:right;">
+                            <button type="button" onclick="CancleAppointment()" class="btn btn-primary">Cancle</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts{
     <script>
+
+        $(document).ready(function () {
+
+            var DoctorId = $("#Doctor_DoctorId_Encrypt").val();
+            window.history.replaceState(null, "Title", "/Home/Appointment?id=" + DoctorId);
+
+        });
+
         function ChangeStatus(id, status) {
-            var DoctorId = $("#Doctor_Doctor_id").val();
-            window.location.href = '/Home/Appointment?DoctorId=' + DoctorId + '&AppointmentId=' + id + "&status=" + status;
+            var DoctorId = $("#Doctor_DoctorId_Encrypt").val();
+
+            if (status == "Cancel") {
+                $("#cancleAppointmentId").val(id);
+                $("#cancleModal").modal();
+            }
+            else {
+                window.location.href = '/Home/Appointment?id=' + DoctorId + '&AppointmentId=' + id + "&status=" + status;
+            }
+        }
+
+        function CancleAppointment() {
+            var id = $("#cancleAppointmentId").val();
+
+            if (id != "") {
+                var msg = $("#MSG").val();
+                var DoctorId = $("#Doctor_DoctorId_Encrypt").val();
+
+                window.location.href = '/Home/Appointment?id=' + DoctorId + '&AppointmentId=' + id + "&status=Cancel&msg=" + msg;
+            }
         }
 
         $('.bookingrange').on('apply.daterangepicker', function (ev, picker) {
             var SelectedDate = $("#SelectedDate").val();
-            var DoctorId = $("#Doctor_Doctor_id").val();
+            var DoctorId = $("#Doctor_DoctorId_Encrypt").val();
 
             if (SelectedDate.length == 10) {
-                window.location.href = '/Home/Appointment?DoctorId=' + DoctorId + '&fromDate=' + SelectedDate;
+                window.location.href = '/Home/Appointment?id=' + DoctorId + '&fromDate=' + SelectedDate;
             }
             else if (SelectedDate.length > 10) {
                 var dates = SelectedDate.split('-');
-                window.location.href = '/Home/Appointment?DoctorId=' + DoctorId + '&fromDate=' + dates[0] + '&toDate=' + dates[1];
+                window.location.href = '/Home/Appointment?id=' + DoctorId + '&fromDate=' + dates[0] + '&toDate=' + dates[1];
             }
         });
 

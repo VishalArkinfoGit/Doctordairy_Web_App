@@ -1,0 +1,85 @@
+﻿@model DoctorDiaryAPI.Models.DoctorViewModel
+
+@{
+    ViewBag.Title = "Doctor Profile";
+}
+
+
+
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <nav aria-label="breadcrumb" class="page-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Doctor Profile</li>
+                    </ol>
+                </nav>
+                <h2 class="breadcrumb-title">Doctor Profile</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container">
+
+        <!-- Doctor Widget -->
+        <div class="card">
+            <div class="card-body">
+                <div class="doctor-widget">
+                    <div class="doc-info-left">
+                        <div class="doctor-img">
+
+                            @if (Model.Doctor_photo.Length < 3)
+                            {
+                                <span class="avatar-title rounded border border-white" style="font-size: 5rem;">@Model.Doctor_photo</span>
+                            }
+                            else
+                            {
+                                <img src="@Model.Doctor_photo" class="img-fluid" alt="User Image">
+                            }
+
+                        </div>
+                        <div class="doc-info-cont">
+                            <h4 class="doc-name">Dr. @Model.Doctor_name</h4>
+                            <p class="doc-speciality">@Model.Doctor_degree</p>
+                            
+                            <div class="clinic-details">
+                                <p class="doc-location"><i class="fas fa-map-marker-alt"></i> @Model.Doctor_address, @Model.Doctor_city, @Model.Doctor_country </p>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="doc-info-right">
+                        <div class="clini-infos">
+                            <ul>
+                                <li><i class="fas fa-map-marker-alt"></i> @Model.Doctor_city, @Model.Doctor_country</li>
+                                <li><i class="fas fa-phone"></i> @Model.Doctor_contact</li>
+                            </ul>
+                        </div>
+                        @*<div class="doctor-action">
+                                <a href="javascript:void(0)" class="btn btn-white fav-btn">
+                                    <i class="far fa-bookmark"></i>
+                                </a>
+                                <a href="chat.html" class="btn btn-white msg-btn">
+                                    <i class="far fa-comment-alt"></i>
+                                </a>
+                                <a href="javascript:void(0)" class="btn btn-white call-btn" data-toggle="modal" data-target="#voice_call">
+                                    <i class="fas fa-phone"></i>
+                                </a>
+                                <a href="javascript:void(0)" class="btn btn-white call-btn" data-toggle="modal" data-target="#video_call">
+                                    <i class="fas fa-video"></i>
+                                </a>
+                            </div>*@
+                        <div class="clinic-booking">
+                            <a class="apt-btn" href="@Model.Url">Book Appointment</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /Doctor Widget -->
+    </div>
+</div>

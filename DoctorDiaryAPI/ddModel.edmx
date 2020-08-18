@@ -35,12 +35,14 @@
           <Property Name="DateStart" Type="datetime" Nullable="false" />
           <Property Name="DateEnd" Type="datetime" Nullable="false" />
           <Property Name="DoctorId" Type="int" Nullable="false" />
+          <Property Name="PatientId" Type="int" Nullable="false" />
           <Property Name="PatientName" Type="nvarchar(max)" Nullable="false" />
           <Property Name="PatientMobile" Type="nvarchar(max)" Nullable="false" />
           <Property Name="Relation" Type="nvarchar(max)" Nullable="false" />
-          <Property Name="Status" Type="nvarchar(max)" />
+          <Property Name="Status" Type="nvarchar(max)" Nullable="false" />
           <Property Name="SessionId" Type="nvarchar(max)" Nullable="false" />
           <Property Name="CreatedDate" Type="datetime" Nullable="false" />
+          <Property Name="UpdatedDate" Type="datetime" Nullable="false" />
         </EntityType>
         <EntityType Name="Disease">
           <Key>
@@ -69,6 +71,25 @@
           <Property Name="Clinic_name" Type="varchar" MaxLength="100" />
           <Property Name="Gender" Type="varchar" MaxLength="50" />
           <Property Name="IsActive" Type="bit" />
+          <Property Name="Url" Type="nvarchar(max)" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Master' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="DoctorPatientMapping_Master">
+          <Key>
+            <PropertyRef Name="Id" />
+            <PropertyRef Name="DoctorId" />
+            <PropertyRef Name="PatientId" />
+            <PropertyRef Name="IsActive" />
+            <PropertyRef Name="CreatedDate" />
+            <PropertyRef Name="UpdatedDate" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="DoctorId" Type="int" Nullable="false" />
+          <Property Name="PatientId" Type="int" Nullable="false" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+          <Property Name="CreatedDate" Type="datetime" Nullable="false" />
+          <Property Name="UpdatedDate" Type="datetime" Nullable="false" />
         </EntityType>
         <EntityType Name="DoctorShifts">
           <Key>
@@ -76,11 +97,13 @@
           </Key>
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="DoctorId" Type="int" Nullable="false" />
-          <Property Name="MorningStart" Type="time" Precision="7" Nullable="false" />
-          <Property Name="MorningEnd" Type="time" Precision="7" Nullable="false" />
-          <Property Name="AfternoonStart" Type="time" Precision="7" Nullable="false" />
-          <Property Name="AfternoonEnd" Type="time" Precision="7" Nullable="false" />
-          <Property Name="IsActive" Type="bit" Nullable="false" />
+          <Property Name="MorningStart" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="MorningEnd" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="AfternoonStart" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="AfternoonEnd" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="Slot" Type="int" Nullable="false" />
+          <Property Name="CreatedDate" Type="datetime" Nullable="false" />
+          <Property Name="UpdatedDate" Type="datetime" Nullable="false" />
         </EntityType>
         <EntityType Name="Injury_Photos_Master">
           <Key>
@@ -112,6 +135,7 @@
           <Property Name="Login_Date" Type="datetime" Nullable="false" />
           <Property Name="IsSuccess" Type="bit" Nullable="false" />
           <Property Name="App_Version" Type="varchar" MaxLength="50" />
+          <Property Name="OS" Type="varchar" MaxLength="50" />
         </EntityType>
         <EntityType Name="Mail_Track">
           <Key>
@@ -205,6 +229,9 @@
           <Property Name="User_Id" Type="int" />
           <Property Name="note" Type="varchar" MaxLength="500" />
           <Property Name="age" Type="numeric" Precision="16" Scale="2" />
+          <Property Name="gender" Type="varchar" MaxLength="5" />
+          <Property Name="relation" Type="nvarchar(max)" />
+          <Property Name="IsActive" Type="bit" />
         </EntityType>
         <EntityType Name="prescription_table">
           <Key>
@@ -356,6 +383,8 @@
           <Property Name="IsActive" Type="bit" />
           <Property Name="token_id" Type="nvarchar(max)" />
           <Property Name="date" Type="datetime" />
+          <Property Name="Provider" Type="varchar" MaxLength="50" />
+          <Property Name="ProviderId" Type="varchar" MaxLength="21" />
         </EntityType>
         <Association Name="FK_Doctor_Master_Login_Master">
           <End Role="usr" Type="Self.usr" Multiplicity="1" />
@@ -593,6 +622,16 @@
           <EntitySet Name="Treatment_Image_Master" EntityType="Self.Treatment_Image_Master" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Treatment_Master" EntityType="Self.Treatment_Master" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="usr" EntityType="Self.usr" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DoctorPatientMapping_Master" EntityType="Self.DoctorPatientMapping_Master" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [DoctorPatientMapping_Master].[Id] AS [Id], 
+    [DoctorPatientMapping_Master].[DoctorId] AS [DoctorId], 
+    [DoctorPatientMapping_Master].[PatientId] AS [PatientId], 
+    [DoctorPatientMapping_Master].[IsActive] AS [IsActive], 
+    [DoctorPatientMapping_Master].[CreatedDate] AS [CreatedDate], 
+    [DoctorPatientMapping_Master].[UpdatedDate] AS [UpdatedDate]
+    FROM [dbo].[DoctorPatientMapping_Master] AS [DoctorPatientMapping_Master]</DefiningQuery>
+          </EntitySet>
           <AssociationSet Name="FK_Doctor_Master_Login_Master" Association="Self.FK_Doctor_Master_Login_Master">
             <End Role="usr" EntitySet="usr" />
             <End Role="Doctor_Master" EntitySet="Doctor_Master" />
@@ -696,6 +735,7 @@
           <EntitySet Name="Treatment_Image_Master" EntityType="ddiarydbModel.Treatment_Image_Master" />
           <EntitySet Name="Treatment_Master" EntityType="ddiarydbModel.Treatment_Master" />
           <EntitySet Name="usrs" EntityType="ddiarydbModel.usr" />
+          <EntitySet Name="DoctorPatientMapping_Master" EntityType="ddiarydbModel.DoctorPatientMapping_Master" />
           <AssociationSet Name="FK_Doctor_Master_Login_Master" Association="ddiarydbModel.FK_Doctor_Master_Login_Master">
             <End Role="usr" EntitySet="usrs" />
             <End Role="Doctor_Master" EntitySet="Doctor_Master" />
@@ -808,12 +848,14 @@
           <Property Name="DateStart" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="DateEnd" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="DoctorId" Type="Int32" Nullable="false" />
+          <Property Name="PatientId" Type="Int32" Nullable="false" />
           <Property Name="PatientName" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="PatientMobile" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="Relation" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="Status" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Status" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="SessionId" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UpdatedDate" Type="DateTime" Nullable="false" Precision="3" />
         </EntityType>
         <EntityType Name="Disease">
           <Key>
@@ -842,6 +884,7 @@
           <Property Name="Clinic_name" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
           <Property Name="Gender" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="IsActive" Type="Boolean" />
+          <Property Name="Url" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="usr" Relationship="ddiarydbModel.FK_Doctor_Master_Login_Master" FromRole="Doctor_Master" ToRole="usr" />
         </EntityType>
         <EntityType Name="DoctorShift">
@@ -850,11 +893,13 @@
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="DoctorId" Type="Int32" Nullable="false" />
-          <Property Name="MorningStart" Type="Time" Nullable="false" Precision="7" />
-          <Property Name="MorningEnd" Type="Time" Nullable="false" Precision="7" />
-          <Property Name="AfternoonStart" Type="Time" Nullable="false" Precision="7" />
-          <Property Name="AfternoonEnd" Type="Time" Nullable="false" Precision="7" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="MorningStart" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="MorningEnd" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="AfternoonStart" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="AfternoonEnd" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Slot" Type="Int32" Nullable="false" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UpdatedDate" Type="DateTime" Nullable="false" Precision="3" />
         </EntityType>
         <EntityType Name="Injury_Photos_Master">
           <Key>
@@ -888,6 +933,7 @@
           <Property Name="Login_Date" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="IsSuccess" Type="Boolean" Nullable="false" />
           <Property Name="App_Version" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="OS" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="Mail_Track">
           <Key>
@@ -975,6 +1021,9 @@
           <Property Name="User_Id" Type="Int32" />
           <Property Name="note" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
           <Property Name="age" Type="Decimal" Precision="16" Scale="2" />
+          <Property Name="gender" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="relation" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="IsActive" Type="Boolean" />
           <NavigationProperty Name="usr" Relationship="ddiarydbModel.FK_Patient_Master_usr" FromRole="Patient_Master" ToRole="usr" />
           <NavigationProperty Name="Treatment_Master" Relationship="ddiarydbModel.FK_Treatment_Master_Patient_Master" FromRole="Patient_Master" ToRole="Treatment_Master" />
           <NavigationProperty Name="Treatment_Master1" Relationship="ddiarydbModel.Patient_Id" FromRole="Patient_Master" ToRole="Treatment_Master" />
@@ -1140,6 +1189,8 @@
           <Property Name="IsActive" Type="Boolean" />
           <Property Name="token_id" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="date" Type="DateTime" Precision="3" />
+          <Property Name="Provider" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ProviderId" Type="String" MaxLength="21" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="Doctor_Master" Relationship="ddiarydbModel.FK_Doctor_Master_Login_Master" FromRole="usr" ToRole="Doctor_Master" />
           <NavigationProperty Name="Injury_Photos_Master" Relationship="ddiarydbModel.FK_Injury_Photos_Master_usr" FromRole="usr" ToRole="Injury_Photos_Master" />
           <NavigationProperty Name="monthly_sms" Relationship="ddiarydbModel.fk_monthly_sms_usr" FromRole="usr" ToRole="monthly_sms" />
@@ -1150,6 +1201,22 @@
           <NavigationProperty Name="SecurityAccount" Relationship="ddiarydbModel.ref_usr_SecurityAccount" FromRole="usr" ToRole="SecurityAccount" />
           <NavigationProperty Name="SMS_Master" Relationship="ddiarydbModel.FK_SMS_Master_SMS_Master" FromRole="usr" ToRole="SMS_Master" />
           <NavigationProperty Name="Treatment_Master" Relationship="ddiarydbModel.FK_Treatment_Master_usr" FromRole="usr" ToRole="Treatment_Master" />
+        </EntityType>
+        <EntityType Name="DoctorPatientMapping_Master">
+          <Key>
+            <PropertyRef Name="Id" />
+            <PropertyRef Name="DoctorId" />
+            <PropertyRef Name="PatientId" />
+            <PropertyRef Name="IsActive" />
+            <PropertyRef Name="CreatedDate" />
+            <PropertyRef Name="UpdatedDate" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="DoctorId" Type="Int32" Nullable="false" />
+          <Property Name="PatientId" Type="Int32" Nullable="false" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UpdatedDate" Type="DateTime" Nullable="false" Precision="3" />
         </EntityType>
         <Association Name="FK_Doctor_Master_Login_Master">
           <End Type="ddiarydbModel.usr" Role="usr" Multiplicity="1" />
@@ -1404,12 +1471,14 @@
           <EntitySetMapping Name="Appointments">
             <EntityTypeMapping TypeName="ddiarydbModel.Appointment">
               <MappingFragment StoreEntitySet="Appointment">
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
                 <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
                 <ScalarProperty Name="SessionId" ColumnName="SessionId" />
                 <ScalarProperty Name="Status" ColumnName="Status" />
                 <ScalarProperty Name="Relation" ColumnName="Relation" />
                 <ScalarProperty Name="PatientMobile" ColumnName="PatientMobile" />
                 <ScalarProperty Name="PatientName" ColumnName="PatientName" />
+                <ScalarProperty Name="PatientId" ColumnName="PatientId" />
                 <ScalarProperty Name="DoctorId" ColumnName="DoctorId" />
                 <ScalarProperty Name="DateEnd" ColumnName="DateEnd" />
                 <ScalarProperty Name="DateStart" ColumnName="DateStart" />
@@ -1428,6 +1497,7 @@
           <EntitySetMapping Name="Doctor_Master">
             <EntityTypeMapping TypeName="ddiarydbModel.Doctor_Master">
               <MappingFragment StoreEntitySet="Doctor_Master">
+                <ScalarProperty Name="Url" ColumnName="Url" />
                 <ScalarProperty Name="IsActive" ColumnName="IsActive" />
                 <ScalarProperty Name="Gender" ColumnName="Gender" />
                 <ScalarProperty Name="Clinic_name" ColumnName="Clinic_name" />
@@ -1450,7 +1520,9 @@
           <EntitySetMapping Name="DoctorShifts">
             <EntityTypeMapping TypeName="ddiarydbModel.DoctorShift">
               <MappingFragment StoreEntitySet="DoctorShifts">
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="Slot" ColumnName="Slot" />
                 <ScalarProperty Name="AfternoonEnd" ColumnName="AfternoonEnd" />
                 <ScalarProperty Name="AfternoonStart" ColumnName="AfternoonStart" />
                 <ScalarProperty Name="MorningEnd" ColumnName="MorningEnd" />
@@ -1485,6 +1557,7 @@
           <EntitySetMapping Name="Login_Track">
             <EntityTypeMapping TypeName="ddiarydbModel.Login_Track">
               <MappingFragment StoreEntitySet="Login_Track">
+                <ScalarProperty Name="OS" ColumnName="OS" />
                 <ScalarProperty Name="App_Version" ColumnName="App_Version" />
                 <ScalarProperty Name="IsSuccess" ColumnName="IsSuccess" />
                 <ScalarProperty Name="Login_Date" ColumnName="Login_Date" />
@@ -1565,6 +1638,9 @@
           <EntitySetMapping Name="Patient_Master">
             <EntityTypeMapping TypeName="ddiarydbModel.Patient_Master">
               <MappingFragment StoreEntitySet="Patient_Master">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="relation" ColumnName="relation" />
+                <ScalarProperty Name="gender" ColumnName="gender" />
                 <ScalarProperty Name="age" ColumnName="age" />
                 <ScalarProperty Name="note" ColumnName="note" />
                 <ScalarProperty Name="User_Id" ColumnName="User_Id" />
@@ -1731,6 +1807,8 @@
           <EntitySetMapping Name="usrs">
             <EntityTypeMapping TypeName="ddiarydbModel.usr">
               <MappingFragment StoreEntitySet="usr">
+                <ScalarProperty Name="ProviderId" ColumnName="ProviderId" />
+                <ScalarProperty Name="Provider" ColumnName="Provider" />
                 <ScalarProperty Name="date" ColumnName="date" />
                 <ScalarProperty Name="token_id" ColumnName="token_id" />
                 <ScalarProperty Name="IsActive" ColumnName="IsActive" />
@@ -1741,6 +1819,18 @@
                 <ScalarProperty Name="Gender" ColumnName="Gender" />
                 <ScalarProperty Name="Firstname" ColumnName="Firstname" />
                 <ScalarProperty Name="Email" ColumnName="Email" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DoctorPatientMapping_Master">
+            <EntityTypeMapping TypeName="ddiarydbModel.DoctorPatientMapping_Master">
+              <MappingFragment StoreEntitySet="DoctorPatientMapping_Master">
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="PatientId" ColumnName="PatientId" />
+                <ScalarProperty Name="DoctorId" ColumnName="DoctorId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

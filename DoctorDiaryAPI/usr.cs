@@ -63,6 +63,10 @@ public partial class usr
 
     public Nullable<System.DateTime> date { get; set; }
 
+    public string Provider { get; set; }
+
+    public string ProviderId { get; set; }
+
 
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
