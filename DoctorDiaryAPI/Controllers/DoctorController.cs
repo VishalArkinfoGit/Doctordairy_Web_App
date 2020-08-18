@@ -205,7 +205,7 @@ namespace DoctorDiaryAPI.Controllers
                     returnData.message = "User Record Not Found";
                     returnData.status_code = Convert.ToInt32(Status.Failed);
                 }
-                
+
                 return returnData;
             }
             catch (Exception ex)
@@ -2088,6 +2088,10 @@ namespace DoctorDiaryAPI.Controllers
                 dm.Patient_address = pat.Patient_address;
                 dm.note = pat.note;
                 dm.age = Convert.ToDecimal(pat.age);
+
+                dm.relation = pat.relation;
+                dm.gender = pat.gender;
+
                 db.Patient_Master.Add(dm);
                 db.SaveChanges();
                 db.Entry(dm).Reload();
@@ -2127,6 +2131,9 @@ namespace DoctorDiaryAPI.Controllers
                 dm.Patient_address = pat.Patient_address;
                 dm.note = pat.note;
                 dm.age = pat.age != "" ? Convert.ToDecimal(pat.age) : 0;
+
+                dm.relation = pat.relation;
+                dm.gender = pat.gender;
 
                 db.Entry(dm).State = System.Data.Entity.EntityState.Modified;
                 db.SaveChanges();
@@ -2323,7 +2330,7 @@ namespace DoctorDiaryAPI.Controllers
                         if (file != null)
                         {
                             var filename = Path.GetFileName(file.FileName);
-                            var path = Path.Combine(folderPath + treat.Treat_crno,treat.Treat_crno+"_"+i+".png");
+                            var path = Path.Combine(folderPath + treat.Treat_crno, treat.Treat_crno + "_" + i + ".png");
                             file.SaveAs(path);
 
                             string DbImagePath = ("~/TreatmentImage/" + treat.Treat_crno + "/" + treat.Treat_crno + "_" + i + ".png");
@@ -2889,7 +2896,7 @@ namespace DoctorDiaryAPI.Controllers
                         Directory.Delete(treatmentFile);
                     }
                     Directory.CreateDirectory(treatmentFile);
-                   
+
                     //this portion is use for save image in folder and add file name to model
                     for (int i = 1; i <= fileCount.Count; i++)
                     {
@@ -3779,17 +3786,69 @@ namespace DoctorDiaryAPI.Controllers
         public ReturnObject SynchronizeData(List<csPatient> modelList)
         {
             ReturnObject ObjReturn = new Controllers.ReturnObject();
+            List<Disease> modelDiseaseList = new List<Disease>();
+            List<symptom> modelSymptomsList = new List<symptom>();
+            List<medicine_table> modelMedicineList = new List<medicine_table>();
             try
             {
-                foreach (var patient in modelList)
+                List<object> modelNewObject = new List<object>();
+                for (int i = 0; i < modelList.Count(); i++)
                 {
-                    var modelPatient = Insert_Patient(patient);
-                    foreach (var treatment in patient.ModeltreatmentList)
+                    var modelPatient = Insert_Patient(modelList[i]);
+                    modelList[i].Patient_Id = ((Patient_Master)modelPatient.data1).Patient_Id;
+                    for (int j = 0; j < modelList[i].ModeltreatmentList.Count(); j++)
                     {
-                        treatment.Patient_Id = Convert.ToString(((Patient_Master)modelPatient.data1).Patient_Id);
-                        var treatmentModel = InsertSyncTreatment(treatment);
+                        modelList[i].ModeltreatmentList[j].Patient_Id = Convert.ToString(((Patient_Master)modelPatient.data1).Patient_Id);
+                        var treatmentModel = InsertSyncTreatment(modelList[i].ModeltreatmentList[j]);
+                        modelList[i].ModeltreatmentList[j].Treat_crno = ((Treatment_Master)treatmentModel.data1).Treat_crno;
+                        modelList[i].ModeltreatmentList[j].modelPrescriptions = new List<csPrescription>();
+                        modelList[i].ModeltreatmentList[j].modelPrescriptions.AddRange(ConvertPrescriptiondbtolocal((List<prescription_table>)treatmentModel.data2));
+
+                        if((List<symptom>)treatmentModel.data4 != null)
+                        {
+                            modelSymptomsList = (List<symptom>)treatmentModel.data4;
+                        }
+
+                        if ((List<Disease>)treatmentModel.data5 != null)
+                        {
+                            modelDiseaseList = (List<Disease>)treatmentModel.data5;
+                        }
+
+                        if ((List<medicine_table>)treatmentModel.data3 != null)
+                        {
+                            modelMedicineList = (List<medicine_table>)treatmentModel.data3;
+                        }
+                        
+                        //foreach (var item in (List<symptom>)treatmentModel.data4)
+                        //{
+                        //    modelSymptomsList.Add((symptom)item);
+                        //}
+
+                        //modelDiseaseList = null;
+
+                        //foreach (var item in (List<Disease>)treatmentModel.data5)
+                        //{
+                        //    modelDiseaseList.Add((Disease)item);
+                        //}
+
+                        //modelMedicineList = null;
+
+                        //foreach (var item in (List<medicine_table>)treatmentModel.data3)
+                        //{
+                        //    modelMedicineList.Add((medicine_table)item);
+                        //}
+
+
                     }
+                    modelNewObject.Add(modelList[i]);
                 }
+                ObjReturn.message = "Successfully";
+                ObjReturn.status_code = Convert.ToInt32(Status.Sucess);
+                ObjReturn.data1 = modelNewObject;
+                ObjReturn.data2 = modelSymptomsList;
+                ObjReturn.data3 = modelDiseaseList;
+                ObjReturn.data4 = modelMedicineList;
+
             }
             catch (Exception ex)
             {
@@ -3801,10 +3860,11 @@ namespace DoctorDiaryAPI.Controllers
             }
             return ObjReturn;
         }
-
         /// <summary>
         /// Created by : Harshal Koshti on 8 Aug 2020
         /// purpose : this method is use for save treatment,medicine,presciption,symptoms and diseas when Syncronize method call
+        /// Changes By : Vishal Chudasama on 18 Aug 2020
+        /// Purpose : 
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
@@ -3866,7 +3926,7 @@ namespace DoctorDiaryAPI.Controllers
                                         db.symptoms.Add(sm);
                                         db.SaveChanges();
                                         db.Entry(sm).Reload();
-                                        
+
                                         modelSymptomsList.Add(sm);
                                         //db.Entry(sm).Reload();
                                     }
@@ -4008,7 +4068,7 @@ namespace DoctorDiaryAPI.Controllers
                         //}
                         if (model.modelPrescriptions != null)
                         {
-                            foreach (csPrescription obj in items)
+                            foreach (csPrescription obj in model.modelPrescriptions)
                             {
 
                                 prescription_table pt = new prescription_table();
@@ -4035,7 +4095,9 @@ namespace DoctorDiaryAPI.Controllers
                                     mdt.Doctor_id = treat.User_Id;
                                     mdt.Medicine = obj.medicine_name;
                                     db.medicine_table.Add(mdt);
-                                    mdt.medicine_id = db.SaveChanges();
+                                    //mdt.medicine_id = db.SaveChanges();
+                                    db.SaveChanges();
+                                    db.Entry(mdt).Reload();
                                     modelMedicineList.Add(mdt);
                                 }
                             }
@@ -4161,7 +4223,7 @@ namespace DoctorDiaryAPI.Controllers
     }
 
     #region All Classes
-    enum Status { Sucess = 1, Failed = 0, NotFound = 2,AlreadyExists = 3 };
+    enum Status { Sucess = 1, Failed = 0, NotFound = 2, AlreadyExists = 3 };
     public class csSymptomsname
     {
         public int[] id { get; set; }
@@ -4289,6 +4351,13 @@ namespace DoctorDiaryAPI.Controllers
         public string note { get; set; }
         public string age { get; set; }
         public DateTime Reg_Date { get; set; }
+
+        public string relation { get; set; }
+
+
+        public string gender { get; set; }
+
+
 
         public virtual List<csTreat> ModeltreatmentList { get; set; }
 
