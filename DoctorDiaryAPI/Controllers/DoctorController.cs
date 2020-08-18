@@ -1678,7 +1678,7 @@ namespace DoctorDiaryAPI.Controllers
 
         [HttpGet]
         [ActionName("Get_User")]
-        public ReturnObject Get_User(string Email, string password, string app_version)
+        public ReturnObject Get_User(string Email, string password, string app_version, string OS)
         {
             ReturnObject returnData = new ReturnObject();
             try
@@ -1695,6 +1695,7 @@ namespace DoctorDiaryAPI.Controllers
                 lt.App_Version = app_version;
                 lt.Login_Date = DateTime.Now;
                 lt.User_Id = user.Id;
+                lt.OS = OS;
                 db.Login_Track.Add(lt);
                 db.SaveChanges();
 
@@ -3582,6 +3583,121 @@ namespace DoctorDiaryAPI.Controllers
             }
 
         }
+
+        /// <summary>
+        /// Purpose: Check User is available or not
+        /// Created By: Vishal Chudasama on 18 Aug 2020
+        /// </summary>
+        /// <param>User</param>
+        /// <returns>Message, User, Doctor, Last Login Details</returns>
+        
+        [HttpPost]
+        [ActionName("User_Available")]
+        public ReturnObject SignUpUsingSocialMedia(csUser cUser)
+        {
+            ReturnObject returnData = new ReturnObject();
+
+            try
+            {
+                var User = db.usrs.Where(x => x.Email == cUser.Email).FirstOrDefault();
+                var Doctor = db.Doctor_Master.Where(x => x.User_id == User.Id).FirstOrDefault();
+
+                if (User != null && Doctor != null)
+                {
+                    Login_Track Login = db.Login_Track.Where(x => x.Email == User.Email).OrderByDescending(x => x.Login_Date).FirstOrDefault();
+
+                    if (Login != null)
+                    {
+                        returnData.data3 = Login;
+                    }
+
+                    returnData.message = "You are allready register with this email.";
+                    returnData.data1 = User;
+                    returnData.data2 = Doctor;
+                    returnData.status_code = Convert.ToInt32(Status.AlreadyExists);
+
+                    return returnData;
+                }
+                else
+                {
+                    //insert user
+                    usr us = new usr();
+                    us.Email = cUser.Email;
+                    us.Firstname = cUser.Firstname;
+                    us.Gender = cUser.Gender;
+                    us.Lastname = cUser.Lastname;
+                    us.passwd = cUser.passwd;
+                    us.IsActive = cUser.IsActive == "true" ? true : false;
+                    us.token_id = cUser.token_id;
+                    db.usrs.Add(us);
+                    db.SaveChanges();
+                    us.Doctor_Master = null;
+                    //db.Entry(us).Reload();
+
+                    Doctor_Master dm = new Doctor_Master();
+                    
+                    if (us.Id > 0)
+                    {
+                        dm.Reg_date = DateTime.Now;
+                        dm.User_id = us.Id;
+                        dm.Gender = cUser.Gender;
+                        dm.Doctor_state = cUser.Doctor_state;
+                        dm.Doctor_name = cUser.Firstname + " " + cUser.Lastname;
+                        dm.Doctor_email = cUser.Email;
+                        dm.Doctor_country = cUser.Doctor_country;
+                        dm.Doctor_contact = cUser.Doctor_contact;
+                        dm.Doctor_city = cUser.Doctor_city;
+                        dm.Doctor_address = cUser.Doctor_address;
+                        dm.Gender = cUser.Gender;
+                        dm.IsActive = cUser.IsActive == "true" ? true : false;//bool.Parse(cUser.IsActive);
+                        db.Doctor_Master.Add(dm);
+                        db.SaveChanges();
+                        db.Entry(dm).Reload();
+
+                        //dm.usr = null;
+
+                        Login_Track lt = new Login_Track();
+                        lt.User_Id = us.Id;
+                        lt.Email = us.Email;
+                        lt.Login_Date = DateTime.Now;
+                        lt.IsSuccess = true;
+                        lt.App_Version = cUser.app_version;
+                        db.Login_Track.Add(lt);
+                        db.SaveChanges();
+
+                        if (cUser.Doctor_country.Equals("India"))
+                        {
+                            monthly_sms ms = new monthly_sms();
+                            ms.user_id = us.Id;
+                            ms.date = DateTime.Now;
+                            ms.sms_count = 50;
+                            ms.sms_remaining_count = 50;
+                            db.monthly_sms.Add(ms);
+                            db.SaveChanges();
+                        }
+
+                        returnData.data3 = lt;
+                        returnData.data2 = dm;
+                    }
+
+                    returnData.data1 = us;
+                    returnData.message = "Successfull";
+                    returnData.status_code = Convert.ToInt32(Status.Sucess);
+                    return returnData;
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrHandler.WriteError(ex.Message, ex);
+                returnData.data1 = ex;
+                returnData.message = "Oops something went wrong! ";
+                returnData.status_code = Convert.ToInt32(Status.Failed);
+                return returnData;
+            }
+
+        }
+
+
         public Image byteArrayToImage(byte[] byteArrayIn)
         {
             using (MemoryStream mStream = new MemoryStream(byteArrayIn))
@@ -3804,7 +3920,7 @@ namespace DoctorDiaryAPI.Controllers
                         modelList[i].ModeltreatmentList[j].modelPrescriptions = new List<csPrescription>();
                         modelList[i].ModeltreatmentList[j].modelPrescriptions.AddRange(ConvertPrescriptiondbtolocal((List<prescription_table>)treatmentModel.data2));
 
-                        if((List<symptom>)treatmentModel.data4 != null)
+                        if ((List<symptom>)treatmentModel.data4 != null)
                         {
                             modelSymptomsList = (List<symptom>)treatmentModel.data4;
                         }
@@ -3818,7 +3934,6 @@ namespace DoctorDiaryAPI.Controllers
                         {
                             modelMedicineList = (List<medicine_table>)treatmentModel.data3;
                         }
-                        
                         //foreach (var item in (List<symptom>)treatmentModel.data4)
                         //{
                         //    modelSymptomsList.Add((symptom)item);
