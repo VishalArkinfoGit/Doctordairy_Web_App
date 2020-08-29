@@ -765,9 +765,9 @@
                                     $(this).parent().addClass('active');
                                     $(this).parent().addClass('btn-outline-info');
                                     $(this).parent().removeClass('btn-outline-light');
-                                    $(this).removeAttr('disabled');
+                                    $(this).prop("disabled", false);
                                     $(this).attr('checked', 'checked');
-                                    $(this).parent().removeAttr('disabled');
+                                    $(this).parent().prop("disabled", false);
                                 }
                             });
                         }
@@ -822,8 +822,8 @@
                         $(this).parent().removeClass('active');
                         $(this).parent().removeClass('btn-outline-info');
                         $(this).parent().addClass('btn-outline-light');
-                        $(this).attr('disabled');
-                        $(this).parent().attr('disabled');
+                        $(this).prop("disabled", true);
+                        $(this).parent().prop("disabled", true);
                     }
                 });
             }
