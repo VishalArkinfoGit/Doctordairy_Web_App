@@ -4055,6 +4055,13 @@ namespace DoctorDiaryAPI.Controllers
                         foreach (var item1 in treatList)
                         {
 
+                            var listTreatmentImageMaster = db.Treatment_Image_Master.Where(x => x.Treat_crno == item1.Treat_crno).ToList();
+
+                            foreach (var itemTIM in listTreatmentImageMaster)
+                            {
+                                item1.Treatment_Image_Master.Add(itemTIM);
+                            }
+
                             modelTreatmentList.Add(item1);
                             if (!string.IsNullOrEmpty(item1.symptoms_id))
                             {
