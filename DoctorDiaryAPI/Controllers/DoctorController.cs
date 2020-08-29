@@ -4055,14 +4055,35 @@ namespace DoctorDiaryAPI.Controllers
                         foreach (var item1 in treatList)
                         {
 
-                            var listTreatmentImageMaster = db.Treatment_Image_Master.Where(x => x.Treat_crno == item1.Treat_crno).ToList();
+                            //var listTreatmentImageMaster = db.Treatment_Image_Master.Where(x => x.Treat_crno == item1.Treat_crno).ToList();
 
-                            foreach (var itemTIM in listTreatmentImageMaster)
+                            //foreach (var itemTIM in listTreatmentImageMaster)
+                            //{
+                            //    item1.Treatment_Image_Master.Add(itemTIM);
+                            //}
+
+                            foreach (var itemTIM in item1.Treatment_Image_Master)
                             {
-                                item1.Treatment_Image_Master.Add(itemTIM);
+                                itemTIM.Image_Path = (itemTIM.Image_Path != null) ? itemTIM.Image_Path : "";
+                                string file = itemTIM.Image_Path != null ? itemTIM.Image_Path : "~\temp\test.txt";
+
+                                if (!System.IO.File.Exists(file))
+                                {
+                                    itemTIM.Image_Path = string.Format("{0}://{1}{2}{3}{4}",
+                                          System.Web.HttpContext.Current.Request.Url.Scheme,
+                                          System.Web.HttpContext.Current.Request.Url.Host,
+                                          System.Web.HttpContext.Current.Request.Url.Port == 80 ? string.Empty : ":" + System.Web.HttpContext.Current.Request.Url.Port,
+                                          System.Web.HttpContext.Current.Request.ApplicationPath,
+                                          itemTIM.Image_Path.Replace("~/", string.Empty));
+                                }
+                                else
+                                {
+                                    itemTIM.Image_Path = "";
+                                }
                             }
 
                             modelTreatmentList.Add(item1);
+
                             if (!string.IsNullOrEmpty(item1.symptoms_id))
                             {
                                 string[] symptoms = item1.symptoms_id.Split(',');
@@ -4094,6 +4115,21 @@ namespace DoctorDiaryAPI.Controllers
                 returnData.status_code = Convert.ToInt32(Status.Sucess);
                 returnData.PatientMasterList = Convertpatientdbtolocal(modelPatientList);
                 returnData.TreatmentMasterList = ConvertTreatmentdbtolocal(modelTreatmentList);
+
+                foreach (var item in returnData.TreatmentMasterList)
+                {
+                    var TIM = modelTreatmentList.Where(x => x.Treat_crno == item.Treat_crno).FirstOrDefault();
+                    if (TIM.Treatment_Image_Master.Count > 0)
+                    {
+                        item.treatment_Images = new List<csTritmentImage>();
+                        foreach (var itemTIM in TIM.Treatment_Image_Master)
+                        {
+                            item.treatment_Images.Add(new MappingService().Map<Treatment_Image_Master, csTritmentImage>(itemTIM));
+                        }
+                        //item.treatment_Images.AddRange(new MappingService().Map<ICollection<Treatment_Image_Master>, List<csTritmentImage>>(TIM.Treatment_Image_Master));
+                    }
+                }
+
                 returnData.SymptomMasterList = ConvertSymptomsdbtolocal(modelSymptopms);
                 returnData.DiseaseMasterList = modelDiseaseList;
                 returnData.PrescriptionMasterList = ConvertPrescriptiondbtolocal(modelPrescriptionList);
@@ -4913,7 +4949,7 @@ namespace DoctorDiaryAPI.Controllers
         public string doctor_country { get; set; }
         public string patientName { get; set; }
 
-        List<csTritmentImage> treatment_Images { get; set; }
+        public List<csTritmentImage> treatment_Images { get; set; }
 
         public virtual List<csPrescription> modelPrescriptions { get; set; }
 
