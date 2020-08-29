@@ -182,7 +182,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Wre you sure to want to cancel appointment.</h4>
+                <h4 class="modal-title">Are you sure to want to cancel appointment.</h4>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close" data-original-title="" title=""><span aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
@@ -216,7 +216,7 @@
 
             if (id != "") {
                 showLoader();
-                window.location.href = '/Patient/Update_Status?id=' + id + "&status=" + status;
+                window.location.href = '/Patient/Update_Status?id=' + id + "&status=Cancel";
             }
         }
     </script>
