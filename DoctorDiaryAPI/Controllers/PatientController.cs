@@ -12,6 +12,7 @@ namespace DoctorDiaryAPI.Controllers
         // GET: Patient
         public ActionResult Login()
         {
+            Session.Clear();
             return View();
         }
 
@@ -41,7 +42,7 @@ namespace DoctorDiaryAPI.Controllers
                         }
                     }
 
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Details");
                 }
                 else
                 {
@@ -63,96 +64,123 @@ namespace DoctorDiaryAPI.Controllers
             return RedirectToAction("Login");
         }
 
-        // GET: Patient
-        public ActionResult Index()
-        {
-            return View();
-        }
-
         // GET: Patient/Details/5
-        public ActionResult Details(int id = 0)
+        public ActionResult Details(int id = 0, string status = "")
         {
-            if (Session["UserID"] != null)
+            if (id == 0)
             {
-                if (id == 0)
+                if (Session["UserID"] != null)
                 {
                     id = int.Parse(new EncryptDecrypt().Decrypt(Session["UserID"].ToString()));
                 }
-
-                PatientViewModel result = new PatientViewModel();
-
-                using (var db = new ddiarydbEntities())
+                else
                 {
-                    result.Patient = db.Patient_Master.Where(x => x.Patient_Id == id).FirstOrDefault();
+                    //id = 31223;
+                    return RedirectToAction("Login");
+                }
+            }
 
-                    string file = result.Patient.Patient_photo != null ? (@"" + result.Patient.Patient_photo) : @"c:\temp\test.txt";
+            PatientViewModel result = new PatientViewModel();
 
-                    if (!System.IO.File.Exists(file))
+            using (var db = new ddiarydbEntities())
+            {
+                var patient = db.Patient_Master.Where(x => x.Patient_Id == id).FirstOrDefault();
+
+                result = new MappingService().Map<Patient_Master, PatientViewModel>(patient);
+
+                //result.Patient_photo = new PhotoPathTextService().IsAvailable(result.Patient_photo, result.Patient_name);
+
+                var appointments = (from x in db.Appointments.AsEnumerable()
+                                    where x.PatientId == id
+                                    select x).OrderByDescending(x=>x.DateStart).ToList<Appointment>();
+
+                if (appointments != null)
+                {
+                    result.Appointments = new List<AppointmentViewModel>();
+                    foreach (var item in appointments)
                     {
-                        var temp = result.Patient.Patient_name.Split(' ');
-                        if (temp.Length > 1)
+                        if (item.DateStart < DateTime.Now)
                         {
-                            result.Patient.Patient_photo = temp[0].Substring(0, 1) + temp[1].Substring(0, 1);
+                            item.Status = "Cancel";
+                            item.UpdatedDate = DateTime.Now;
+
+                            db.Entry(item).State = System.Data.Entity.EntityState.Modified;
+                            db.SaveChanges();
                         }
-                        else
-                        {
-                            result.Patient.Patient_photo = temp[0].Substring(0, 1);
-                        }
-                    }
 
-                    var appointments = (from x in db.Appointments.AsEnumerable()
-                                        where x.PatientId == id
-                                        select x).ToList<Appointment>();
+                        var temp = new MappingService().Map<Appointment, AppointmentViewModel>(item);
 
-                    if (appointments != null)
-                    {
-                        result.Appointments = new List<AppointmentViewModel>();
-                        foreach (var item in appointments)
-                        {
+                        var doctor = db.Doctor_Master.Where(x => x.Doctor_id == item.DoctorId).FirstOrDefault();
+                        temp.Doctor = new MappingService().Map<Doctor_Master, DoctorViewModel>(doctor);
+                        temp.Doctor.DoctorId_Encrypt = new EncryptDecrypt().Encrypt(doctor.Doctor_id.ToString());
+                        temp.AppointmentId_Encrypt = new EncryptDecrypt().Encrypt(temp.Id.ToString());
 
-                            var temp = new MappingService().Map<Appointment, AppointmentViewModel>(item);
-
-                            var doctor = db.Doctor_Master.Where(x => x.Doctor_id == item.DoctorId).FirstOrDefault();
-                            temp.Doctor = new MappingService().Map<Doctor_Master, DoctorViewModel>(doctor);
-
-                            result.Appointments.Add(temp);
-                        }
+                        result.Appointments.Add(temp);
                     }
                 }
+            }
 
-                return View(result);
-            }
-            else
-            {
-                return RedirectToAction("Login", "Patient");
-            }
+            return View(result);
         }
 
         // GET: Patient/Create
-        public ActionResult Create()
+        public ActionResult Edit(int id = 0)
         {
-            return View();
+            if (id == 0)
+            {
+                if (Session["UserID"] != null)
+                {
+                    id = int.Parse(new EncryptDecrypt().Decrypt(Session["UserID"].ToString()));
+                }
+                else
+                {
+                    return RedirectToAction("Login");
+                }
+            }
+
+            PatientViewModel obj = new PatientViewModel();
+
+            using (var db = new ddiarydbEntities())
+            {
+                var patient = db.Patient_Master.Where(x => x.Patient_Id == id).FirstOrDefault();
+
+                obj = new MappingService().Map<Patient_Master, PatientViewModel>(patient);
+
+                //obj.Patient_photo = new PhotoPathTextService().IsAvailable(obj.Patient_photo, obj.Patient_name);
+            }
+
+            return View(obj);
         }
 
-        // POST: Patient/Create
+        // POST: Patient/Edit
         [HttpPost]
-        public ActionResult Create(FormCollection collection)
+        public ActionResult Edit(PatientViewModel obj)
         {
             try
             {
-                // TODO: Add insert logic here
+                csPatient csPatient = new MappingService().Map<PatientViewModel, csPatient>(obj);
 
-                return RedirectToAction("Index");
+                var res = new DoctorController().Update_Patient(csPatient);
+
+                if (res.status_code == 1)
+                {
+                    return RedirectToAction("Details");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Oops something went wrong! ");
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                ModelState.AddModelError(string.Empty, ex.Message);
             }
+
+            return View(obj);
         }
 
-        // POST: Patient/Edit/5
         [HttpGet]
-        public ActionResult Edit(int id, string status)
+        public ActionResult Update_Status(int id, string status)
         {
             try
             {
@@ -179,27 +207,6 @@ namespace DoctorDiaryAPI.Controllers
             return RedirectToAction("Details");
         }
 
-        // GET: Patient/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: Patient/Delete/5
-        [HttpPost]
-        public ActionResult Delete(int id, FormCollection collection)
-        {
-            try
-            {
-                // TODO: Add delete logic here
-
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
-        }
     }
 
 }
