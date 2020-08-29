@@ -1,0 +1,34 @@
+USE [arkinfos_ddiaryRestapi]
+GO
+
+/****** Object:  Table [dbo].[Appointment]    Script Date: 26-Aug-20 5:36:57 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Appointment](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[DateStart] [datetime] NOT NULL,
+	[DateEnd] [datetime] NOT NULL,
+	[DoctorId] [int] NOT NULL,
+	[PatientId] [int] NOT NULL,
+	[PatientName] [nvarchar](max) NOT NULL,
+	[PatientMobile] [nvarchar](max) NOT NULL,
+	[Relation] [nvarchar](max) NOT NULL,
+	[Status] [nvarchar](max) NOT NULL,
+	[SessionId] [nvarchar](max) NOT NULL,
+	[CreatedDate] [datetime] NOT NULL,
+	[UpdatedDate] [datetime] NOT NULL,
+ CONSTRAINT [PK__Appointm__3214EC073DE3CC4F] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[Appointment] ADD  CONSTRAINT [DF__Appointme__Statu__38EE7070]  DEFAULT ('Free') FOR [Status]
+GO
+
+

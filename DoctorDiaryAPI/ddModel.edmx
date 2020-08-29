@@ -13,8 +13,8 @@
           <Property Name="patient_id" Type="int" Nullable="false" />
           <Property Name="amount" Type="decimal" Precision="18" Scale="2" Nullable="false" />
           <Property Name="date" Type="date" />
-          <Property Name="remarks" Type="varchar" MaxLength="100" />
-          <Property Name="transaction_type" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="remarks" Type="nvarchar" MaxLength="200" />
+          <Property Name="transaction_type" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="Treat_crno" Type="int" />
           <Property Name="Doctor_id" Type="int" Nullable="false" />
         </EntityType>
@@ -49,7 +49,7 @@
             <PropertyRef Name="id" />
           </Key>
           <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="disease_name" Type="varchar(max)" Nullable="false" />
+          <Property Name="disease_name" Type="nvarchar(max)" Nullable="false" />
         </EntityType>
         <EntityType Name="Doctor_Master">
           <Key>
@@ -57,32 +57,25 @@
           </Key>
           <Property Name="Reg_date" Type="datetime" />
           <Property Name="User_id" Type="int" Nullable="false" />
-          <Property Name="Doctor_state" Type="varchar" MaxLength="30" />
+          <Property Name="Doctor_state" Type="nvarchar" MaxLength="60" />
           <Property Name="Doctor_photo" Type="varchar(max)" />
-          <Property Name="Doctor_name" Type="varchar" MaxLength="50" />
+          <Property Name="Doctor_name" Type="nvarchar" MaxLength="100" />
           <Property Name="Doctor_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Doctor_exp" Type="varchar" MaxLength="20" />
           <Property Name="Doctor_email" Type="varchar" MaxLength="50" />
-          <Property Name="Doctor_degree" Type="varchar" MaxLength="20" />
-          <Property Name="Doctor_country" Type="varchar" MaxLength="30" />
+          <Property Name="Doctor_degree" Type="nvarchar" MaxLength="40" />
+          <Property Name="Doctor_country" Type="nvarchar" MaxLength="60" />
           <Property Name="Doctor_contact" Type="varchar" MaxLength="20" />
-          <Property Name="Doctor_city" Type="varchar" MaxLength="30" />
-          <Property Name="Doctor_address" Type="varchar" MaxLength="500" />
-          <Property Name="Clinic_name" Type="varchar" MaxLength="100" />
-          <Property Name="Gender" Type="varchar" MaxLength="50" />
+          <Property Name="Doctor_city" Type="nvarchar" MaxLength="60" />
+          <Property Name="Doctor_address" Type="nvarchar" MaxLength="1000" />
+          <Property Name="Clinic_name" Type="nvarchar" MaxLength="200" />
+          <Property Name="Gender" Type="nvarchar" MaxLength="100" />
           <Property Name="IsActive" Type="bit" />
           <Property Name="Url" Type="nvarchar(max)" />
         </EntityType>
-        <!--Errors Found During Generation:
-warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Master' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
-        <EntityType Name="DoctorPatientMapping_Master">
+        <EntityType Name="DoctorPatient_Master">
           <Key>
             <PropertyRef Name="Id" />
-            <PropertyRef Name="DoctorId" />
-            <PropertyRef Name="PatientId" />
-            <PropertyRef Name="IsActive" />
-            <PropertyRef Name="CreatedDate" />
-            <PropertyRef Name="UpdatedDate" />
           </Key>
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="DoctorId" Type="int" Nullable="false" />
@@ -119,7 +112,7 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
           <Key>
             <PropertyRef Name="intUserId" />
           </Key>
-          <Property Name="stUserName" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="stUserName" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="stPhoneNo" Type="varchar" MaxLength="20" />
           <Property Name="stPassword" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="stEmail" Type="varchar" MaxLength="50" />
@@ -153,7 +146,7 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
           </Key>
           <Property Name="medicine_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Doctor_id" Type="int" />
-          <Property Name="Medicine" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="Medicine" Type="nvarchar" MaxLength="400" Nullable="false" />
         </EntityType>
         <EntityType Name="monthly_sms">
           <Key>
@@ -216,18 +209,18 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
           <Key>
             <PropertyRef Name="Patient_Id" />
           </Key>
-          <Property Name="Patient_state" Type="varchar" MaxLength="30" />
+          <Property Name="Patient_state" Type="nvarchar" MaxLength="60" />
           <Property Name="Patient_photo" Type="varchar" MaxLength="200" />
           <Property Name="Patient_name" Type="varchar" MaxLength="50" />
           <Property Name="Patient_email" Type="varchar" MaxLength="100" />
           <Property Name="Patient_contact" Type="varchar" MaxLength="20" />
-          <Property Name="Patient_city" Type="varchar" MaxLength="30" />
-          <Property Name="Patient_address" Type="varchar" MaxLength="500" />
+          <Property Name="Patient_city" Type="nvarchar" MaxLength="60" />
+          <Property Name="Patient_address" Type="nvarchar" MaxLength="1000" />
           <Property Name="Patient_Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="Patient_Country" Type="varchar" MaxLength="30" />
+          <Property Name="Patient_Country" Type="nvarchar" MaxLength="60" />
           <Property Name="Reg_Date" Type="date" />
           <Property Name="User_Id" Type="int" />
-          <Property Name="note" Type="varchar" MaxLength="500" />
+          <Property Name="note" Type="nvarchar" MaxLength="1000" />
           <Property Name="age" Type="numeric" Precision="16" Scale="2" />
           <Property Name="gender" Type="varchar" MaxLength="5" />
           <Property Name="relation" Type="nvarchar(max)" />
@@ -241,8 +234,8 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
           <Property Name="Patient_Id" Type="int" Nullable="false" />
           <Property Name="Doctor_id" Type="int" Nullable="false" />
           <Property Name="Treat_crno" Type="int" Nullable="false" />
-          <Property Name="medicine_name" Type="varchar" MaxLength="200" Nullable="false" />
-          <Property Name="note" Type="varchar" MaxLength="200" />
+          <Property Name="medicine_name" Type="nvarchar" MaxLength="400" Nullable="false" />
+          <Property Name="note" Type="nvarchar" MaxLength="400" />
           <Property Name="isMorning" Type="bit" />
           <Property Name="isNoon" Type="bit" />
           <Property Name="isEvening" Type="bit" />
@@ -254,7 +247,7 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="Problem_Detail" Type="varchar" MaxLength="200" />
+          <Property Name="Problem_Detail" Type="nvarchar" MaxLength="400" />
           <Property Name="User_Id" Type="int" />
         </EntityType>
         <EntityType Name="SecurityAccount">
@@ -309,7 +302,7 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
           <Property Name="From_Email_Address" Type="varchar" MaxLength="255" />
           <Property Name="Credential_Email_Address" Type="varchar" MaxLength="255" />
           <Property Name="Credential_Password" Type="varchar" MaxLength="255" />
-          <Property Name="Display_name" Type="varchar" MaxLength="255" />
+          <Property Name="Display_name" Type="nvarchar" MaxLength="511" />
           <Property Name="Host_name" Type="varchar" MaxLength="255" />
           <Property Name="EnableSSL" Type="bit" />
           <Property Name="IsActive" Type="bit" />
@@ -347,21 +340,21 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
           </Key>
           <Property Name="Treat_date" Type="date" />
           <Property Name="Treat_crno" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="SPO_two" Type="varchar" MaxLength="50" />
-          <Property Name="Remarks" Type="varchar" MaxLength="200" />
+          <Property Name="SPO_two" Type="nvarchar" MaxLength="100" />
+          <Property Name="Remarks" Type="nvarchar" MaxLength="400" />
           <Property Name="Patient_temp" Type="char" MaxLength="10" />
           <Property Name="Patient_pulse" Type="char" MaxLength="50" />
           <Property Name="Patient_image" Type="varchar" MaxLength="200" />
-          <Property Name="Patient_complain" Type="varchar" MaxLength="500" />
+          <Property Name="Patient_complain" Type="nvarchar" MaxLength="1000" />
           <Property Name="Patient_Id" Type="int" />
           <Property Name="Patient_BP" Type="char" MaxLength="50" />
-          <Property Name="Medicine" Type="varchar" MaxLength="200" />
+          <Property Name="Medicine" Type="nvarchar" MaxLength="400" />
           <Property Name="Counsultancyfee" Type="decimal" Precision="18" Scale="2" />
-          <Property Name="Advice" Type="varchar" MaxLength="200" />
-          <Property Name="Status" Type="varchar" MaxLength="100" />
-          <Property Name="Referred_Doctor_Name" Type="varchar" MaxLength="200" />
-          <Property Name="Referred_Hospital_Detail" Type="varchar" MaxLength="500" />
-          <Property Name="Patient_Report_Detail" Type="varchar" MaxLength="500" />
+          <Property Name="Advice" Type="nvarchar" MaxLength="400" />
+          <Property Name="Status" Type="nvarchar" MaxLength="200" />
+          <Property Name="Referred_Doctor_Name" Type="nvarchar" MaxLength="400" />
+          <Property Name="Referred_Hospital_Detail" Type="nvarchar" MaxLength="1000" />
+          <Property Name="Patient_Report_Detail" Type="nvarchar" MaxLength="1000" />
           <Property Name="User_Id" Type="int" />
           <Property Name="Is_Paid" Type="bit" Nullable="false" />
           <Property Name="Follow_Date" Type="datetime" />
@@ -374,10 +367,10 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Email" Type="varchar" MaxLength="255" />
-          <Property Name="Firstname" Type="varchar" MaxLength="255" />
-          <Property Name="Gender" Type="varchar" MaxLength="255" />
+          <Property Name="Firstname" Type="nvarchar" MaxLength="510" />
+          <Property Name="Gender" Type="nvarchar" MaxLength="510" />
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="Lastname" Type="varchar" MaxLength="255" />
+          <Property Name="Lastname" Type="nvarchar" MaxLength="510" />
           <Property Name="passwd" Type="varchar" MaxLength="255" />
           <Property Name="AccountId" Type="int" />
           <Property Name="IsActive" Type="bit" />
@@ -598,6 +591,7 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
           <EntitySet Name="Appointment" EntityType="Self.Appointment" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Disease" EntityType="Self.Disease" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Doctor_Master" EntityType="Self.Doctor_Master" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DoctorPatient_Master" EntityType="Self.DoctorPatient_Master" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="DoctorShifts" EntityType="Self.DoctorShifts" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Injury_Photos_Master" EntityType="Self.Injury_Photos_Master" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Login_Master" EntityType="Self.Login_Master" Schema="dbo" store:Type="Tables" />
@@ -622,16 +616,6 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
           <EntitySet Name="Treatment_Image_Master" EntityType="Self.Treatment_Image_Master" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Treatment_Master" EntityType="Self.Treatment_Master" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="usr" EntityType="Self.usr" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="DoctorPatientMapping_Master" EntityType="Self.DoctorPatientMapping_Master" store:Type="Tables" store:Schema="dbo">
-            <DefiningQuery>SELECT 
-    [DoctorPatientMapping_Master].[Id] AS [Id], 
-    [DoctorPatientMapping_Master].[DoctorId] AS [DoctorId], 
-    [DoctorPatientMapping_Master].[PatientId] AS [PatientId], 
-    [DoctorPatientMapping_Master].[IsActive] AS [IsActive], 
-    [DoctorPatientMapping_Master].[CreatedDate] AS [CreatedDate], 
-    [DoctorPatientMapping_Master].[UpdatedDate] AS [UpdatedDate]
-    FROM [dbo].[DoctorPatientMapping_Master] AS [DoctorPatientMapping_Master]</DefiningQuery>
-          </EntitySet>
           <AssociationSet Name="FK_Doctor_Master_Login_Master" Association="Self.FK_Doctor_Master_Login_Master">
             <End Role="usr" EntitySet="usr" />
             <End Role="Doctor_Master" EntitySet="Doctor_Master" />
@@ -712,6 +696,7 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
           <EntitySet Name="Appointments" EntityType="ddiarydbModel.Appointment" />
           <EntitySet Name="Diseases" EntityType="ddiarydbModel.Disease" />
           <EntitySet Name="Doctor_Master" EntityType="ddiarydbModel.Doctor_Master" />
+          <EntitySet Name="DoctorPatient_Master" EntityType="ddiarydbModel.DoctorPatient_Master" />
           <EntitySet Name="DoctorShifts" EntityType="ddiarydbModel.DoctorShift" />
           <EntitySet Name="Injury_Photos_Master" EntityType="ddiarydbModel.Injury_Photos_Master" />
           <EntitySet Name="Login_Master" EntityType="ddiarydbModel.Login_Master" />
@@ -735,7 +720,6 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
           <EntitySet Name="Treatment_Image_Master" EntityType="ddiarydbModel.Treatment_Image_Master" />
           <EntitySet Name="Treatment_Master" EntityType="ddiarydbModel.Treatment_Master" />
           <EntitySet Name="usrs" EntityType="ddiarydbModel.usr" />
-          <EntitySet Name="DoctorPatientMapping_Master" EntityType="ddiarydbModel.DoctorPatientMapping_Master" />
           <AssociationSet Name="FK_Doctor_Master_Login_Master" Association="ddiarydbModel.FK_Doctor_Master_Login_Master">
             <End Role="usr" EntitySet="usrs" />
             <End Role="Doctor_Master" EntitySet="Doctor_Master" />
@@ -826,8 +810,8 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
           <Property Name="patient_id" Type="Int32" Nullable="false" />
           <Property Name="amount" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
           <Property Name="date" Type="DateTime" Precision="0" />
-          <Property Name="remarks" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="transaction_type" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="remarks" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="transaction_type" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="Treat_crno" Type="Int32" />
           <Property Name="Doctor_id" Type="Int32" Nullable="false" />
         </EntityType>
@@ -862,7 +846,7 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
             <PropertyRef Name="id" />
           </Key>
           <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="disease_name" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="disease_name" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="Doctor_Master">
           <Key>
@@ -870,22 +854,33 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
           </Key>
           <Property Name="Reg_date" Type="DateTime" Precision="3" />
           <Property Name="User_id" Type="Int32" Nullable="false" />
-          <Property Name="Doctor_state" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="Doctor_state" Type="String" MaxLength="60" FixedLength="false" Unicode="true" />
           <Property Name="Doctor_photo" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="Doctor_name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Doctor_name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="Doctor_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Doctor_exp" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
           <Property Name="Doctor_email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="Doctor_degree" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="Doctor_country" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="Doctor_degree" Type="String" MaxLength="40" FixedLength="false" Unicode="true" />
+          <Property Name="Doctor_country" Type="String" MaxLength="60" FixedLength="false" Unicode="true" />
           <Property Name="Doctor_contact" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="Doctor_city" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="Doctor_address" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="Clinic_name" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="Gender" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Doctor_city" Type="String" MaxLength="60" FixedLength="false" Unicode="true" />
+          <Property Name="Doctor_address" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" />
+          <Property Name="Clinic_name" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="Gender" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="IsActive" Type="Boolean" />
           <Property Name="Url" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="usr" Relationship="ddiarydbModel.FK_Doctor_Master_Login_Master" FromRole="Doctor_Master" ToRole="usr" />
+        </EntityType>
+        <EntityType Name="DoctorPatient_Master">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="DoctorId" Type="Int32" Nullable="false" />
+          <Property Name="PatientId" Type="Int32" Nullable="false" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UpdatedDate" Type="DateTime" Nullable="false" Precision="3" />
         </EntityType>
         <EntityType Name="DoctorShift">
           <Key>
@@ -917,7 +912,7 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
           <Key>
             <PropertyRef Name="intUserId" />
           </Key>
-          <Property Name="stUserName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="stUserName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="stPhoneNo" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
           <Property Name="stPassword" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="stEmail" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
@@ -951,7 +946,7 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
           </Key>
           <Property Name="medicine_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Doctor_id" Type="Int32" />
-          <Property Name="Medicine" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="Medicine" Type="String" Nullable="false" MaxLength="400" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="monthly_sms">
           <Key>
@@ -1008,18 +1003,18 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
           <Key>
             <PropertyRef Name="Patient_Id" />
           </Key>
-          <Property Name="Patient_state" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="Patient_state" Type="String" MaxLength="60" FixedLength="false" Unicode="true" />
           <Property Name="Patient_photo" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="Patient_name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="Patient_email" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
           <Property Name="Patient_contact" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="Patient_city" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="Patient_address" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="Patient_city" Type="String" MaxLength="60" FixedLength="false" Unicode="true" />
+          <Property Name="Patient_address" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" />
           <Property Name="Patient_Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Patient_Country" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="Patient_Country" Type="String" MaxLength="60" FixedLength="false" Unicode="true" />
           <Property Name="Reg_Date" Type="DateTime" Precision="0" />
           <Property Name="User_Id" Type="Int32" />
-          <Property Name="note" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="note" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" />
           <Property Name="age" Type="Decimal" Precision="16" Scale="2" />
           <Property Name="gender" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
           <Property Name="relation" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
@@ -1036,8 +1031,8 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
           <Property Name="Patient_Id" Type="Int32" Nullable="false" />
           <Property Name="Doctor_id" Type="Int32" Nullable="false" />
           <Property Name="Treat_crno" Type="Int32" Nullable="false" />
-          <Property Name="medicine_name" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="note" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="medicine_name" Type="String" Nullable="false" MaxLength="400" FixedLength="false" Unicode="true" />
+          <Property Name="note" Type="String" MaxLength="400" FixedLength="false" Unicode="true" />
           <Property Name="isMorning" Type="Boolean" />
           <Property Name="isNoon" Type="Boolean" />
           <Property Name="isEvening" Type="Boolean" />
@@ -1049,7 +1044,7 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Problem_Detail" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="Problem_Detail" Type="String" MaxLength="400" FixedLength="false" Unicode="true" />
           <Property Name="User_Id" Type="Int32" />
           <NavigationProperty Name="usr" Relationship="ddiarydbModel.FK_Report_Problems_Mst_usr" FromRole="Report_Problems_Mst" ToRole="usr" />
         </EntityType>
@@ -1109,7 +1104,7 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
           <Property Name="From_Email_Address" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="Credential_Email_Address" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="Credential_Password" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
-          <Property Name="Display_name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="Display_name" Type="String" MaxLength="511" FixedLength="false" Unicode="true" />
           <Property Name="Host_name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="EnableSSL" Type="Boolean" />
           <Property Name="IsActive" Type="Boolean" />
@@ -1148,21 +1143,21 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
           </Key>
           <Property Name="Treat_date" Type="DateTime" Precision="0" />
           <Property Name="Treat_crno" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="SPO_two" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="Remarks" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="SPO_two" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Remarks" Type="String" MaxLength="400" FixedLength="false" Unicode="true" />
           <Property Name="Patient_temp" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
           <Property Name="Patient_pulse" Type="String" MaxLength="50" FixedLength="true" Unicode="false" />
           <Property Name="Patient_image" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="Patient_complain" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="Patient_complain" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" />
           <Property Name="Patient_Id" Type="Int32" />
           <Property Name="Patient_BP" Type="String" MaxLength="50" FixedLength="true" Unicode="false" />
-          <Property Name="Medicine" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="Medicine" Type="String" MaxLength="400" FixedLength="false" Unicode="true" />
           <Property Name="Counsultancyfee" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="Advice" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="Status" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="Referred_Doctor_Name" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="Referred_Hospital_Detail" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="Patient_Report_Detail" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="Advice" Type="String" MaxLength="400" FixedLength="false" Unicode="true" />
+          <Property Name="Status" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="Referred_Doctor_Name" Type="String" MaxLength="400" FixedLength="false" Unicode="true" />
+          <Property Name="Referred_Hospital_Detail" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" />
+          <Property Name="Patient_Report_Detail" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" />
           <Property Name="User_Id" Type="Int32" />
           <Property Name="Is_Paid" Type="Boolean" Nullable="false" />
           <Property Name="Follow_Date" Type="DateTime" Precision="3" />
@@ -1180,10 +1175,10 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Email" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
-          <Property Name="Firstname" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
-          <Property Name="Gender" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="Firstname" Type="String" MaxLength="510" FixedLength="false" Unicode="true" />
+          <Property Name="Gender" Type="String" MaxLength="510" FixedLength="false" Unicode="true" />
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Lastname" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="Lastname" Type="String" MaxLength="510" FixedLength="false" Unicode="true" />
           <Property Name="passwd" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="AccountId" Type="Int32" />
           <Property Name="IsActive" Type="Boolean" />
@@ -1201,22 +1196,6 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
           <NavigationProperty Name="SecurityAccount" Relationship="ddiarydbModel.ref_usr_SecurityAccount" FromRole="usr" ToRole="SecurityAccount" />
           <NavigationProperty Name="SMS_Master" Relationship="ddiarydbModel.FK_SMS_Master_SMS_Master" FromRole="usr" ToRole="SMS_Master" />
           <NavigationProperty Name="Treatment_Master" Relationship="ddiarydbModel.FK_Treatment_Master_usr" FromRole="usr" ToRole="Treatment_Master" />
-        </EntityType>
-        <EntityType Name="DoctorPatientMapping_Master">
-          <Key>
-            <PropertyRef Name="Id" />
-            <PropertyRef Name="DoctorId" />
-            <PropertyRef Name="PatientId" />
-            <PropertyRef Name="IsActive" />
-            <PropertyRef Name="CreatedDate" />
-            <PropertyRef Name="UpdatedDate" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="DoctorId" Type="Int32" Nullable="false" />
-          <Property Name="PatientId" Type="Int32" Nullable="false" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="UpdatedDate" Type="DateTime" Nullable="false" Precision="3" />
         </EntityType>
         <Association Name="FK_Doctor_Master_Login_Master">
           <End Type="ddiarydbModel.usr" Role="usr" Multiplicity="1" />
@@ -1514,6 +1493,18 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
                 <ScalarProperty Name="Doctor_state" ColumnName="Doctor_state" />
                 <ScalarProperty Name="User_id" ColumnName="User_id" />
                 <ScalarProperty Name="Reg_date" ColumnName="Reg_date" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DoctorPatient_Master">
+            <EntityTypeMapping TypeName="ddiarydbModel.DoctorPatient_Master">
+              <MappingFragment StoreEntitySet="DoctorPatient_Master">
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="PatientId" ColumnName="PatientId" />
+                <ScalarProperty Name="DoctorId" ColumnName="DoctorId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -1819,18 +1810,6 @@ warning 6002: The table/view 'arkinfos_ddiaryRestapi.dbo.DoctorPatientMapping_Ma
                 <ScalarProperty Name="Gender" ColumnName="Gender" />
                 <ScalarProperty Name="Firstname" ColumnName="Firstname" />
                 <ScalarProperty Name="Email" ColumnName="Email" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="DoctorPatientMapping_Master">
-            <EntityTypeMapping TypeName="ddiarydbModel.DoctorPatientMapping_Master">
-              <MappingFragment StoreEntitySet="DoctorPatientMapping_Master">
-                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
-                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="PatientId" ColumnName="PatientId" />
-                <ScalarProperty Name="DoctorId" ColumnName="DoctorId" />
-                <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

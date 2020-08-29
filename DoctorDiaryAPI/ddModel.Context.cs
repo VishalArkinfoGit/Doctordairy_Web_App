@@ -44,6 +44,8 @@ public partial class ddiarydbEntities : DbContext
 
     public virtual DbSet<Doctor_Master> Doctor_Master { get; set; }
 
+    public virtual DbSet<DoctorPatient_Master> DoctorPatient_Master { get; set; }
+
     public virtual DbSet<DoctorShift> DoctorShifts { get; set; }
 
     public virtual DbSet<Injury_Photos_Master> Injury_Photos_Master { get; set; }
@@ -89,8 +91,6 @@ public partial class ddiarydbEntities : DbContext
     public virtual DbSet<Treatment_Master> Treatment_Master { get; set; }
 
     public virtual DbSet<usr> usrs { get; set; }
-
-    public virtual DbSet<DoctorPatientMapping_Master> DoctorPatientMapping_Master { get; set; }
 
 }
 

@@ -15,7 +15,7 @@ namespace DoctorDiaryAPI
 using System;
     using System.Collections.Generic;
     
-public partial class DoctorPatientMapping_Master
+public partial class DoctorPatient_Master
 {
 
     public int Id { get; set; }

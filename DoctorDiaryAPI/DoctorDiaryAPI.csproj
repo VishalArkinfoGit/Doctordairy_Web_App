@@ -253,7 +253,7 @@
     <Compile Include="Disease.cs">
       <DependentUpon>ddModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="DoctorPatientMapping_Master.cs">
+    <Compile Include="DoctorPatient_Master.cs">
       <DependentUpon>ddModel.tt</DependentUpon>
     </Compile>
     <Compile Include="DoctorShift.cs">
@@ -291,6 +291,7 @@
     <Compile Include="Models\MappingService.cs" />
     <Compile Include="Models\PatientLoginViewModel.cs" />
     <Compile Include="Models\PatientViewModel.cs" />
+    <Compile Include="Models\PhotoPathTextService.cs" />
     <Compile Include="monthly_sms.cs">
       <DependentUpon>ddModel.tt</DependentUpon>
     </Compile>
@@ -492,6 +493,9 @@
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="DataScript\Create_OTPVerification_table.sql" />
+    <Content Include="DataScript\dbo.Appointment.txt" />
+    <Content Include="DataScript\dbo.DoctorPatientMapping_Master.txt" />
+    <Content Include="DataScript\dbo.DoctorShifts.txt" />
     <Content Include="DataScript\Treatment_Image_Master_table.sql" />
     <Content Include="ddModel.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -1117,6 +1121,9 @@
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
+    <Content Include="TreatmentImage\22808\22808_1.png" />
+    <Content Include="TreatmentImage\22808\22808_2.png" />
+    <Content Include="TreatmentImage\22808\22808_3.png" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -1140,6 +1147,7 @@
     <Content Include="Views\Home\AppointmentDetails.cshtml" />
     <Content Include="Views\Patient\Login.cshtml" />
     <Content Include="Views\Patient\Details.cshtml" />
+    <Content Include="Views\Patient\Edit.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

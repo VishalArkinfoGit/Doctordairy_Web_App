@@ -1,0 +1,21 @@
+USE [arkinfos_ddiaryRestapi]
+GO
+
+/****** Object:  Table [dbo].[DoctorPatientMapping_Master]    Script Date: 26-Aug-20 5:37:27 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[DoctorPatientMapping_Master](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[DoctorId] [int] NOT NULL,
+	[PatientId] [int] NOT NULL,
+	[IsActive] [bit] NOT NULL,
+	[CreatedDate] [datetime] NOT NULL,
+	[UpdatedDate] [datetime] NOT NULL
+) ON [PRIMARY]
+GO
+
+
