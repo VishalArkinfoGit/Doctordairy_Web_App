@@ -4632,7 +4632,71 @@ namespace DoctorDiaryAPI.Controllers
 
         #endregion
 
-        
+        /// <summary>
+        /// Purpose: Get list of symptoms, list of Disease and list of Medicines
+        /// Created By: Vishal Chudasama on 25 Aug 2020
+        /// </summary>
+        /// <returns> list of symptoms, list of Disease and list of Medicines </returns>
+        /// <param name="userId"> User Id </param>
+
+        [HttpGet]
+        [ActionName("GetAllSymptomsDisease")]
+        public ReturnObject GetAllSymptomsDisease(int userId = 0)
+        {
+            ReturnObject result = new ReturnObject();
+
+            try
+            {
+                //if (userId == 0)
+                //{
+                //    var listSymptoms = (from x in db.symptoms.AsEnumerable()
+                //                        select x).ToList<symptom>();
+
+
+                //    result.data1 = listSymptoms;
+                //}
+                //else
+                //{
+                var listSymptoms = (from x in db.symptoms.AsEnumerable()
+                                    where x.user_id == userId || x.user_id == null
+                                    select x).ToList<symptom>();
+
+
+                result.data1 = listSymptoms;
+                // }
+
+                var listDisease = db.Diseases.ToList();
+
+                result.data2 = listDisease;
+
+                //if (userId == 0)
+                //{
+                //    var listMedicines = (from x in db.medicine_table.AsEnumerable()
+                //                         where x.Doctor_id > 0 || x.Doctor_id == null
+                //                         select x).ToList<medicine_table>();
+
+
+                //    result.data3 = listMedicines;
+                //}
+                //else
+                //{
+                var listMedicines = db.medicine_table.AsNoTracking().Where(a => a.Doctor_id == userId || a.Doctor_id == null).ToList();
+
+                result.data3 = listMedicines;
+                //  }
+
+                result.message = "Successfull";
+                result.status_code = Convert.ToInt32(Status.Sucess);
+            }
+            catch (Exception ex)
+            {
+                ErrHandler.WriteError(ex.Message, ex);
+                result.data1 = ex;
+                result.message = "Oops something went wrong! ";
+                result.status_code = Convert.ToInt32(Status.Failed);
+            }
+            return result;
+        }
 
         #region Mapping Class
         private List<Treatment_Image_Master> ConvertTreatmentImageModel(List<csTritmentImage> images)
