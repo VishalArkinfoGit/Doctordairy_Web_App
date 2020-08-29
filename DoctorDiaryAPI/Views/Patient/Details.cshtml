@@ -5,6 +5,16 @@
     ViewBag.Title = "Details";
 }
 
+@{ var homeUrl = "/Home/Index";
+
+    if (Session["UserID"] != null)
+    {
+        homeUrl = "/Patient/Details";
+    }
+    else
+    {
+        homeUrl = "/Home/Index";
+    } }
 
 
 <div class="breadcrumb-bar">
@@ -13,7 +23,7 @@
             <div class="col-md-12 col-12">
                 <nav aria-label="breadcrumb" class="page-breadcrumb">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                        <li class="breadcrumb-item"><a href="@homeUrl">Home</a></li>
                         <li class="breadcrumb-item active" aria-current="page">Details</li>
                     </ol>
                 </nav>

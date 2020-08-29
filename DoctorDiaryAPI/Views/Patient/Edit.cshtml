@@ -6,6 +6,16 @@
     ViewBag.Title = "Edit";
 }
 
+@{ var homeUrl = "/Home/Index";
+
+    if (Session["UserID"] != null)
+    {
+        homeUrl = "/Patient/Details";
+    }
+    else
+    {
+        homeUrl = "/Home/Index";
+    } }
 
 <div class="breadcrumb-bar">
     <div class="container-fluid">
@@ -13,7 +23,7 @@
             <div class="col-md-12 col-12">
                 <nav aria-label="breadcrumb" class="page-breadcrumb">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                        <li class="breadcrumb-item"><a href="@homeUrl">Home</a></li>
                         <li class="breadcrumb-item active" aria-current="page">Edit</li>
                     </ol>
                 </nav>
@@ -109,7 +119,7 @@
                                 <div class="col-12 col-md-6">
                                     <div class="form-group">
                                         <label>Email ID</label>
-                                        @Html.EditorFor(model => model.Patient_email, new { htmlAttributes = new { @class = "form-control" ,@type="email",@pattern= "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}" } })
+                                        @Html.EditorFor(model => model.Patient_email, new { htmlAttributes = new { @class = "form-control", @type = "email", @pattern = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}" } })
                                         <small class="text-danger" id="msgPatient_email"></small>
                                     </div>
                                 </div>
@@ -157,7 +167,7 @@
                 var valid = true;
                 var name_regx = "^[a-zA-Z/]+(([',. -][a-zA-Z/ ])?[a-zA-Z/]*)*$";
                 var mobile_regx = "^([1-9]{1})([0-9]{1})([0-9]{8})$";
-                
+
                 if (name.length == 0) {
                     valid = false;
                     $("#msgPatient_name").html("Patient name is Required.");
@@ -210,6 +220,7 @@
                 }
 
                 if (valid) {
+                    showLoader();
                     document.getElementById("formBooking").submit();
                 }
                 else {
