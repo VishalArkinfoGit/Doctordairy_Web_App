@@ -2124,6 +2124,17 @@ namespace DoctorDiaryAPI.Controllers
                 db.SaveChanges();
                 db.Entry(dm).Reload();
 
+                DoctorPatient_Master temp = new DoctorPatient_Master();
+
+                //temp.DoctorId = dm.DoctorId;
+                temp.PatientId = dm.Patient_Id;
+                temp.IsActive = true;
+                temp.CreatedDate = DateTime.Now;
+                temp.UpdatedDate = DateTime.Now;
+
+                db.DoctorPatient_Master.Add(temp);
+                db.SaveChanges();
+
                 returnData.data1 = dm;
                 returnData.message = "Successfull";
                 returnData.status_code = Convert.ToInt32(Status.Sucess);
