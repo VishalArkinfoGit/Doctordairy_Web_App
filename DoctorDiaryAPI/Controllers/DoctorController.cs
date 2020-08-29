@@ -20,6 +20,7 @@ using AutoMapper;
 using System.Web.Script.Serialization;
 using Newtonsoft.Json;
 using System.Data.Entity;
+using System.Web.Util;
 
 namespace DoctorDiaryAPI.Controllers
 {
@@ -1722,8 +1723,7 @@ namespace DoctorDiaryAPI.Controllers
                 else
                 {
                     returnData.data1 = user;
-                    returnData.data2 = "Doctor data not found";
-                    returnData.message = "Record not found";
+                    returnData.message = "Doctor data not found";
                     returnData.status_code = Convert.ToInt32(Status.Failed);
                     return returnData;
                 }
@@ -1965,7 +1965,7 @@ namespace DoctorDiaryAPI.Controllers
                 if (dm.Doctor_id > 0)
                 {
                     var unique = new EncryptDecrypt().Encrypt(dm.Doctor_id.ToString());
-                    dm.Url = "/Home/Booking?id=" + unique;
+                    dm.Url = "/Home/Booking?doctorId=" + unique;
 
                     db.Entry(dm).State = EntityState.Modified;
                     db.SaveChanges();
@@ -2026,17 +2026,17 @@ namespace DoctorDiaryAPI.Controllers
                 db.Entry(dm).State = System.Data.Entity.EntityState.Modified;
                 db.SaveChanges();
 
-                //Doctor Shift
+                //Insert Doctor Shift data
                 if (doc.doctorShift != null)
                 {
-                    //var temp = Insert_DoctorShift(cUser.doctorShift);
-
                     doc.doctorShift.DoctorId = dm.Doctor_id;
                     doc.doctorShift.CreatedDate = DateTime.Now;
 
-                    DoctorShift temp = new MappingService().Map<csDoctorShift, DoctorShift>(doc.doctorShift);
+                    //returnData = Insert_DoctorShift(doc.doctorShift, db.Database.BeginTransaction());
 
-                    db.DoctorShifts.Add(temp);
+                    DoctorShift doctorShift = new MappingService().Map<csDoctorShift, DoctorShift>(doc.doctorShift);
+
+                    db.DoctorShifts.Add(doctorShift);
                     db.SaveChanges();
                 }
 
@@ -2114,6 +2114,7 @@ namespace DoctorDiaryAPI.Controllers
                 dm.Patient_city = pat.Patient_city;
                 dm.Patient_address = pat.Patient_address;
                 dm.note = pat.note;
+                dm.IsActive = true;
                 dm.age = Convert.ToDecimal(pat.age);
 
                 dm.relation = pat.relation;
@@ -2122,6 +2123,7 @@ namespace DoctorDiaryAPI.Controllers
                 db.Patient_Master.Add(dm);
                 db.SaveChanges();
                 db.Entry(dm).Reload();
+
                 returnData.data1 = dm;
                 returnData.message = "Successfull";
                 returnData.status_code = Convert.ToInt32(Status.Sucess);
@@ -2145,7 +2147,7 @@ namespace DoctorDiaryAPI.Controllers
             try
             {
                 string filepath = "";
-                Patient_Master dm = db.Patient_Master.FirstOrDefault(x => x.Patient_Id == pat.Patient_Id);
+                Patient_Master dm = db.Patient_Master.Include(a => a.usr).FirstOrDefault(x => x.Patient_Id == pat.Patient_Id);
                 dm.Reg_Date = DateTime.Now;
                 dm.User_Id = pat.User_Id;
                 dm.Patient_state = pat.Patient_state;
@@ -3577,7 +3579,7 @@ namespace DoctorDiaryAPI.Controllers
                         if (dm.Doctor_id > 0)
                         {
                             var unique = new EncryptDecrypt().Encrypt(dm.Doctor_id.ToString());
-                            dm.Url = "/Home/Booking?id=" + unique;
+                            dm.Url = "/Home/Booking?doctorId=" + unique;
 
                             db.Entry(dm).State = EntityState.Modified;
                             db.SaveChanges();
@@ -3586,17 +3588,17 @@ namespace DoctorDiaryAPI.Controllers
 
                         //dm.usr = null;
 
-                        //Doctor Shift
+                        //Insert Doctor Shift data
                         if (cUser.doctorShift != null)
                         {
-                            //var temp = Insert_DoctorShift(cUser.doctorShift);
-
                             cUser.doctorShift.DoctorId = dm.Doctor_id;
                             cUser.doctorShift.CreatedDate = DateTime.Now;
 
-                            DoctorShift temp = new MappingService().Map<csDoctorShift, DoctorShift>(cUser.doctorShift);
+                            //returnData = Insert_DoctorShift(cUser.doctorShift, transaction);
 
-                            db.DoctorShifts.Add(temp);
+                            DoctorShift doctorShift = new MappingService().Map<csDoctorShift, DoctorShift>(cUser.doctorShift);
+
+                            db.DoctorShifts.Add(doctorShift);
                             db.SaveChanges();
                         }
 
@@ -3792,7 +3794,7 @@ namespace DoctorDiaryAPI.Controllers
         /// Purpose: Check User is available or not
         /// Created By: Vishal Chudasama on 18 Aug 2020
         /// </summary>
-        /// <param>User</param>
+        /// <param name="cUser">User</param>
         /// <returns>Message, User, Doctor, Last Login Details</returns>
 
         [HttpPost]
@@ -3866,7 +3868,7 @@ namespace DoctorDiaryAPI.Controllers
                             if (dm.Doctor_id > 0)
                             {
                                 var unique = new EncryptDecrypt().Encrypt(dm.Doctor_id.ToString());
-                                dm.Url = "/Home/Booking?id=" + unique;
+                                dm.Url = "/Home/Booking?doctorId=" + unique;
 
                                 db.Entry(dm).State = EntityState.Modified;
                                 db.SaveChanges();
@@ -3875,17 +3877,17 @@ namespace DoctorDiaryAPI.Controllers
 
                             //dm.usr = null;
 
-                            //Doctor Shift
+                            //Insert Doctor Shift data
                             if (cUser.doctorShift != null)
                             {
-                                //var temp = Insert_DoctorShift(cUser.doctorShift);
-
                                 cUser.doctorShift.DoctorId = dm.Doctor_id;
                                 cUser.doctorShift.CreatedDate = DateTime.Now;
 
-                                DoctorShift temp = new MappingService().Map<csDoctorShift, DoctorShift>(cUser.doctorShift);
+                                //returnData = Insert_DoctorShift(cUser.doctorShift, transaction);
 
-                                db.DoctorShifts.Add(temp);
+                                DoctorShift doctorShift = new MappingService().Map<csDoctorShift, DoctorShift>(cUser.doctorShift);
+
+                                db.DoctorShifts.Add(doctorShift);
                                 db.SaveChanges();
                             }
 
@@ -3917,23 +3919,25 @@ namespace DoctorDiaryAPI.Controllers
                             returnData.data2 = dm;
                         }
 
-                        transaction.Commit();
-
                         returnData.data1 = us;
                         returnData.message = "Successfull";
                         returnData.status_code = Convert.ToInt32(Status.Sucess);
+
+                        transaction.Commit();
+
                         return returnData;
                     }
                 }
                 catch (Exception ex)
                 {
-                    // roll back all database operations, if any thing goes wrong
-                    transaction.Rollback();
-
                     ErrHandler.WriteError(ex.Message, ex);
                     returnData.data1 = ex;
                     returnData.message = "Oops something went wrong! ";
                     returnData.status_code = Convert.ToInt32(Status.Failed);
+
+                    // roll back all database operations, if any thing goes wrong
+                    transaction.Rollback();
+
                     return returnData;
                 }
             }
@@ -3943,31 +3947,29 @@ namespace DoctorDiaryAPI.Controllers
         /// Created by Vishal Chudasama on 20 July 2020
         /// Purpose : Create record in DoctorShift table
         /// </summary>
-        /// <param name="id">Doctor Id</param>
-        /// <param name="morningShift">Time Start to End for Morning</param>
-        /// <param name="afternoonShift">Time Start to End for Afternoon</param>
-        /// <param name="slotMin">Slot Time in Minutes</param>
+        /// <param name="obj">Doctor Shift object</param>
         /// <returns>Return Success or Failed with Message</returns>
 
         [HttpPost]
         [ActionName("Insert_DoctorShift")]
-        public ReturnObject Insert_DoctorShift(csDoctorShift obj)
+        public ReturnObject Insert_DoctorShift(csDoctorShift obj, DbContextTransaction transaction)
         {
             ReturnObject returnData = new ReturnObject();
 
-            using (var db = new ddiarydbEntities())
+            using (transaction)
             {
+                //db.Database.UseTransaction(transaction);
                 try
                 {
                     csDoctorShift ds = new csDoctorShift();
 
                     if (obj.DoctorId > 0)
                     {
-                        DoctorShift temp = db.DoctorShifts.Where(x => x.DoctorId == obj.DoctorId).FirstOrDefault();
+                        DoctorShift doctorShift = db.DoctorShifts.Where(x => x.DoctorId == obj.DoctorId).FirstOrDefault();
 
-                        if (temp != null)
+                        if (doctorShift != null)
                         {
-                            ds = new MappingService().Map<DoctorShift, csDoctorShift>(temp);
+                            ds = new MappingService().Map<DoctorShift, csDoctorShift>(doctorShift);
 
                             returnData.data1 = ds;
                             returnData.message = "Allready Available!";
@@ -3975,16 +3977,18 @@ namespace DoctorDiaryAPI.Controllers
                         }
                         else
                         {
-                            temp = new DoctorShift();
+                            doctorShift = new DoctorShift();
 
-                            temp = new MappingService().Map<csDoctorShift, DoctorShift>(obj);
-                            temp.CreatedDate = DateTime.Now;
+                            doctorShift = new MappingService().Map<csDoctorShift, DoctorShift>(obj);
+                            doctorShift.CreatedDate = DateTime.Now;
+                            doctorShift.UpdatedDate = DateTime.Now;
 
-                            db.DoctorShifts.Add(temp);
+                            db.DoctorShifts.Add(doctorShift);
                             db.SaveChanges();
 
 
-                            returnData.data1 = temp;
+                            returnData.data1 = doctorShift;
+                            returnData.data2 = transaction;
                             returnData.message = "Successfull";
                             returnData.status_code = Convert.ToInt32(Status.Sucess);
                         }
@@ -3999,8 +4003,11 @@ namespace DoctorDiaryAPI.Controllers
                 {
                     ErrHandler.WriteError(ex.Message, ex);
                     returnData.data1 = ex;
+                    returnData.data2 = transaction;
                     returnData.message = "Oops something went wrong! ";
                     returnData.status_code = Convert.ToInt32(Status.Failed);
+
+                    transaction.Rollback();
                 }
             }
 
@@ -4036,6 +4043,7 @@ namespace DoctorDiaryAPI.Controllers
                         var treatList = db.Treatment_Master.AsNoTracking().Where(a => a.Patient_Id == item.Patient_Id).ToList();
                         foreach (var item1 in treatList)
                         {
+
                             modelTreatmentList.Add(item1);
                             if (!string.IsNullOrEmpty(item1.symptoms_id))
                             {
@@ -4094,87 +4102,161 @@ namespace DoctorDiaryAPI.Controllers
             List<Disease> modelDiseaseList = new List<Disease>();
             List<symptom> modelSymptomsList = new List<symptom>();
             List<medicine_table> modelMedicineList = new List<medicine_table>();
-            try
+            using (var transaction = db.Database.BeginTransaction())
             {
-                List<object> modelNewObject = new List<object>();
-                for (int i = 0; i < modelList.Count(); i++)
+                try
                 {
-                    var modelPatient = Insert_Patient(modelList[i]);
-                    modelList[i].Patient_Id = ((Patient_Master)modelPatient.data1).Patient_Id;
-
-                    //Add Account by Patient id - ModelPatientPayment 
-
-                    if (modelList[i].ModelPatientPayment != null)
+                    List<object> modelNewObject = new List<object>();
+                    for (int i = 0; i < modelList.Count(); i++)
                     {
-                        modelList[i].ModelPatientPayment.patient_id = modelList[i].Patient_Id;
-                        var patientAccount = Insert_Account(modelList[i].ModelPatientPayment);
+                        if (modelList[0].isPatientDelete == true)
+                        {
+                            //Delete Patient related data
+                            ObjReturn = DeletePatientWithAllRecords(modelList[0], transaction);
+                            if (ObjReturn.status_code == 1)
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                return ObjReturn;
+                            }
+                        }
+                        else
+                        {
+                            var modelPatient = Insert_Patient(modelList[i]);
+                            modelList[i].Patient_Id = ((Patient_Master)modelPatient.data1).Patient_Id;
+
+                            //Add Account by Patient id - ModelPatientPayment 
+
+                            if (modelList[i].ModelPatientPayment != null)
+                            {
+                                modelList[i].ModelPatientPayment.patient_id = modelList[i].Patient_Id;
+                                var patientAccount = Insert_Account(modelList[i].ModelPatientPayment);
+                            }
+
+                            //End
+
+                            for (int j = 0; j < modelList[i].ModeltreatmentList.Count(); j++)
+                            {
+                                modelList[i].ModeltreatmentList[j].Patient_Id = Convert.ToString(((Patient_Master)modelPatient.data1).Patient_Id);
+                                var treatmentModel = InsertSyncTreatment(modelList[i].ModeltreatmentList[j]);
+                                modelList[i].ModeltreatmentList[j].Treat_crno = ((Treatment_Master)treatmentModel.data1).Treat_crno;
+                                modelList[i].ModeltreatmentList[j].modelPrescriptions = new List<csPrescription>();
+                                modelList[i].ModeltreatmentList[j].modelPrescriptions.AddRange(ConvertPrescriptiondbtolocal((List<prescription_table>)treatmentModel.data2));
+
+                                if ((List<symptom>)treatmentModel.data4 != null)
+                                {
+                                    modelSymptomsList = (List<symptom>)treatmentModel.data4;
+                                }
+
+                                if ((List<Disease>)treatmentModel.data5 != null)
+                                {
+                                    modelDiseaseList = (List<Disease>)treatmentModel.data5;
+                                }
+
+                                if ((List<medicine_table>)treatmentModel.data3 != null)
+                                {
+                                    modelMedicineList = (List<medicine_table>)treatmentModel.data3;
+                                }
+                                //foreach (var item in (List<symptom>)treatmentModel.data4)
+                                //{
+                                //    modelSymptomsList.Add((symptom)item);
+                                //}
+
+                                //modelDiseaseList = null;
+
+                                //foreach (var item in (List<Disease>)treatmentModel.data5)
+                                //{
+                                //    modelDiseaseList.Add((Disease)item);
+                                //}
+
+                                //modelMedicineList = null;
+
+                                //foreach (var item in (List<medicine_table>)treatmentModel.data3)
+                                //{
+                                //    modelMedicineList.Add((medicine_table)item);
+                                //}
+
+
+                            }
+                            modelNewObject.Add(modelList[i]);
+                        }
+                        ObjReturn.message = "Successfully";
+                        ObjReturn.status_code = Convert.ToInt32(Status.Sucess);
+                        ObjReturn.data1 = modelNewObject;
+                        ObjReturn.data2 = modelSymptomsList;
+                        ObjReturn.data3 = modelDiseaseList;
+                        ObjReturn.data4 = modelMedicineList;
                     }
 
-                    //End
-
-                    for (int j = 0; j < modelList[i].ModeltreatmentList.Count(); j++)
-                    {
-                        modelList[i].ModeltreatmentList[j].Patient_Id = Convert.ToString(((Patient_Master)modelPatient.data1).Patient_Id);
-                        var treatmentModel = InsertSyncTreatment(modelList[i].ModeltreatmentList[j]);
-                        modelList[i].ModeltreatmentList[j].Treat_crno = ((Treatment_Master)treatmentModel.data1).Treat_crno;
-                        modelList[i].ModeltreatmentList[j].modelPrescriptions = new List<csPrescription>();
-                        modelList[i].ModeltreatmentList[j].modelPrescriptions.AddRange(ConvertPrescriptiondbtolocal((List<prescription_table>)treatmentModel.data2));
-
-                        if ((List<symptom>)treatmentModel.data4 != null)
-                        {
-                            modelSymptomsList = (List<symptom>)treatmentModel.data4;
-                        }
-
-                        if ((List<Disease>)treatmentModel.data5 != null)
-                        {
-                            modelDiseaseList = (List<Disease>)treatmentModel.data5;
-                        }
-
-                        if ((List<medicine_table>)treatmentModel.data3 != null)
-                        {
-                            modelMedicineList = (List<medicine_table>)treatmentModel.data3;
-                        }
-                        //foreach (var item in (List<symptom>)treatmentModel.data4)
-                        //{
-                        //    modelSymptomsList.Add((symptom)item);
-                        //}
-
-                        //modelDiseaseList = null;
-
-                        //foreach (var item in (List<Disease>)treatmentModel.data5)
-                        //{
-                        //    modelDiseaseList.Add((Disease)item);
-                        //}
-
-                        //modelMedicineList = null;
-
-                        //foreach (var item in (List<medicine_table>)treatmentModel.data3)
-                        //{
-                        //    modelMedicineList.Add((medicine_table)item);
-                        //}
-
-
-                    }
-                    modelNewObject.Add(modelList[i]);
+                    transaction.Commit();
                 }
-                ObjReturn.message = "Successfully";
-                ObjReturn.status_code = Convert.ToInt32(Status.Sucess);
-                ObjReturn.data1 = modelNewObject;
-                ObjReturn.data2 = modelSymptomsList;
-                ObjReturn.data3 = modelDiseaseList;
-                ObjReturn.data4 = modelMedicineList;
-
-            }
-            catch (Exception ex)
-            {
-                ErrHandler.WriteError(ex.Message, ex);
-                ObjReturn.data1 = ex;
-                ObjReturn.message = "Oops something went wrong! ";
-                ObjReturn.status_code = Convert.ToInt32(Status.Failed);
-                return ObjReturn;
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    ErrHandler.WriteError(ex.Message, ex);
+                    ObjReturn.data1 = ex;
+                    ObjReturn.message = "Oops something went wrong! ";
+                    ObjReturn.status_code = Convert.ToInt32(Status.Failed);
+                    return ObjReturn;
+                }
             }
             return ObjReturn;
         }
+
+        private ReturnObject DeletePatientWithAllRecords(csPatient patient, DbContextTransaction transaction)
+        {
+            ReturnObject returnObject = new ReturnObject();
+
+            using (transaction)
+            {
+
+                try
+                {
+                    if (patient.isPatientDelete == true)
+                    {
+                        var listPayment = (from x in db.account_table
+                                           where x.patient_id == patient.Patient_Id
+                                           select x).ToList<account_table>();
+
+                        db.account_table.RemoveRange(listPayment);
+                        db.SaveChanges();
+
+                        var listTreatment = (from x in db.Treatment_Master
+                                             where x.Patient_Id == patient.Patient_Id
+                                             select x).ToList<Treatment_Master>();
+
+                        db.Treatment_Master.RemoveRange(listTreatment);
+                        db.SaveChanges();
+
+                        var listPrescription = (from x in db.prescription_table
+                                                where x.Patient_Id == patient.Patient_Id
+                                                select x).ToList<prescription_table>();
+
+                        db.prescription_table.RemoveRange(listPrescription);
+                        db.SaveChanges();
+
+                        var patient_master = db.Patient_Master.Where(x => x.Patient_Id == patient.Patient_Id).FirstOrDefault();
+                        db.Patient_Master.Remove(patient_master);
+                    }
+
+                    //transaction.Commit();
+                    returnObject.message = "Successfully";
+                    returnObject.status_code = Convert.ToInt32(Status.Sucess);
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    ErrHandler.WriteError(ex.Message, ex);
+                    returnObject.data1 = ex;
+                    returnObject.message = "Oops something went wrong! ";
+                    returnObject.status_code = Convert.ToInt32(Status.Failed);
+                }
+            }
+            return returnObject;
+        }
+
         /// <summary>
         /// Created by : Harshal Koshti on 8 Aug 2020
         /// purpose : this method is use for save treatment,medicine,presciption,symptoms and diseas when Syncronize method call
@@ -4547,7 +4629,10 @@ namespace DoctorDiaryAPI.Controllers
 
             return result;
         }
+
         #endregion
+
+        
 
         #region Mapping Class
         private List<Treatment_Image_Master> ConvertTreatmentImageModel(List<csTritmentImage> images)
@@ -4582,6 +4667,7 @@ namespace DoctorDiaryAPI.Controllers
                 cfg =>
                 {
                     cfg.CreateMap<Treatment_Master, csTreat>();
+                    cfg.ValidateInlineMaps = false;
                 });
             mapper = Config.CreateMapper();
 
@@ -4608,6 +4694,7 @@ namespace DoctorDiaryAPI.Controllers
                 cfg =>
                 {
                     cfg.CreateMap<prescription_table, csPrescription>();
+                    cfg.ValidateInlineMaps = false;
                 });
             mapper = Config.CreateMapper();
 
@@ -4621,22 +4708,12 @@ namespace DoctorDiaryAPI.Controllers
                 cfg =>
                 {
                     cfg.CreateMap<account_table, csAccount>();
+                    cfg.ValidateInlineMaps = false;
                 });
             mapper = Config.CreateMapper();
 
             var model = mapper.Map<List<csAccount>>(modelList);
             return model;
-        }
-        private DoctorShift ConvertDoctorShiftModel(csDoctorShift obj)
-        {
-            Config = new AutoMapper.MapperConfiguration(
-                cfg =>
-                {
-                    cfg.CreateMap<csDoctorShift, csDoctorShift>();
-                });
-            mapper = Config.CreateMapper();
-
-            return mapper.Map<DoctorShift>(obj);
         }
 
         #endregion
@@ -4695,6 +4772,8 @@ namespace DoctorDiaryAPI.Controllers
         public string Doctor_id { get; set; }
         public int patient_id { get; set; }
         public string Treat_crno { get; set; }
+
+        public bool isPaymentDelete { get; set; }
     }
     public class csDoctor
     {
@@ -4756,7 +4835,7 @@ namespace DoctorDiaryAPI.Controllers
 
         public virtual List<csPrescription> modelPrescriptions { get; set; }
 
-
+        public bool isTreatmentDelete { get; set; }
     }
     public class csPatient
     {
@@ -4785,6 +4864,9 @@ namespace DoctorDiaryAPI.Controllers
         public virtual List<csTreat> ModeltreatmentList { get; set; }
         public virtual csAccount ModelPatientPayment { get; set; }
 
+
+        public bool isPatientDelete { get; set; }
+
     }
     public class csSymptoms
     {
@@ -4811,6 +4893,7 @@ namespace DoctorDiaryAPI.Controllers
         public int Treat_crno { get; set; }
 
         // public string tablet_description { get; set; }
+        public bool isPrescriptionDelete { get; set; }
     }
     public class csUser
     {
