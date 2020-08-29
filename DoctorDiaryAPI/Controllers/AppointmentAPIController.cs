@@ -31,28 +31,75 @@ namespace DoctorDiaryAPI.Controllers
             {
                 using (var db = new ddiarydbEntities())
                 {
-                    if (appointment.CreatedDate == null)
-                    {
-                        appointment.CreatedDate = DateTime.Now;
-                    }
 
-                    if (appointment.UpdatedDate == null)
-                    {
-                        appointment.UpdatedDate = DateTime.Now;
-                    }
+                    appointment.CreatedDate = DateTime.Now;
+                    appointment.UpdatedDate = DateTime.Now;
 
                     db.Appointments.Add(appointment);
                     db.SaveChanges();
 
-                    DoctorPatientMapping_Master temp = new DoctorPatientMapping_Master();
+                    Patient_Master patient = new Patient_Master();
 
-                    temp.DoctorId = appointment.DoctorId;
-                    temp.PatientId = appointment.PatientId;
-                    temp.IsActive = false;
-                    temp.CreatedDate = DateTime.Now;
-                    temp.UpdatedDate = DateTime.Now;
+                    patient = db.Patient_Master.Where(x => x.Patient_contact == appointment.PatientMobile).FirstOrDefault();
 
-                    db.DoctorPatientMapping_Master.Add(temp);
+                    if (patient == null)
+                    {
+                        patient = new Patient_Master();
+                        patient.Reg_Date = DateTime.Now;
+                        patient.Patient_name = appointment.PatientName;
+                        patient.Patient_contact = appointment.PatientMobile;
+                        patient.relation = appointment.Relation;
+                        patient.IsActive = false;
+                        patient.User_Id = db.Doctor_Master.Where(x => x.Doctor_id == appointment.DoctorId).Select(x => x.User_id).FirstOrDefault();
+
+                        db.Patient_Master.Add(patient);
+                        db.SaveChanges();
+                    }
+                    appointment.PatientId = patient.Patient_Id;
+
+                    db.Entry(appointment).State = System.Data.Entity.EntityState.Modified;
+                    db.SaveChanges();
+
+                    returnData.message = "Successfull";
+                    returnData.status_code = Convert.ToInt32(Status.Sucess);
+                    returnData.data1 = appointment;
+                    returnData.data2 = patient;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                ErrHandler.WriteError(ex.Message, ex);
+                returnData.data1 = ex;
+                returnData.message = "Oops something went wrong! ";
+                returnData.status_code = Convert.ToInt32(Status.Failed);
+            }
+
+            return returnData;
+        }
+
+
+        /// <summary>
+        /// Purpose: Add a Appointment Details
+        /// Created By: Vishal Chudasama on 25 Aug 2020
+        /// </summary>
+        /// <returns> Created Appointment record </returns>
+        /// <param name="appointment"> A Appointment Details </param>
+
+        [HttpPost]
+        [ActionName("IUpdate_Appointment")]
+        public ReturnObject Update_Appointment(Appointment appointment)
+        {
+            ReturnObject returnData = new ReturnObject();
+
+            try
+            {
+                using (var db = new ddiarydbEntities())
+                {
+
+                    appointment.UpdatedDate = DateTime.Now;
+
+                    db.Entry(appointment).State = System.Data.Entity.EntityState.Modified;
                     db.SaveChanges();
 
                     returnData.message = "Successfull";
@@ -71,7 +118,6 @@ namespace DoctorDiaryAPI.Controllers
 
             return returnData;
         }
-
 
         /// <summary>
         /// Purpose: Get Appointment Details
@@ -267,44 +313,42 @@ namespace DoctorDiaryAPI.Controllers
                             sms = "Your Appointment is Accepted Successfully! Appointment booked with Dr." + doctor.Doctor_name + " on " +
                             appointment.DateStart.ToString("dd MMM yyyy") + " " + appointment.DateStart.ToString("hh:mm tt") + " to " + appointment.DateEnd.ToString("hh:mm tt");
 
-                            Patient_Master patient = new Patient_Master();
+                            Patient_Master patient = db.Patient_Master.Where(x => x.Patient_Id == appointment.PatientId).FirstOrDefault();
 
-                            patient = db.Patient_Master.Where(x => x.Patient_contact == appointment.PatientMobile).FirstOrDefault();
-
-                            if (patient == null)
+                            if (patient != null)
                             {
-                                patient = new Patient_Master();
-                                patient.Reg_Date = DateTime.Now;
-                                patient.Patient_name = appointment.PatientName;
-                                patient.Patient_contact = appointment.PatientMobile;
-                                patient.relation = appointment.Relation;
+                                patient.IsActive = true;
 
-                                var ro = new DoctorController().Insert_Patient(new MappingService().Map<Patient_Master, csPatient>(patient));
-
-                                if (ro.status_code == 1)
-                                {
-
-                                    patient = (Patient_Master)ro.data1;
-
-                                }
+                                db.Entry(patient).State = System.Data.Entity.EntityState.Modified;
+                                db.SaveChanges();
                             }
 
-                            appointment.PatientId = patient.Patient_Id;
-                            appointment.UpdatedDate = DateTime.Now;
+                            DoctorPatient_Master doctorPatient = new DoctorPatient_Master();
 
-                            db.Entry(appointment).State = System.Data.Entity.EntityState.Modified;
-                            db.SaveChanges();
+                            doctorPatient = (from x in db.DoctorPatient_Master.AsEnumerable()
+                                             where x.PatientId == appointment.PatientId && x.DoctorId == appointment.DoctorId
+                                             select x).FirstOrDefault();
 
-                            DoctorPatientMapping_Master temp = new DoctorPatientMapping_Master();
+                            if (doctorPatient == null)
+                            {
+                                doctorPatient = new DoctorPatient_Master();
+                                doctorPatient.DoctorId = appointment.DoctorId;
+                                doctorPatient.PatientId = appointment.PatientId;
+                                doctorPatient.IsActive = true;
+                                doctorPatient.CreatedDate = DateTime.Now;
+                                doctorPatient.UpdatedDate = DateTime.Now;
 
-                            temp.DoctorId = appointment.DoctorId;
-                            temp.PatientId = patient.Patient_Id;
-                            temp.IsActive = false;
-                            temp.CreatedDate = DateTime.Now;
-                            temp.UpdatedDate = DateTime.Now;
+                                db.DoctorPatient_Master.Add(doctorPatient);
+                                db.SaveChanges();
+                            }
+                            else
+                            {
+                                doctorPatient.UpdatedDate = DateTime.Now;
 
-                            db.DoctorPatientMapping_Master.Add(temp);
-                            db.SaveChanges();
+                                db.Entry(doctorPatient).State = System.Data.Entity.EntityState.Modified;
+                                db.SaveChanges();
+                            }
+
                         }
                         else if (appointment.Status == "Cancel")
                         {
@@ -567,6 +611,14 @@ namespace DoctorDiaryAPI.Controllers
             }
             return returnData;
         }
+
+        /// <summary>
+        /// Purpose: Verify Mobile Number with OTP
+        /// Created By: Vishal Chudasama on 25 Aug 2020
+        /// </summary>
+        /// <returns> Message : Successfull or not </returns>
+        /// <param name="mobile"> mobile number </param>
+        /// <param name="OTP"> OTP - 4 Digits number </param>
 
         [HttpGet]
         [ActionName("VerifyMobile")]
