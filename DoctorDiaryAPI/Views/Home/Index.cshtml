@@ -222,7 +222,7 @@
                             if (doctors.length == 1) {
 
                                 var host = window.location.origin;
-                                var link = host + "/Home/Booking?id=" + doctors[0].DoctorId_Encrypt;
+                                var link = host + "/Home/Booking?doctorId=" + doctors[0].DoctorId_Encrypt;
 
                                 $("#appointment_link").val(link);
 
@@ -246,7 +246,7 @@
             else {
 
                 var host = window.location.origin;
-                var link = host + "/Home/Booking?id=" + id;
+                var link = host + "/Home/Booking?doctorId=" + id;
 
                 $("#appointment_link").val(link);
 

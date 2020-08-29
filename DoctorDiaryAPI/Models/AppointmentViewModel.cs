@@ -39,6 +39,7 @@ namespace DoctorDiaryAPI.Models
 
         public string Status { get; set; }
 
+        public string AppointmentId_Encrypt { get; set; }
 
         [Required(ErrorMessage = "Please Select Time Slot.")]
         [StringLength(11, MinimumLength = 11)]

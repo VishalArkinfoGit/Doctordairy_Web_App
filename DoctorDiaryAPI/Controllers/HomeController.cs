@@ -28,44 +28,54 @@ namespace DoctorDiaryAPI.Controllers
         /// <param name="id"> Doctor Id </param>
 
         [HttpGet]
-        public ActionResult Booking(string id)
+        public ActionResult Booking(string doctorId, string appointmentId = "")
         {
-            int Doctor_Id = int.Parse(new EncryptDecrypt().Decrypt(id));
-
             AppointmentViewModel appointment = new AppointmentViewModel();
 
             using (var db = new ddiarydbEntities())
             {
-                var doctor = db.Doctor_Master.Where(x => x.Doctor_id == Doctor_Id).FirstOrDefault();
-
-                if (doctor != null)
+                if (appointmentId == "")
                 {
-                    appointment.Doctor = new DoctorViewModel().DoctorModel_to_ViewModel(doctor);
+                    int Doctor_Id = int.Parse(new EncryptDecrypt().Decrypt(doctorId));
 
-                    string file = appointment.Doctor.Doctor_photo != null ? (@"" + appointment.Doctor.Doctor_photo) : @"c:\temp\test.txt";
+                    var doctor = db.Doctor_Master.Where(x => x.Doctor_id == Doctor_Id).FirstOrDefault();
 
-                    if (!System.IO.File.Exists(file))
+                    if (doctor != null)
                     {
-                        var temp = appointment.Doctor.Doctor_name.Split(' ');
-                        if (temp.Length > 1)
-                        {
-                            appointment.Doctor.Doctor_photo = temp[0].Substring(0, 1) + temp[1].Substring(0, 1);
-                        }
-                        else
-                        {
-                            appointment.Doctor.Doctor_photo = temp[0].Substring(0, 1);
-                        }
-
+                        appointment.Doctor = new DoctorViewModel().DoctorModel_to_ViewModel(doctor);
                     }
+                    else
+                    {
+                        appointment.Doctor = null;
+                    }
+
+                    appointment.DateStart = DateTime.Now;
+                    appointment.Relation = "Self";
                 }
                 else
                 {
-                    appointment.Doctor = null;
+                    appointment = new AppointmentViewModel();
+
+                    appointment.Id = int.Parse(new EncryptDecrypt().Decrypt(appointmentId));
+
+                    var dbAppointment = (from s in db.Appointments
+                                         where s.Id == appointment.Id
+                                         select s).FirstOrDefault();
+
+                    appointment = new MappingService().Map<Appointment, AppointmentViewModel>(dbAppointment);
+
+                    var doctor = db.Doctor_Master.Where(x => x.Doctor_id == dbAppointment.DoctorId).FirstOrDefault();
+
+                    if (doctor != null)
+                    {
+                        appointment.Doctor = new DoctorViewModel().DoctorModel_to_ViewModel(doctor);
+                    }
+                    else
+                    {
+                        appointment.Doctor = null;
+                    }
                 }
             }
-
-            appointment.DateStart = DateTime.Now;
-            appointment.Relation = "Self";
 
             return View(appointment);
         }
@@ -82,8 +92,6 @@ namespace DoctorDiaryAPI.Controllers
         [ActionName("Booking")]
         public ActionResult Booking(AppointmentViewModel appointment)
         {
-            appointment.CreatedDate = DateTime.Now;
-            appointment.UpdatedDate = DateTime.Now;
             appointment.Status = "Pending";
 
             var startend = appointment.SessionId.Split('-');
@@ -96,7 +104,7 @@ namespace DoctorDiaryAPI.Controllers
             appointment.DateStart = DateTime.Parse(datetimeStart);
             appointment.DateEnd = DateTime.Parse(datetimeEnd);
 
-            appointment.SessionId = appointment.DateStart.ToString("ddMMyyyyHHmm") + appointment.DateEnd.ToString("HHmm") + appointment.DoctorId.ToString();
+            appointment.SessionId = appointment.DateStart.ToString("ddMMyyyyHHmm") + appointment.DateEnd.ToString("HHmm");
 
             try
             {
@@ -108,18 +116,26 @@ namespace DoctorDiaryAPI.Controllers
                     //db.Appointments.Add(obj);
                     //db.SaveChanges();
                     AppointmentAPIController aController = new AppointmentAPIController();
-                    ReturnObject temp = aController.Insert_Appointment(obj);
+                    ReturnObject returnObject = new ReturnObject();
+
+                    if (appointment.Id != 0)
+                    {
+                        returnObject = aController.Update_Appointment(obj);
+                    }
+                    else
+                    {
+                        returnObject = aController.Insert_Appointment(obj);
+                    }
 
                     try
                     {
-                        if (temp != null)
+                        if (returnObject != null)
                         {
-                            Appointment a = (Appointment)temp.data1;
+                            Appointment a = (Appointment)returnObject.data1;
 
                             var doctor = db.Doctor_Master.Where(x => x.Doctor_id == obj.DoctorId).FirstOrDefault();
 
                             TempData["DoctorName"] = doctor.Doctor_name;
-
 
                             string id = new EncryptDecrypt().Encrypt(a.Id.ToString());
 
@@ -128,7 +144,7 @@ namespace DoctorDiaryAPI.Controllers
 
                         return Redirect("Booking?id=" + appointment.Doctor.DoctorId_Encrypt);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
                         ModelState.AddModelError(string.Empty, "Something Wrong.!");
                         return View(appointment);
@@ -220,7 +236,6 @@ namespace DoctorDiaryAPI.Controllers
 
                 ro = aController.Get_Appointments(0, DoctorId, fromDate, toDate);
 
-
                 try
                 {
                     appointments = (List<Appointment>)ro.data2;
@@ -232,22 +247,6 @@ namespace DoctorDiaryAPI.Controllers
 
                 if (doctor != null)
                 {
-
-                    string file = doctor.Doctor_photo != null ? (@"" + doctor.Doctor_photo) : @"c:\temp\test.txt";
-
-                    if (!System.IO.File.Exists(file))
-                    {
-                        var temp = doctor.Doctor_name.Split(' ');
-                        if (temp.Length > 1)
-                        {
-                            doctor.Doctor_photo = temp[0].Substring(0, 1) + temp[1].Substring(0, 1);
-                        }
-                        else
-                        {
-                            doctor.Doctor_photo = temp[0].Substring(0, 1);
-                        }
-
-                    }
 
                     data.Doctor = new DoctorViewModel().DoctorModel_to_ViewModel(doctor);
 
@@ -296,22 +295,6 @@ namespace DoctorDiaryAPI.Controllers
             using (var db = new ddiarydbEntities())
             {
                 Doctor_Master doctor = db.Doctor_Master.Where(x => x.Doctor_id == DoctorId).FirstOrDefault();
-
-                string file = doctor.Doctor_photo != null ? (@"" + doctor.Doctor_photo) : @"c:\temp\test.txt";
-
-                if (!System.IO.File.Exists(file))
-                {
-                    var temp = doctor.Doctor_name.Split(' ');
-                    if (temp.Length > 1)
-                    {
-                        doctor.Doctor_photo = temp[0].Substring(0, 1) + temp[1].Substring(0, 1);
-                    }
-                    else
-                    {
-                        doctor.Doctor_photo = temp[0].Substring(0, 1);
-                    }
-
-                }
 
                 data = new DoctorViewModel().DoctorModel_to_ViewModel(doctor);
             }
@@ -403,7 +386,7 @@ namespace DoctorDiaryAPI.Controllers
 
                 data = JsonConvert.SerializeObject(x);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 var x = "";
 
@@ -532,6 +515,7 @@ namespace DoctorDiaryAPI.Controllers
 
             var data = new
             {
+                message = returnData.message,
                 status_code = returnData.status_code,
                 data1 = ((returnData.data1 != null) ? JsonConvert.SerializeObject(returnData.data1) : "")
             };

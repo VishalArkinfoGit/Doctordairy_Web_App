@@ -1,8 +1,24 @@
 ﻿@model DoctorDiaryAPI.Models.AppointmentViewModel
 
+@using DoctorDiaryAPI.Models;
+
 @{
     ViewBag.Title = "Appointment";
-    var data = Model;
+    var seletedSlot = "";
+    var seletedDate = "";
+
+    if (Model.DateEnd != null)
+    {
+        seletedDate = Model.DateStart.ToString("dd/MM/yyyy");
+        //seletedDate = seletedDate.Replace('-', '/');
+        seletedSlot = Model.DateStart.ToString("HH:mm");
+        seletedSlot += "-" + Model.DateEnd.ToString("HH:mm");
+    }
+    else
+    {
+        seletedDate = Model.DateStart.ToString("dd/MM/yyyy");
+        //seletedDate = seletedDate.Replace('-', '/');
+    }
 }
 
 
@@ -39,16 +55,18 @@
                                 <div class="doctor-widget">
                                     <div class="doc-info-left">
                                         <div class="doctor-img">
+                                            @{
+                                                var photoText = new PhotoPathTextService().IsAvailable(Model.Doctor.Doctor_photo, Model.Doctor.Doctor_name);
 
-                                            @if (Model.Doctor.Doctor_photo.Length < 3)
-                                            {
-                                                <span class="avatar-title rounded border border-white" style="font-size: 5rem;">@Model.Doctor.Doctor_photo</span>
+                                                if (photoText.Length > 2)
+                                                {
+                                                    <img src="@Model.Doctor.Doctor_photo.ToString().Replace("~",string.Empty)" class="img-fluid" alt="User Image">
+                                                }
+                                                else
+                                                {
+                                                    <span class="avatar-title rounded border border-white" style="font-size: 5rem;">@photoText</span>
+                                                }
                                             }
-                                            else
-                                            {
-                                                <img src="@Model.Doctor.Doctor_photo" class="img-fluid" alt="User Image">
-                                            }
-
                                         </div>
                                         <div class="doc-info-cont">
                                             <h4 class="doc-name">Dr. @Model.Doctor.Doctor_name</h4>
@@ -77,11 +95,17 @@
 
                                     <!-- Checkout Form -->
 
-                                    @Html.HiddenFor(x => x.Doctor.DoctorId_Encrypt)
-
                                     @Html.AntiForgeryToken()
                                     <hr />
                                     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                                    @Html.HiddenFor(x => x.Doctor.DoctorId_Encrypt)
+
+                                    @Html.HiddenFor(x => x.Id)
+
+                                    @Html.HiddenFor(x => x.PatientId)
+                                    @Html.HiddenFor(x => x.CreatedDate)
+                                    @Html.HiddenFor(x => x.UpdatedDate)
 
                                     <h4 class="card-title">Personal Information</h4>
                                     <div class="row">
@@ -118,6 +142,11 @@
                                                 <label>Date</label>
                                                 <input id="SelectDate" name="SelectDate" class="form-control" type="text">
                                                 @Html.HiddenFor(x => x.DateStart)
+
+                                                @*<input type="hidden" id="DateStart" name="DateStart" value="@seletedDate" />*@
+
+                                                <input type="hidden" id="seletedDate" value="@seletedDate" />
+
                                                 <small id="msgDateStart" class="text-danger"></small>
                                             </div>
                                         </div>
@@ -146,6 +175,8 @@
 
                                             <!-- Time Slot -->
                                             <div class="time-slot">
+
+                                                <input type="hidden" id="seletedSlot" value="@seletedSlot" />
 
                                                 <p id="msgSessionId" class="text-danger mb-2"></p>
 
@@ -214,11 +245,30 @@
 
         $(document).ready(function () {
 
+            $("input").attr("autocomplete", "off");
+
             $('#OTP').val("");
             $('#msgOTP').html("");
 
-            $("#formBooking :input").prop("disabled", true);
-            $('#PatientMobile').prop("disabled", false);
+            var relation = $("#Relation").val();
+
+            if (relation.length > 0) {
+                $('#selRelation').val(relation);
+                $('#selRelation').trigger('change');
+            }
+
+            //var mobile = $('#PatientMobile').val();
+            //if (mobile.length > 0) {
+            //    $('#PatientMobile').prop("disabled", true);
+            //    $('#PatientName').prop("disabled", true);
+            //}
+
+            var seletedSlot = $('#seletedSlot').val();
+
+            if (seletedSlot.length == 0) {
+                $("#formBooking :input").prop("disabled", true);
+                $('#PatientMobile').prop("disabled", false);
+            }
 
             $('#PatientMobile').change(function () {
 
@@ -274,7 +324,6 @@
                 }
             });
 
-
             var name = $('#PatientName').val();
             var mobile = $('#PatientMobile').val();
 
@@ -285,7 +334,9 @@
 
             var dmy = objDate.split('-');
 
-            date = moment(dmy[2]+'/'+dmy[1]+'/'+dmy[0]).format('MM/DD/YYYY');
+            date = moment(dmy[1] + '/' + dmy[0] + '/' + dmy[2]).format('MM/DD/YYYY');
+
+            $('#DateStart').val(dmy[0] + '-' + dmy[1] + '-' + dmy[2]);
 
             $('input[name="SelectDate"]').daterangepicker({
                 singleDatePicker: true,
@@ -297,8 +348,8 @@
                 minYear: parseInt(moment().format('YYYY')),
                 maxYear: parseInt(moment().format('YYYY'), 1)
             }, function (start, end, label) {
-                $('#DateStart').val(start.format('DD/MM/YYYY'));
-                ScheduleTimings();
+                $('#DateStart').val(start.format('DD-MM-YYYY'));
+                    ScheduleTimings();
             });
 
             $('#selRelation').on('select2:select', function (e) {
@@ -459,6 +510,7 @@
 
                         if (data.status_code == 1) {
                             $("#modalVerifyMobile").modal('hide');
+                            showLoader();
                             document.getElementById("formBooking").submit();
                         }
                         else {
@@ -488,7 +540,9 @@
 
                 if (date.length > 0) {
 
-                    var objDate = date.split(' ')[0];
+                    //var dmy = date.split('/');
+
+                    //date = dmy[1]+'/'+dmy[0]+'/'+dmy[2];
 
             var ts = document.getElementById("time_slots");
 
@@ -517,6 +571,9 @@
                     var endTime = new Date();
                     var st, et = [];
                     var str, num = "";
+                    var currentDateTime = new Date();
+
+                    var seletedSlot = $('#seletedSlot').val();
 
                     if (data.docShifts.MorningStart.length > 0) {
                         st = data.docShifts.MorningStart.split(':');
@@ -540,10 +597,6 @@
                         morningSlot.push(str);
 
                         while (startTime < endTime) {
-
-                            if (i === 3) {
-                                continue;
-                            }
 
                             startTime.setMinutes(startTime.getMinutes() + data.docShifts.ObTime);
 
@@ -631,6 +684,7 @@
                             }
 
                             if (bookedSlots.indexOf(morningSlot[i]) > -1) {
+
                                 row1.innerHTML += '<label class="btn btn-outline-light mx-1 my-2 flex-fill" disabled>'
                                     + '<input type="radio" name="@Html.NameFor(x=>x.SessionId)"'
                                     + 'value = "' + morningSlot[i] + '-' + morningSlot[i + 1] + '" disabled> '
@@ -688,14 +742,92 @@
 
                     ts.appendChild(div);
 
+                    var seletedSlot = $('#seletedSlot').val();
+
+                    if (seletedSlot.length > 0) {
+
+                        var apDate = $('#seletedDate').val();
+                        var date = $('#DateStart').val();
+
+                        if (date.length > 10) {
+                            var objDate = date.split(' ')[0];
+
+                            var dmy = objDate.split('-');
+
+                            date = dmy[0] + '-' + dmy[1] + '-' + dmy[2];
+                        }
+
+                        if (apDate == date) {
+                            $('input[name=SessionId]').each(function () {
+                                if ($(this).val() == seletedSlot) {
+                                    //alert($(this).val() + " " + seletedSlot);
+                                    $(this).parent().addClass('focus');
+                                    $(this).parent().addClass('active');
+                                    $(this).parent().addClass('btn-outline-info');
+                                    $(this).parent().removeClass('btn-outline-light');
+                                    $(this).removeAttr('disabled');
+                                    $(this).attr('checked', 'checked');
+                                    $(this).parent().removeAttr('disabled');
+                                }
+                            });
+                        }
+                    }
+
+                    hideSlot();
+
                 },
                 error: function (err) {
                     //alert(err);
                 }
             });
 
-
                 }
+        }
+
+        function hideSlot() {
+
+            var todayDate = new Date();
+
+            var num = todayDate.getDate().toString();
+            var str = ((num.length < 2) ? "0" + num : num) + '-';
+
+            num = (parseInt(todayDate.getMonth()) + 1).toString();
+            str += (num.length < 2) ? "0" + num : num;
+
+            todayDate = str + '-' + todayDate.getFullYear();
+
+            var seletedDate = $('#DateStart').val();
+
+            var matchDate = seletedDate.split('-')[2] + '-' + seletedDate.split('-')[1] + '-' + seletedDate.split('-')[0];
+
+            if (todayDate == seletedDate) {
+
+                var hours = new Date().getHours();
+                var minutes = new Date().getMinutes();
+                var slotHours = 0;
+                var slotMinutes = 0;
+
+                $('input[name=SessionId]').each(function () {
+
+                    slotHours = $(this).val().split('-')[0];
+                    slotMinutes = slotHours.split(':')[1];
+                    slotHours = slotHours.split(':')[0];
+
+                    var d1 = new Date(seletedDate.split('-')[2], (parseInt(seletedDate.split('-')[1]) - 1 ), seletedDate.split('-')[0], slotHours, slotMinutes);
+                    var d2 = new Date();
+
+                    if (d1 < d2) {
+                        //alert($(this).val() + " " + seletedSlot);
+                        $(this).parent().removeClass('focus');
+                        $(this).parent().removeClass('active');
+                        $(this).parent().removeClass('btn-outline-info');
+                        $(this).parent().addClass('btn-outline-light');
+                        $(this).attr('disabled');
+                        $(this).parent().attr('disabled');
+                    }
+                });
+            }
+
         }
     </script>
 }

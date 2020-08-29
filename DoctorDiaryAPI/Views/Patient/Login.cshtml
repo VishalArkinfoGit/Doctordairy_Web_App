@@ -47,7 +47,7 @@
                                         <button id="btnLogin" class="btn btn-primary btn-block" type="submit" style="display: none;">Login</button>
                                     </div>
                                 </div>
-                                <div class="text-center dont-have">Don’t have an account? <a href="register.html">Register</a></div>
+                                @*<div class="text-center dont-have">Don’t have an account? <a href="register.html">Register</a></div>*@
                             }
                         </div>
                     </div>
@@ -68,6 +68,8 @@
 
         $(document).ready(function () {
 
+            $("input").attr("autocomplete", "off");
+
             $('#formLogin').submit(function (evt) {
 
                 var otp = $('#OTP').val() ?? "";
@@ -76,9 +78,9 @@
 
                 if ((otp != "") && otp.length == 4) {
                     evt.preventDefault();
+                    showLoader();
                     document.getElementById("formLogin").submit();
                     return false;
-
                 }
                 else if (otp.length > 4 || otp.length < 4) {
                     $("#msgOTP").html("OTP have 4 digits.").attr("class", "text-danger");
@@ -104,9 +106,8 @@
                 $("#msgMobileNo").html("");
                 $('#MSG').html("Wait...").attr("class", "text-info");
 
-
                 $.ajax({
-                    url: "/Home/SendOTP",
+                    url: "/Home/FindPatientByMobile",
                     method: "GET",
                     data: { mobile: mobile },
                     dataType: "json",
@@ -116,13 +117,7 @@
 
                         if (data.status_code == 1) {
 
-                            $("#divOTP").css("display", "");
-                            //$("#btnResend").css("display", "");
-                            $("#btnLogin").css("display", "");
-                            $("#btnVerify").css("display", "none");
-                            $("#MSG").html(data.message + ", OTP sent to entered mobile no.").attr("class", "text-success");
-
-                            Timer();
+                            sendOTP(mobile);
 
                         }
                         else {
@@ -145,6 +140,77 @@
                 $('#MobileNo').focus();
             }
 
+        }
+
+        function sendOTP(mobile) {
+
+            Timer();
+
+            $.ajax({
+                url: "/Home/SendOTP",
+                method: "GET",
+                data: { mobile: mobile },
+                dataType: "json",
+                success: function (res) {
+
+                    var data = JSON.parse(res);
+
+                    if (data.status_code == 1) {
+
+                        $("#divOTP").css("display", "");
+                        //$("#btnResend").css("display", "");
+                        $("#btnLogin").css("display", "");
+                        $("#btnVerify").css("display", "none");
+                        $("#MSG").html(data.message + ", OTP sent to entered mobile no.").attr("class", "text-success");
+
+                    }
+                    else {
+                        $("#MSG").html(data.message).attr("class", "text-danger");
+                    }
+                },
+                error: function (err) {
+                    //alert(err);
+                }
+            });
+        }
+
+
+        function VerifyOTP() {
+
+            var mobile = $('#PatientMobile').val() ?? "";
+            var otp = $("#OTP").val();
+
+            if ((otp != "") && otp.length == 4) {
+                $.ajax({
+                    url: "/Home/VerifyMobile",
+                    method: "GET",
+                    data: { mobile: mobile, OTP: otp },
+                    dataType: "json",
+                    success: function (res) {
+
+                        var data = JSON.parse(res);
+
+                        if (data.status_code == 1) {
+                            $("#modalVerifyMobile").modal('hide');
+                            document.getElementById("formBooking").submit();
+                        }
+                        else {
+                            $("#msgOTP").html(data.message).attr("class", "text-danger");
+                        }
+                    },
+                    error: function (err) {
+                        //alert(err);
+                    }
+                });
+            }
+            else if (otp.length > 4) {
+                $("#msgOTP").html("OTP have 4 digits.").attr("class", "text-danger");
+                return false;
+            }
+            else {
+                $("#msgOTP").html("Please enter OTP.").attr("class", "text-danger");
+                return false;
+            }
         }
 
         function Timer() {

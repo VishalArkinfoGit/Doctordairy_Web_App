@@ -1,5 +1,6 @@
 ﻿@model DoctorDiaryAPI.Models.DoctorViewModel
 
+@using DoctorDiaryAPI.Models;
 @{
     ViewBag.Title = "Doctor Profile";
 }
@@ -31,21 +32,23 @@
                 <div class="doctor-widget">
                     <div class="doc-info-left">
                         <div class="doctor-img">
+                            @{
+                                var photoText = new PhotoPathTextService().IsAvailable(Model.Doctor_photo, Model.Doctor_name);
 
-                            @if (Model.Doctor_photo.Length < 3)
-                            {
-                                <span class="avatar-title rounded border border-white" style="font-size: 5rem;">@Model.Doctor_photo</span>
+                                if (photoText.Length > 2)
+                                {
+                                    <img src="@Model.Doctor_photo.ToString().Replace("~",string.Empty)" class="img-fluid" alt="User Image">
+                                }
+                                else
+                                {
+                                    <span class="avatar-title rounded border border-white" style="font-size: 5rem;">@photoText</span>
+                                }
                             }
-                            else
-                            {
-                                <img src="@Model.Doctor_photo" class="img-fluid" alt="User Image">
-                            }
-
                         </div>
                         <div class="doc-info-cont">
                             <h4 class="doc-name">Dr. @Model.Doctor_name</h4>
                             <p class="doc-speciality">@Model.Doctor_degree</p>
-                            
+
                             <div class="clinic-details">
                                 <p class="doc-location"><i class="fas fa-map-marker-alt"></i> @Model.Doctor_address, @Model.Doctor_city, @Model.Doctor_country </p>
                             </div>

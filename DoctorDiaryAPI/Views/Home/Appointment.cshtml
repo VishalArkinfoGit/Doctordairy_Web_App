@@ -1,4 +1,5 @@
 ﻿@model DoctorDiaryAPI.Models.DoctorAppointmentViewModel
+@using DoctorDiaryAPI.Models;
 @{
     ViewBag.Title = "Appointment";
     DateTime fromDate = DateTime.Now;
@@ -53,13 +54,17 @@
                     <div class="widget-profile pro-widget-content">
                         <div class="profile-info-widget">
                             <div class="doctor-img" style="width: 100%;">
-                                @if (Model.Doctor.Doctor_photo.Length < 3)
-                                {
-                                    <span class="avatar-title rounded border border-white" style="font-size: 5rem;">@Model.Doctor.Doctor_photo</span>
-                                }
-                                else
-                                {
-                                    <img src="@Model.Doctor.Doctor_photo" class="img-fluid" alt="User Image">
+                                @{
+                                    var photoText = new PhotoPathTextService().IsAvailable(Model.Doctor.Doctor_photo, Model.Doctor.Doctor_name);
+
+                                    if (photoText.Length > 2)
+                                    {
+                                        <img src="@Model.Doctor.Doctor_photo.ToString().Replace("~",string.Empty)" class="img-fluid" alt="User Image">
+                                    }
+                                    else
+                                    {
+                                        <span class="avatar-title rounded border border-white" style="font-size: 5rem;">@photoText</span>
+                                    }
                                 }
                             </div>
                             <br />
@@ -240,6 +245,8 @@
 
         $(document).ready(function () {
 
+            $("input").attr("autocomplete", "off");
+
             var DoctorId = $("#Doctor_DoctorId_Encrypt").val();
             window.history.replaceState(null, "Title", "/Home/Appointment?id=" + DoctorId);
 
@@ -253,6 +260,7 @@
                 $("#cancleModal").modal();
             }
             else {
+                showLoader();
                 window.location.href = '/Home/Appointment?id=' + DoctorId + '&AppointmentId=' + id + "&status=" + status;
             }
         }
@@ -264,6 +272,7 @@
                 var msg = $("#MSG").val();
                 var DoctorId = $("#Doctor_DoctorId_Encrypt").val();
 
+                showLoader();
                 window.location.href = '/Home/Appointment?id=' + DoctorId + '&AppointmentId=' + id + "&status=Cancel&msg=" + msg;
             }
         }
@@ -271,6 +280,8 @@
         $('.bookingrange').on('apply.daterangepicker', function (ev, picker) {
             var SelectedDate = $("#SelectedDate").val();
             var DoctorId = $("#Doctor_DoctorId_Encrypt").val();
+
+            showLoader();
 
             if (SelectedDate.length == 10) {
                 window.location.href = '/Home/Appointment?id=' + DoctorId + '&fromDate=' + SelectedDate;
