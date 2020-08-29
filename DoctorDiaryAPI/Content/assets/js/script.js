@@ -250,7 +250,7 @@ Version      : 1.3
 
     // Date Range Picker
     if ($('.bookingrange').length > 0) {
-        var start = moment().subtract(6, 'days');
+        var start = moment();
         var end = moment();
 
         function booking_range(start, end) {
@@ -271,6 +271,7 @@ Version      : 1.3
             ranges: {
                 'Today': [moment(), moment()],
                 'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                'Tomorrow': [moment().add(1, 'days'), moment().add(1, 'days')],
                 'Last 7 Days': [moment().subtract(6, 'days'), moment()],
                 'Last 30 Days': [moment().subtract(29, 'days'), moment()],
                 'This Month': [moment().startOf('month'), moment().endOf('month')],
