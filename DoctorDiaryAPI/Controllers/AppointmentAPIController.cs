@@ -32,6 +32,15 @@ namespace DoctorDiaryAPI.Controllers
                 using (var db = new ddiarydbEntities())
                 {
 
+                    if (db.Appointments.Any(x => x.DateStart == appointment.DateStart && x.DateEnd == appointment.DateEnd))
+                    {
+                        returnData.message = "This time slot booked.";
+                        returnData.status_code = Convert.ToInt32(Status.AlreadyExists);
+                        returnData.data1 = appointment;
+
+                        return returnData;
+                    }
+
                     appointment.CreatedDate = DateTime.Now;
                     appointment.UpdatedDate = DateTime.Now;
 
@@ -63,7 +72,6 @@ namespace DoctorDiaryAPI.Controllers
                     returnData.message = "Successfull";
                     returnData.status_code = Convert.ToInt32(Status.Sucess);
                     returnData.data1 = appointment;
-                    returnData.data2 = patient;
                 }
 
             }
@@ -87,7 +95,7 @@ namespace DoctorDiaryAPI.Controllers
         /// <param name="appointment"> A Appointment Details </param>
 
         [HttpPost]
-        [ActionName("IUpdate_Appointment")]
+        [ActionName("Update_Appointment")]
         public ReturnObject Update_Appointment(Appointment appointment)
         {
             ReturnObject returnData = new ReturnObject();
@@ -96,15 +104,43 @@ namespace DoctorDiaryAPI.Controllers
             {
                 using (var db = new ddiarydbEntities())
                 {
+                    var dbAppointment = db.Appointments.Where(x => x.Id == appointment.Id).FirstOrDefault();
 
-                    appointment.UpdatedDate = DateTime.Now;
+                    if (db.Appointments.Any(x => x.Id != appointment.Id && x.DateStart == appointment.DateStart && x.DateEnd == appointment.DateEnd))
+                    {
+                        returnData.message = "This time slot booked.";
+                        returnData.status_code = Convert.ToInt32(Status.AlreadyExists);
+                        returnData.data1 = appointment;
 
-                    db.Entry(appointment).State = System.Data.Entity.EntityState.Modified;
+                        return returnData;
+                    }
+
+                    dbAppointment.DateStart = appointment.DateStart;
+
+                    dbAppointment.DateEnd = appointment.DateEnd;
+
+                    dbAppointment.DoctorId = appointment.DoctorId;
+
+                    dbAppointment.PatientId = appointment.PatientId;
+
+                    dbAppointment.PatientName = appointment.PatientName;
+
+                    dbAppointment.PatientMobile = appointment.PatientMobile;
+
+                    dbAppointment.Relation = appointment.Relation;
+
+                    dbAppointment.Status = appointment.Status;
+
+                    dbAppointment.SessionId = appointment.SessionId;
+
+                    dbAppointment.UpdatedDate = DateTime.Now;
+
+                    db.Entry(dbAppointment).State = System.Data.Entity.EntityState.Modified;
                     db.SaveChanges();
 
                     returnData.message = "Successfull";
                     returnData.status_code = Convert.ToInt32(Status.Sucess);
-                    returnData.data1 = appointment;
+                    returnData.data1 = dbAppointment;
                 }
 
             }
@@ -282,7 +318,7 @@ namespace DoctorDiaryAPI.Controllers
         /// <param name="msg"> Message </param>
 
         [HttpPost]
-        [ActionName("Update_Appointment")]
+        [ActionName("UpdateStatus_Appointment")]
         public ReturnObject Update_Appointment(int id, string status, string msg)
         {
             ReturnObject returnData = new ReturnObject();
@@ -297,70 +333,74 @@ namespace DoctorDiaryAPI.Controllers
 
                     if (appointment.DateStart > DateTime.Now)
                     {
-
                         appointment.Status = status;
-                        //appointment.CreatedDate = DateTime.Now;
-                        appointment.UpdatedDate = DateTime.Now;
+                    }
+                    else
+                    {
+                        appointment.Status = "Cancel";
+                    }
 
-                        db.Entry(appointment).State = System.Data.Entity.EntityState.Modified;
-                        db.SaveChanges();
+                    //appointment.CreatedDate = DateTime.Now;
+                    appointment.UpdatedDate = DateTime.Now;
 
-                        var sms = "";
-                        var doctor = db.Doctor_Master.Where(x => x.Doctor_id == appointment.DoctorId).FirstOrDefault();
+                    db.Entry(appointment).State = System.Data.Entity.EntityState.Modified;
+                    db.SaveChanges();
 
-                        if (appointment.Status == "Accept")
+                    var sms = "";
+                    var doctor = db.Doctor_Master.Where(x => x.Doctor_id == appointment.DoctorId).FirstOrDefault();
+
+                    if (appointment.Status == "Accept")
+                    {
+                        sms = "Your Appointment is Accepted Successfully! Appointment booked with Dr." + doctor.Doctor_name + " on " +
+                        appointment.DateStart.ToString("dd MMM yyyy") + " " + appointment.DateStart.ToString("hh:mm tt") + " to " + appointment.DateEnd.ToString("hh:mm tt");
+
+                        Patient_Master patient = db.Patient_Master.Where(x => x.Patient_Id == appointment.PatientId).FirstOrDefault();
+
+                        if (patient != null)
                         {
-                            sms = "Your Appointment is Accepted Successfully! Appointment booked with Dr." + doctor.Doctor_name + " on " +
-                            appointment.DateStart.ToString("dd MMM yyyy") + " " + appointment.DateStart.ToString("hh:mm tt") + " to " + appointment.DateEnd.ToString("hh:mm tt");
+                            patient.IsActive = true;
 
-                            Patient_Master patient = db.Patient_Master.Where(x => x.Patient_Id == appointment.PatientId).FirstOrDefault();
-
-                            if (patient != null)
-                            {
-                                patient.IsActive = true;
-
-                                db.Entry(patient).State = System.Data.Entity.EntityState.Modified;
-                                db.SaveChanges();
-                            }
-
-                            DoctorPatient_Master doctorPatient = new DoctorPatient_Master();
-
-                            doctorPatient = (from x in db.DoctorPatient_Master.AsEnumerable()
-                                             where x.PatientId == appointment.PatientId && x.DoctorId == appointment.DoctorId
-                                             select x).FirstOrDefault();
-
-                            if (doctorPatient == null)
-                            {
-                                doctorPatient = new DoctorPatient_Master();
-                                doctorPatient.DoctorId = appointment.DoctorId;
-                                doctorPatient.PatientId = appointment.PatientId;
-                                doctorPatient.IsActive = true;
-                                doctorPatient.CreatedDate = DateTime.Now;
-                                doctorPatient.UpdatedDate = DateTime.Now;
-
-                                db.DoctorPatient_Master.Add(doctorPatient);
-                                db.SaveChanges();
-                            }
-                            else
-                            {
-                                doctorPatient.UpdatedDate = DateTime.Now;
-
-                                db.Entry(doctorPatient).State = System.Data.Entity.EntityState.Modified;
-                                db.SaveChanges();
-                            }
-
-                        }
-                        else if (appointment.Status == "Cancel")
-                        {
-                            sms = "Your Appointment booked on " +
-                            appointment.DateStart.ToString("dd MMM yyyy") + " " + appointment.DateStart.ToString("hh:mm tt") + " to " + appointment.DateEnd.ToString("hh:mm tt") +
-                            " is Canceled by Dr." + doctor.Doctor_name + ".";
-                            sms = msg != "" ? (sms + " Reason: " + msg) : sms;
+                            db.Entry(patient).State = System.Data.Entity.EntityState.Modified;
+                            db.SaveChanges();
                         }
 
-                        SmsSend.Send(appointment.PatientMobile, sms);
+                        DoctorPatient_Master doctorPatient = new DoctorPatient_Master();
+
+                        doctorPatient = (from x in db.DoctorPatient_Master.AsEnumerable()
+                                         where x.PatientId == appointment.PatientId && x.DoctorId == appointment.DoctorId
+                                         select x).FirstOrDefault();
+
+                        if (doctorPatient == null)
+                        {
+                            doctorPatient = new DoctorPatient_Master();
+                            doctorPatient.DoctorId = appointment.DoctorId;
+                            doctorPatient.PatientId = appointment.PatientId;
+                            doctorPatient.IsActive = true;
+                            doctorPatient.CreatedDate = DateTime.Now;
+                            doctorPatient.UpdatedDate = DateTime.Now;
+
+                            db.DoctorPatient_Master.Add(doctorPatient);
+                            db.SaveChanges();
+                        }
+                        else
+                        {
+                            doctorPatient.UpdatedDate = DateTime.Now;
+
+                            db.Entry(doctorPatient).State = System.Data.Entity.EntityState.Modified;
+                            db.SaveChanges();
+                        }
 
                     }
+                    else if (appointment.Status == "Cancel")
+                    {
+                        sms = "Your Appointment booked on " +
+                        appointment.DateStart.ToString("dd MMM yyyy") + " " + appointment.DateStart.ToString("hh:mm tt") + " to " + appointment.DateEnd.ToString("hh:mm tt") +
+                        " is Canceled by Dr." + doctor.Doctor_name + ".";
+                        sms = msg != "" ? (sms + " Reason: " + msg) : sms;
+                    }
+
+                    SmsSend.Send(appointment.PatientMobile, sms);
+
 
                     returnData.message = "Successfull";
                     returnData.status_code = Convert.ToInt32(Status.Sucess);
