@@ -21,10 +21,14 @@ using System.Web.Script.Serialization;
 using Newtonsoft.Json;
 using System.Data.Entity;
 using System.Web.Util;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Net.Http.Headers;
+using System.Net.Http.Formatting;
 
 namespace DoctorDiaryAPI.Controllers
 {
-    //[Authorize]
+    [System.Web.Http.Authorize]
     [RoutePrefix("api/Doctor")]
     public class DoctorController : ApiController
     {
@@ -1171,14 +1175,17 @@ namespace DoctorDiaryAPI.Controllers
         public ReturnObject Send_ReportMail(string subject, string body)
         {
             ReturnObject returnData = new ReturnObject();
-            const string to1 = "mayur@arkinfosoft.com";
+            //const string to1 = "mayur@arkinfosoft.com";
             // const string to2 = "ruchitaajmera27@gmail.com";
-            const string to3 = "info@arkinfosoft.com";
+            //const string to3 = "info@arkinfosoft.com";Send
+
+            //string cc = "info@arkinfosoft.com" + "|" + "mayur@arkinfosoft.com";
+            string cc = "";
 
             string data;
             try
             {
-                if (Email.MailSend(to1, subject, body, "", "") == true && Email.MailSend(to3, subject, body, "", "") == true)
+                if (Email.MailSend("doctordairy@arkinfosoft.com", subject, body, "", cc) == true)
                 {
                     returnData.message = "Successfull";
                     returnData.status_code = Convert.ToInt32(Status.Sucess);
@@ -1202,9 +1209,6 @@ namespace DoctorDiaryAPI.Controllers
             }
 
         }
-
-
-
 
         public string Getbase64str(string path)
         {
@@ -1680,53 +1684,101 @@ namespace DoctorDiaryAPI.Controllers
 
         [HttpGet]
         [ActionName("Get_User")]
-        public ReturnObject Get_User(string Email, string password, string app_version, string OS)
+        [AllowAnonymous]
+        public async Task<ReturnObject> Get_User(string email, string password, string app_version, string OS)
         {
             ReturnObject returnData = new ReturnObject();
             try
             {
+
                 //int docid = int.Parse(User_Id);
-                var user = db.usrs.Select(x => new { x.AccountId, x.Email, x.Firstname, x.Lastname, x.Gender, x.IsActive, x.passwd, x.token_id, x.Id }).FirstOrDefault(x => x.Email == Email && x.passwd == password);
+                var user = db.usrs.Select(x => new { x.AccountId, x.Email, x.Firstname, x.Lastname, x.Gender, x.IsActive, x.passwd, x.token_id, x.Id }).FirstOrDefault(x => x.Email == email);
                 //usr user = db.usrs.Where(x => x.Email == Email && x.passwd == password).FirstOrDefault();
                 // Doctor_Master docmaster = db.Doctor_Master.Where(x => x.Doctor_email == Email).FirstOrDefault();
-
-                var docmaster = db.Doctor_Master.Select(x => new { x.User_id, x.Clinic_name, x.Doctor_address, x.Doctor_city, x.Doctor_contact, x.Doctor_email, x.Doctor_country, x.Doctor_exp, x.Doctor_id, x.Doctor_name, x.Doctor_photo, x.Doctor_state, x.Gender, x.Reg_date, x.IsActive }).FirstOrDefault(x => x.Doctor_email == Email);
-
-                Login_Track lt = new Login_Track();
-                lt.Email = Email;
-                lt.App_Version = app_version;
-                lt.Login_Date = DateTime.Now;
-                lt.User_Id = user.Id;
-                lt.OS = OS;
-                db.Login_Track.Add(lt);
-                db.SaveChanges();
-
-                if (docmaster != null && docmaster.Doctor_country == "India")
+                if (user != null)
                 {
-                    var Smscount = db.monthly_sms.Where(x => x.date.Value.Month == DateTime.Now.Month && x.date.Value.Year == DateTime.Now.Year && x.user_id == user.Id).FirstOrDefault();
-                    if (Smscount == null)
+                    user = db.usrs.Select(x => new { x.AccountId, x.Email, x.Firstname, x.Lastname, x.Gender, x.IsActive, x.passwd, x.token_id, x.Id }).FirstOrDefault(x => x.Email == email && x.passwd == password);
+
+                    if (user != null)
                     {
-                        monthly_sms ms = new monthly_sms();
-                        ms.user_id = user.Id;
-                        ms.sms_count = 50;
-                        ms.sms_remaining_count = 50;
-                        ms.date = DateTime.Now;
-                        db.monthly_sms.Add(ms);
+                        var docmaster = db.Doctor_Master.Select(x => new { x.User_id, x.Clinic_name, x.Doctor_address, x.Doctor_city, x.Doctor_contact, x.Doctor_email, x.Doctor_country, x.Doctor_exp, x.Doctor_id, x.Doctor_name, x.Doctor_photo, x.Doctor_state, x.Gender, x.Reg_date, x.IsActive }).FirstOrDefault(x => x.Doctor_email == email);
+
+                        Login_Track lt = new Login_Track();
+                        lt.Email = email;
+                        lt.App_Version = app_version;
+                        lt.Login_Date = DateTime.Now;
+                        lt.User_Id = user.Id;
+                        lt.OS = OS;
+                        db.Login_Track.Add(lt);
                         db.SaveChanges();
+
+                        if (docmaster != null)
+                        {
+                            //Access Authorization Token
+                            string baseAddress = string.Format("{0}://{1}{2}{3}",
+                                          System.Web.HttpContext.Current.Request.Url.Scheme,
+                                          System.Web.HttpContext.Current.Request.Url.Host,
+                                          System.Web.HttpContext.Current.Request.Url.Port == 80 ? string.Empty : ":" + System.Web.HttpContext.Current.Request.Url.Port,
+                                          System.Web.HttpContext.Current.Request.ApplicationPath);
+
+                            using (var client = new HttpClient())
+                            {
+                                var form = new Dictionary<string, string>{
+                                   {"grant_type", "password"},
+                                   {"username", email.Trim()},
+                                   {"password", password.Trim()},
+                                };
+
+                                var tokenResponse = client.PostAsync(baseAddress + "/token", new FormUrlEncodedContent(form)).Result;
+                                //var token = tokenResponse.Content.ReadAsStringAsync().Result;  
+                                var token = tokenResponse.Content.ReadAsAsync<Token>(new[] { new JsonMediaTypeFormatter() }).Result;
+
+                                returnData.data3 = token;
+
+                            }
+                        }
+
+                        if (docmaster != null && docmaster.Doctor_country == "India")
+                        {
+                            var Smscount = db.monthly_sms.Where(x => x.date.Value.Month == DateTime.Now.Month && x.date.Value.Year == DateTime.Now.Year && x.user_id == user.Id).FirstOrDefault();
+                            if (Smscount == null)
+                            {
+                                monthly_sms ms = new monthly_sms();
+                                ms.user_id = user.Id;
+                                ms.sms_count = 50;
+                                ms.sms_remaining_count = 50;
+                                ms.date = DateTime.Now;
+                                db.monthly_sms.Add(ms);
+                                db.SaveChanges();
+                            }
+                            returnData.data1 = user;
+                            returnData.data2 = docmaster;
+                            returnData.message = "Successfull";
+                            returnData.status_code = Convert.ToInt32(Status.Sucess);
+                            return returnData;
+                        }
+                        else
+                        {
+                            returnData.data1 = user;
+                            returnData.message = "Doctor data not found";
+                            returnData.status_code = Convert.ToInt32(Status.Failed);
+                            return returnData;
+                        }
                     }
-                    returnData.data1 = user;
-                    returnData.data2 = docmaster;
-                    returnData.message = "Successfull";
-                    returnData.status_code = Convert.ToInt32(Status.Sucess);
-                    return returnData;
+                    else
+                    {
+                        returnData.message = "Enter valid password.";
+                        returnData.status_code = Convert.ToInt32(Status.Failed);
+                        return returnData;
+                    }
                 }
                 else
                 {
-                    returnData.data1 = user;
-                    returnData.message = "Doctor data not found";
+                    returnData.message = "Invalid username and password.";
                     returnData.status_code = Convert.ToInt32(Status.Failed);
                     return returnData;
                 }
+
             }
             catch (Exception ex)
             {
@@ -2029,15 +2081,41 @@ namespace DoctorDiaryAPI.Controllers
                 //Insert Doctor Shift data
                 if (doc.doctorShift != null)
                 {
-                    doc.doctorShift.DoctorId = dm.Doctor_id;
-                    doc.doctorShift.CreatedDate = DateTime.Now;
-
                     //returnData = Insert_DoctorShift(doc.doctorShift, db.Database.BeginTransaction());
 
-                    DoctorShift doctorShift = new MappingService().Map<csDoctorShift, DoctorShift>(doc.doctorShift);
+                    DoctorShift doctorShift = new DoctorShift();
 
-                    db.DoctorShifts.Add(doctorShift);
-                    db.SaveChanges();
+                    doctorShift = db.DoctorShifts.Where(x => x.DoctorId == doc.doctorShift.DoctorId).FirstOrDefault();
+
+                    if (doctorShift != null)
+                    {
+                        doctorShift.MorningStart = doc.doctorShift.MorningStart;
+                        doctorShift.MorningEnd = doc.doctorShift.MorningEnd;
+                        doctorShift.AfternoonStart = doc.doctorShift.AfternoonStart;
+                        doctorShift.AfternoonEnd = doc.doctorShift.AfternoonEnd;
+                        doctorShift.Slot = doc.doctorShift.Slot;
+
+                        doctorShift.UpdatedDate = DateTime.Now;
+
+                        db.Entry(doctorShift).State = EntityState.Modified;
+                        db.SaveChanges();
+                    }
+                    else
+                    {
+                        doctorShift = new DoctorShift();
+
+                        doctorShift.DoctorId = dm.Doctor_id;
+                        doctorShift.MorningStart = doc.doctorShift.MorningStart;
+                        doctorShift.MorningEnd = doc.doctorShift.MorningEnd;
+                        doctorShift.AfternoonStart = doc.doctorShift.AfternoonStart;
+                        doctorShift.AfternoonEnd = doc.doctorShift.AfternoonEnd;
+                        doctorShift.Slot = doc.doctorShift.Slot;
+                        doctorShift.CreatedDate = DateTime.Now;
+                        doctorShift.UpdatedDate = DateTime.Now;
+
+                        db.DoctorShifts.Add(doctorShift);
+                        db.SaveChanges();
+                    }
                 }
 
                 returnData.message = "Successfull";
@@ -3604,6 +3682,7 @@ namespace DoctorDiaryAPI.Controllers
                         {
                             cUser.doctorShift.DoctorId = dm.Doctor_id;
                             cUser.doctorShift.CreatedDate = DateTime.Now;
+                            cUser.doctorShift.UpdatedDate = DateTime.Now;
 
                             //returnData = Insert_DoctorShift(cUser.doctorShift, transaction);
 
@@ -3777,8 +3856,23 @@ namespace DoctorDiaryAPI.Controllers
                             returnData.data1 = model;
                         }
 
+
                         returnData.message = "Successfull";
                         returnData.status_code = Convert.ToInt32(Status.Sucess);
+
+                        if (!string.IsNullOrEmpty(EmailId) && (result.IsEmailSend == false))
+                        {
+                            returnData.message = "Oops something went wrong! ";
+                            returnData.status_code = Convert.ToInt32(Status.Failed);
+                        }
+
+                        if (!string.IsNullOrEmpty(MobileNo) && (result.IsSMSSend == false))
+                        {
+                            returnData.message = "Oops something went wrong! ";
+                            returnData.status_code = Convert.ToInt32(Status.Failed);
+                        }
+
+
                         return returnData;
                     }
                 }
@@ -3893,6 +3987,7 @@ namespace DoctorDiaryAPI.Controllers
                             {
                                 cUser.doctorShift.DoctorId = dm.Doctor_id;
                                 cUser.doctorShift.CreatedDate = DateTime.Now;
+                                cUser.doctorShift.UpdatedDate = DateTime.Now;
 
                                 //returnData = Insert_DoctorShift(cUser.doctorShift, transaction);
 
@@ -4236,13 +4331,14 @@ namespace DoctorDiaryAPI.Controllers
                             }
                             modelNewObject.Add(modelList[i]);
                         }
-                        ObjReturn.message = "Successfully";
-                        ObjReturn.status_code = Convert.ToInt32(Status.Sucess);
-                        ObjReturn.data1 = modelNewObject;
-                        ObjReturn.data2 = modelSymptomsList;
-                        ObjReturn.data3 = modelDiseaseList;
-                        ObjReturn.data4 = modelMedicineList;
                     }
+
+                    ObjReturn.message = "Successfully";
+                    ObjReturn.status_code = Convert.ToInt32(Status.Sucess);
+                    ObjReturn.data1 = modelNewObject;
+                    ObjReturn.data2 = modelSymptomsList;
+                    ObjReturn.data3 = modelDiseaseList;
+                    ObjReturn.data4 = modelMedicineList;
 
                     transaction.Commit();
                 }
@@ -4274,25 +4370,25 @@ namespace DoctorDiaryAPI.Controllers
                                            where x.patient_id == patient.Patient_Id
                                            select x).ToList<account_table>();
 
-                        db.account_table.RemoveRange(listPayment);
-                        db.SaveChanges();
+                        //db.account_table.RemoveRange(listPayment);
+                        //db.SaveChanges();
 
                         var listTreatment = (from x in db.Treatment_Master
                                              where x.Patient_Id == patient.Patient_Id
                                              select x).ToList<Treatment_Master>();
 
-                        db.Treatment_Master.RemoveRange(listTreatment);
-                        db.SaveChanges();
+                        //db.Treatment_Master.RemoveRange(listTreatment);
+                        //db.SaveChanges();
 
                         var listPrescription = (from x in db.prescription_table
                                                 where x.Patient_Id == patient.Patient_Id
                                                 select x).ToList<prescription_table>();
 
-                        db.prescription_table.RemoveRange(listPrescription);
-                        db.SaveChanges();
+                        //db.prescription_table.RemoveRange(listPrescription);
+                        //db.SaveChanges();
 
                         var patient_master = db.Patient_Master.Where(x => x.Patient_Id == patient.Patient_Id).FirstOrDefault();
-                        db.Patient_Master.Remove(patient_master);
+                        //db.Patient_Master.Remove(patient_master);
                     }
 
                     //transaction.Commit();
@@ -4651,8 +4747,9 @@ namespace DoctorDiaryAPI.Controllers
 
                         sms += obj.note.Equals("") ? "" : " (" + obj.note + ") " + "\n";
 
-                        sms += "From DoctorDiary.";
                     }
+
+                    sms += "From DoctorDiary.";
 
                     var isSMSSend = SmsSend.Send(data.patient_number, sms);
                     if (isSMSSend)
@@ -4839,6 +4936,20 @@ namespace DoctorDiaryAPI.Controllers
     }
 
     #region All Classes
+
+    public class Token
+    {
+        [JsonProperty("access_token")]
+        public string AccessToken { get; set; }
+        [JsonProperty("token_type")]
+        public string TokenType { get; set; }
+        [JsonProperty("expires_in")]
+        public int ExpiresIn { get; set; }
+        [JsonProperty("refresh_token")]
+        public string RefreshToken { get; set; }
+        [JsonProperty("error")]
+        public string Error { get; set; }
+    }
     enum Status { Sucess = 1, Failed = 0, NotFound = 2, AlreadyExists = 3 };
     public class csSymptomsname
     {
@@ -5076,6 +5187,7 @@ namespace DoctorDiaryAPI.Controllers
 
         public DateTime CreatedDate { get; set; }
 
+        public DateTime UpdatedDate { get; set; }
     }
     // GET api/Account/UserInfo
     #endregion

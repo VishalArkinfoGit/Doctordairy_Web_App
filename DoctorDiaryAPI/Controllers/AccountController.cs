@@ -19,7 +19,7 @@ using DoctorDiaryAPI.Results;
 
 namespace DoctorDiaryAPI.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [RoutePrefix("api/Account")]
     
     public class AccountController : ApiController
