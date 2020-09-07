@@ -254,20 +254,21 @@ Version      : 1.3
         var end = moment();
 
         function booking_range(start, end) {
-            if (start.format('MMMM D, YYYY') == end.format('MMMM D, YYYY')) {
+            if (start.format('DD/MM/YYYY') == end.format('DD/MM/YYYY')) {
                 $('#SelectedDate').val(start.format('DD/MM/YYYY'));
-                $('.bookingrange span').html(start.format('MMMM D, YYYY'));
+                $('.bookingrange span').html(start.format('DD/MM/YYYY'));
             }
             else {
                 $('#SelectedDate').val(start.format('DD/MM/YYYY') + '-' + end.format('DD/MM/YYYY'));
-                $('.bookingrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+                $('.bookingrange span').html(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
             }
-            //$('.bookingrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+            //$('.bookingrange span').html(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
         }
 
         $('.bookingrange').daterangepicker({
             startDate: start,
             endDate: end,
+            format: 'DD/MM/YYYY',
             ranges: {
                 'Today': [moment(), moment()],
                 'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],

@@ -7219,8 +7219,8 @@ html.menu-opened body {
 }
 
 .video {
-    position: relative;
-    padding-bottom: 56%;
+    position: initial;
+    /*padding-bottom: 56%;*/
     height: 0;
 }
 
@@ -7739,18 +7739,18 @@ html.menu-opened body {
 .loader {
     display: inline-block;
     height: 50px;
-    left: 50%;
-    margin-left: -25px;
-    margin-top: -25px;
+    left: calc(50% - 50px);
+    /*margin-left: -25px;
+    margin-top: -25px;*/
     width: 50px;
     position: absolute;
-    top: 50%;
+    top: calc(50% - 50px);
 }
 
     .loader span {
         -webkit-animation: loader 1.3s linear infinite;
         animation: loader 1.3s linear infinite;
-        background-color: #20c0f3;
+        background-color: #009efb;
         border-radius: 100%;
         display: inline-block;
         height: 50px;
