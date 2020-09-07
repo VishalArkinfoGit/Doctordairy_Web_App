@@ -119,7 +119,7 @@
                                 <div class="col-12 col-md-6">
                                     <div class="form-group">
                                         <label>Email ID</label>
-                                        @Html.EditorFor(model => model.Patient_email, new { htmlAttributes = new { @class = "form-control", @type = "email", @pattern = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}" } })
+                                        @Html.EditorFor(model => model.Patient_email, new { htmlAttributes = new { @class = "form-control", @type = "email", @pattern = "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}" } })
                                         <small class="text-danger" id="msgPatient_email"></small>
                                     </div>
                                 </div>
@@ -140,7 +140,7 @@
 
                             </div>
                             <div class="submit-section">
-                                <button type="submit" class="btn btn-primary submit-btn">Save Changes</button>
+                                <button type="submit" class="btn btn-primary submit-btn">Update profile</button>
                             </div>
                         }
                     </div>
@@ -155,7 +155,59 @@
 
         $(document).ready(function () {
 
-            $("input").attr("autocomplete", "off");
+            $('#formBooking').on('focus', ':input', function () {
+                $(this).attr('autocomplete', 'off');
+            });
+
+            //$("input").attr("autocomplete", "off");
+
+            $("#Patient_name").blur(function () {
+                var name_regx = "^[a-zA-Z/]+(([',. -][a-zA-Z/ ])?[a-zA-Z/]*)*$";
+
+                var name = $('#Patient_name').val() ?? "";
+                if (name.length == 0) {
+                    $("#msgPatient_name").html("Patient name is Required.");
+                    $('#Patient_name').focus();
+                }
+                else if (!name.match(name_regx)) {
+                    $("#msgPatient_name").html("Please enter valid name.");
+                    $('#Patient_name').focus();
+                }
+                else {
+                    $("#msgPatient_name").html("");
+                }
+            });
+
+            $("#Patient_contact").blur(function () {
+                var mobile_regx = "^([1-9]{1})([0-9]{1})([0-9]{8})$";
+
+                var mobile = $('#Patient_contact').val() ?? "";
+                if (mobile.length == 0) {
+                    $("#msgPatient_contact").html("Mobile No. is Required.");
+                    $('#Patient_contact').focus();
+                }
+                else if (!mobile.match(mobile_regx)) {
+                    $("#msgPatient_contact").html("Please enter valid mobile no.");
+                    $('#Patient_contact').focus();
+                }
+                else {
+                    $("#msgPatient_contact").html("");
+                }
+            });
+
+            $("#Patient_address").blur(function () {
+
+                var address = $("#Patient_address").val() ?? "";
+                if (address.length == 0) {
+                    $("#msgPatient_address").html("Address is Required.");
+                    $('#Patient_address').focus();
+                }
+                else {
+                    $("#msgPatient_address").html("");
+                }
+
+            });
+
 
             $('#formBooking').submit(function (evt) {
 
@@ -219,6 +271,8 @@
                     $("#msgPatient_address").html("");
                 }
 
+                //var valid = formValidation();
+
                 if (valid) {
                     showLoader();
                     document.getElementById("formBooking").submit();
@@ -230,6 +284,69 @@
             });
         });
 
+        function formValidation() {
+            var name = $('#Patient_name').val() ?? "";
+            var mobile = $('#Patient_contact').val() ?? "";
+            var email = $('#Patient_email').val() ?? "";
+            var address = $("#Patient_address").val() ?? "";
+
+            var valid = true;
+            var name_regx = "^[a-zA-Z/]+(([',. -][a-zA-Z/ ])?[a-zA-Z/]*)*$";
+            var mobile_regx = "^([1-9]{1})([0-9]{1})([0-9]{8})$";
+
+            if (name.length == 0) {
+                valid = false;
+                $("#msgPatient_name").html("Patient name is Required.");
+                $('#Patient_name').focus();
+            }
+            else if (!name.match(name_regx)) {
+                valid = false;
+                $("#msgPatient_name").html("Please enter valid name.");
+                $('#Patient_name').focus();
+            }
+            else {
+                $("#msgPatient_name").html("");
+            }
+
+            if (mobile.length == 0) {
+                valid = false;
+                $("#msgPatient_contact").html("Mobile No. is Required.");
+                $('#Patient_contact').focus();
+            }
+            else if (!mobile.match(mobile_regx)) {
+                valid = false;
+                $("#msgPatient_contact").html("Please enter valid mobile no.");
+                $('#Patient_contact').focus();
+            }
+            else {
+                $("#msgPatient_contact").html("");
+            }
+
+            if (email.length == 0) {
+                valid = false;
+                $("#msgPatient_email").html("Email is Required.");
+                $('#Patient_email').focus();
+            }
+            //else if (!email.match(email_regx)) {
+            //    valid = false;
+            //    $("#msgPatient_email").html("Please enter valid email.");
+            //    $('#Patient_email').focus();
+            //}
+            else {
+                $("#msgPatient_email").html("");
+            }
+
+            if (address.length == 0) {
+                valid = false;
+                $("#msgPatient_address").html("Address is Required.");
+                $('#Patient_address').focus();
+            }
+            else {
+                $("#msgPatient_address").html("");
+            }
+
+            return valid;
+        }
     </script>
 
     @Scripts.Render("~/bundles/jqueryval")
