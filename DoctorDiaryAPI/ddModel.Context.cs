@@ -56,6 +56,8 @@ public partial class ddiarydbEntities : DbContext
 
     public virtual DbSet<Mail_Track> Mail_Track { get; set; }
 
+    public virtual DbSet<MainConfiguration> MainConfigurations { get; set; }
+
     public virtual DbSet<medicine_table> medicine_table { get; set; }
 
     public virtual DbSet<monthly_sms> monthly_sms { get; set; }

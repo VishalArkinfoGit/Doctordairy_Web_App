@@ -75,6 +75,8 @@ public partial class Treatment_Master
 
     public string symptoms_id { get; set; }
 
+    public string Prescription_Image { get; set; }
+
 
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

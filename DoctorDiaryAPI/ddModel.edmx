@@ -140,6 +140,16 @@
           <Property Name="Verify_Code" Type="varchar" MaxLength="50" />
           <Property Name="IsSuccess" Type="bit" />
         </EntityType>
+        <EntityType Name="MainConfiguration">
+          <Key>
+            <PropertyRef Name="ConfigId" />
+          </Key>
+          <Property Name="ConfigId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="NoOfIdealDays" Type="int" />
+          <Property Name="MessageBody" Type="nvarchar(max)" />
+          <Property Name="CreatedDate" Type="datetime" />
+          <Property Name="UpdatedDate" Type="datetime" />
+        </EntityType>
         <EntityType Name="medicine_table">
           <Key>
             <PropertyRef Name="medicine_id" />
@@ -361,6 +371,7 @@
           <Property Name="paid_Amount" Type="decimal" Precision="18" Scale="2" />
           <Property Name="bill_Amount" Type="decimal" Precision="18" Scale="2" />
           <Property Name="symptoms_id" Type="nvarchar(max)" />
+          <Property Name="Prescription_Image" Type="nvarchar(max)" />
         </EntityType>
         <EntityType Name="usr">
           <Key>
@@ -597,6 +608,7 @@
           <EntitySet Name="Login_Master" EntityType="Self.Login_Master" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Login_Track" EntityType="Self.Login_Track" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Mail_Track" EntityType="Self.Mail_Track" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="MainConfiguration" EntityType="Self.MainConfiguration" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="medicine_table" EntityType="Self.medicine_table" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="monthly_sms" EntityType="Self.monthly_sms" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="OTPVerification" EntityType="Self.OTPVerification" Schema="dbo" store:Type="Tables" />
@@ -702,6 +714,7 @@
           <EntitySet Name="Login_Master" EntityType="ddiarydbModel.Login_Master" />
           <EntitySet Name="Login_Track" EntityType="ddiarydbModel.Login_Track" />
           <EntitySet Name="Mail_Track" EntityType="ddiarydbModel.Mail_Track" />
+          <EntitySet Name="MainConfigurations" EntityType="ddiarydbModel.MainConfiguration" />
           <EntitySet Name="medicine_table" EntityType="ddiarydbModel.medicine_table" />
           <EntitySet Name="monthly_sms" EntityType="ddiarydbModel.monthly_sms" />
           <EntitySet Name="Package_Assigned" EntityType="ddiarydbModel.Package_Assigned" />
@@ -940,6 +953,16 @@
           <Property Name="Verify_Code" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="IsSuccess" Type="Boolean" />
         </EntityType>
+        <EntityType Name="MainConfiguration">
+          <Key>
+            <PropertyRef Name="ConfigId" />
+          </Key>
+          <Property Name="ConfigId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="NoOfIdealDays" Type="Int32" />
+          <Property Name="MessageBody" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+        </EntityType>
         <EntityType Name="medicine_table">
           <Key>
             <PropertyRef Name="medicine_id" />
@@ -1164,6 +1187,7 @@
           <Property Name="paid_Amount" Type="Decimal" Precision="18" Scale="2" />
           <Property Name="bill_Amount" Type="Decimal" Precision="18" Scale="2" />
           <Property Name="symptoms_id" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Prescription_Image" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="Injury_Photos_Master" Relationship="ddiarydbModel.FK_Injury_Photos_Master_Treatment_Master" FromRole="Treatment_Master" ToRole="Injury_Photos_Master" />
           <NavigationProperty Name="Patient_Master" Relationship="ddiarydbModel.FK_Treatment_Master_Patient_Master" FromRole="Treatment_Master" ToRole="Patient_Master" />
           <NavigationProperty Name="Patient_Master1" Relationship="ddiarydbModel.Patient_Id" FromRole="Treatment_Master" ToRole="Patient_Master" />
@@ -1569,6 +1593,17 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="MainConfigurations">
+            <EntityTypeMapping TypeName="ddiarydbModel.MainConfiguration">
+              <MappingFragment StoreEntitySet="MainConfiguration">
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="MessageBody" ColumnName="MessageBody" />
+                <ScalarProperty Name="NoOfIdealDays" ColumnName="NoOfIdealDays" />
+                <ScalarProperty Name="ConfigId" ColumnName="ConfigId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="medicine_table">
             <EntityTypeMapping TypeName="ddiarydbModel.medicine_table">
               <MappingFragment StoreEntitySet="medicine_table">
@@ -1769,6 +1804,7 @@
           <EntitySetMapping Name="Treatment_Master">
             <EntityTypeMapping TypeName="ddiarydbModel.Treatment_Master">
               <MappingFragment StoreEntitySet="Treatment_Master">
+                <ScalarProperty Name="Prescription_Image" ColumnName="Prescription_Image" />
                 <ScalarProperty Name="symptoms_id" ColumnName="symptoms_id" />
                 <ScalarProperty Name="bill_Amount" ColumnName="bill_Amount" />
                 <ScalarProperty Name="paid_Amount" ColumnName="paid_Amount" />
