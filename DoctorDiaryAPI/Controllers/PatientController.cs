@@ -13,7 +13,8 @@ namespace DoctorDiaryAPI.Controllers
         public ActionResult Login()
         {
             Session.Clear();
-            return View();
+            PatientLoginViewModel obj = new PatientLoginViewModel();
+            return View(obj);
         }
 
         [HttpPost]
@@ -92,7 +93,7 @@ namespace DoctorDiaryAPI.Controllers
 
                 var appointments = (from x in db.Appointments.AsEnumerable()
                                     where x.PatientId == id
-                                    select x).OrderByDescending(x=>x.DateStart).ToList<Appointment>();
+                                    select x).OrderByDescending(x => x.DateStart).ToList<Appointment>();
 
                 if (appointments != null)
                 {

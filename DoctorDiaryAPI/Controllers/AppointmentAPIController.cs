@@ -10,6 +10,8 @@ using System.Web.Http;
 
 namespace DoctorDiaryAPI.Controllers
 {
+    [System.Web.Http.Authorize]
+    [RoutePrefix("api/AppointmentAPI")]
     public class AppointmentAPIController : ApiController
     {
         #region Appointment
@@ -277,6 +279,7 @@ namespace DoctorDiaryAPI.Controllers
 
                         returnData.message = "Successfull";
                         returnData.status_code = Convert.ToInt32(Status.Sucess);
+                        doctor.usr = new usr();
                         returnData.data1 = doctor;
                         returnData.data2 = appointments;
                     }
