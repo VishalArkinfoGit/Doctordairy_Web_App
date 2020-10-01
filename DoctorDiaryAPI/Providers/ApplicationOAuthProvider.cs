@@ -10,6 +10,7 @@ using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OAuth;
 using DoctorDiaryAPI.Models;
+using System.Web;
 
 namespace DoctorDiaryAPI.Providers
 {
@@ -29,6 +30,9 @@ namespace DoctorDiaryAPI.Providers
 
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
         {
+            var authentication = HttpContext.Current.GetOwinContext().Authentication;
+            authentication.SignOut(DefaultAuthenticationTypes.ExternalBearer);
+
             var userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
 
             ApplicationUser user = await userManager.FindAsync(context.UserName, context.Password);
