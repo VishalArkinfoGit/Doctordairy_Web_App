@@ -66,10 +66,25 @@ namespace DoctorDiaryAPI.Controllers
                         db.Patient_Master.Add(patient);
                         db.SaveChanges();
                     }
+
                     appointment.PatientId = patient.Patient_Id;
 
                     db.Entry(appointment).State = System.Data.Entity.EntityState.Modified;
                     db.SaveChanges();
+
+                    try
+                    {
+                        var doctor = db.Doctor_Master.Where(x => x.Doctor_id == appointment.DoctorId).FirstOrDefault();
+
+                        var sms = "Your Appointment is Booked Successfully! Appointment booked with Dr." + doctor.Doctor_name + " on " +
+                            appointment.DateStart.ToString("dd MMM yyyy") + " " + appointment.DateStart.ToString("hh:mm tt") + " to " + appointment.DateEnd.ToString("hh:mm tt");
+
+                        sms += appointment.Message != "" ? (" Reason: " + appointment.Message) : "";
+
+                        SmsSend.Send(appointment.PatientMobile, sms);
+                    }
+                    catch (Exception)
+                    { }
 
                     returnData.message = "Successfull";
                     returnData.status_code = Convert.ToInt32(Status.Sucess);
@@ -104,47 +119,73 @@ namespace DoctorDiaryAPI.Controllers
 
             try
             {
-                using (var db = new ddiarydbEntities())
+                if (appointment.Id > 0)
                 {
-                    var dbAppointment = db.Appointments.Where(x => x.Id == appointment.Id).FirstOrDefault();
-
-                    if (db.Appointments.Any(x => x.Id != appointment.Id && x.DateStart == appointment.DateStart && x.DateEnd == appointment.DateEnd))
+                    using (var db = new ddiarydbEntities())
                     {
-                        returnData.message = "This time slot booked.";
-                        returnData.status_code = Convert.ToInt32(Status.AlreadyExists);
-                        returnData.data1 = appointment;
+                        var dbAppointment = db.Appointments.Where(x => x.Id == appointment.Id).FirstOrDefault();
 
-                        return returnData;
+                        if (db.Appointments.Any(x => x.Id != appointment.Id && x.DateStart == appointment.DateStart && x.DateEnd == appointment.DateEnd))
+                        {
+                            returnData.message = "This time slot booked.";
+                            returnData.status_code = Convert.ToInt32(Status.AlreadyExists);
+                            returnData.data1 = appointment;
+
+                            return returnData;
+                        }
+
+                        dbAppointment.DateStart = appointment.DateStart;
+
+                        dbAppointment.DateEnd = appointment.DateEnd;
+
+                        dbAppointment.DoctorId = appointment.DoctorId;
+
+                        dbAppointment.PatientId = appointment.PatientId;
+
+                        dbAppointment.PatientName = appointment.PatientName;
+
+                        dbAppointment.PatientMobile = appointment.PatientMobile;
+
+                        dbAppointment.Relation = appointment.Relation;
+
+                        dbAppointment.Status = appointment.Status;
+
+                        dbAppointment.SessionId = appointment.DateStart.ToString("ddMMyyyyHHmm") + appointment.DateEnd.ToString("HHmm");
+
+                        dbAppointment.UpdatedDate = DateTime.Now;
+
+                        //dbAppointment.Message = appointment.Message;
+
+                        db.Entry(dbAppointment).State = System.Data.Entity.EntityState.Modified;
+                        db.SaveChanges();
+
+                        try
+                        {
+                            var doctor = db.Doctor_Master.Where(x => x.Doctor_id == dbAppointment.DoctorId).FirstOrDefault();
+
+                            var sms = "Your Appointment is Updated Successfully!" + Environment.NewLine +
+                                "Now, Appointment booked with Dr." + doctor.Doctor_name + " on " +
+                                dbAppointment.DateStart.ToString("dd MMM yyyy") + " " +
+                                dbAppointment.DateStart.ToString("hh:mm tt") + " to " + dbAppointment.DateEnd.ToString("hh:mm tt");
+
+                            sms += appointment.Message != "" ? Environment.NewLine + (" Reason: " + appointment.Message) : "";
+
+                            SmsSend.Send(appointment.PatientMobile, sms);
+                        }
+                        catch (Exception)
+                        { }
+
+
+                        returnData.message = "Successfull";
+                        returnData.status_code = Convert.ToInt32(Status.Sucess);
+                        returnData.data1 = dbAppointment;
                     }
-
-                    dbAppointment.DateStart = appointment.DateStart;
-
-                    dbAppointment.DateEnd = appointment.DateEnd;
-
-                    dbAppointment.DoctorId = appointment.DoctorId;
-
-                    dbAppointment.PatientId = appointment.PatientId;
-
-                    dbAppointment.PatientName = appointment.PatientName;
-
-                    dbAppointment.PatientMobile = appointment.PatientMobile;
-
-                    dbAppointment.Relation = appointment.Relation;
-
-                    dbAppointment.Status = appointment.Status;
-
-                    dbAppointment.SessionId = appointment.SessionId;
-
-                    dbAppointment.UpdatedDate = DateTime.Now;
-
-                    db.Entry(dbAppointment).State = System.Data.Entity.EntityState.Modified;
-                    db.SaveChanges();
-
-                    returnData.message = "Successfull";
-                    returnData.status_code = Convert.ToInt32(Status.Sucess);
-                    returnData.data1 = dbAppointment;
                 }
-
+                else
+                {
+                    returnData.message = "Oops something went wrong! ";
+                    returnData.status_code = Convert.ToInt32(Status.Failed);
+                }
             }
             catch (Exception ex)
             {
