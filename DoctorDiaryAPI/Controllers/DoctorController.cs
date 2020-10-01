@@ -25,6 +25,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using System.Net.Http.Formatting;
+using System.Text.RegularExpressions;
 
 namespace DoctorDiaryAPI.Controllers
 {
@@ -1685,118 +1686,164 @@ namespace DoctorDiaryAPI.Controllers
         [HttpGet]
         [ActionName("Get_User")]
         [AllowAnonymous]
-        public async Task<ReturnObject> Get_User(string email, string password, string app_version, string OS)
+        public async Task<ReturnObject> Get_User(string username, string password, string app_version, string OS)
         {
             ReturnObject returnData = new ReturnObject();
             try
             {
+                var user = new usr();
+
+                if (Regex.IsMatch(username, @"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}", RegexOptions.IgnoreCase))
+                {
+                    user = (from x in db.usrs
+                            where x.Email == username && x.passwd == password
+                            select x).FirstOrDefault();
+
+                }
+                else if (Regex.IsMatch(username, @"(\d*-)?\d{10}", RegexOptions.IgnoreCase))
+                {
+                    user = (from d in db.Doctor_Master
+                            join x in db.usrs on d.User_id equals x.Id
+                            where d.Doctor_contact == username && x.passwd == password
+                            select x).FirstOrDefault();
+
+                }
+                else
+                {
+                    returnData.message = "Invalid username and password.";
+                    returnData.status_code = Convert.ToInt32(Status.Failed);
+                    return returnData;
+                }
 
                 //int docid = int.Parse(User_Id);
-                var user = db.usrs.Select(x => new { x.AccountId, x.Email, x.Firstname, x.Lastname, x.Gender, x.IsActive, x.passwd, x.token_id, x.Id }).FirstOrDefault(x => x.Email == email);
+
                 //usr user = db.usrs.Where(x => x.Email == Email && x.passwd == password).FirstOrDefault();
                 // Doctor_Master docmaster = db.Doctor_Master.Where(x => x.Doctor_email == Email).FirstOrDefault();
                 if (user != null)
                 {
-                    user = db.usrs.Select(x => new { x.AccountId, x.Email, x.Firstname, x.Lastname, x.Gender, x.IsActive, x.passwd, x.token_id, x.Id }).FirstOrDefault(x => x.Email == email && x.passwd == password);
+                    //user.Doctor_Master = null;
 
-                    if (user != null)
+                    //user.Injury_Photos_Master = null;
+
+                    //user.monthly_sms = null;
+
+                    //user.Package_Assigned = null;
+
+                    //user.Package_Requested = null;
+
+                    //user.Patient_Master = null;
+
+                    //user.Report_Problems_Mst = null;
+
+                    //user.SMS_Master = null;
+
+                    //user.Treatment_Master = null;
+
+                    var docmaster = db.Doctor_Master.Select(x => new { x.User_id, x.Clinic_name, x.Doctor_address, x.Doctor_city, x.Doctor_contact, x.Doctor_email, x.Doctor_country, x.Doctor_exp, x.Doctor_id, x.Doctor_name, x.Doctor_photo, x.Doctor_state, x.Gender, x.Reg_date, x.IsActive, x.Doctor_degree, x.Url }).FirstOrDefault(x => x.User_id == user.Id);
+
+                    Login_Track lt = new Login_Track();
+                    lt.Email = username;
+                    lt.App_Version = app_version;
+                    lt.Login_Date = DateTime.Now;
+                    lt.User_Id = user.Id;
+                    lt.OS = OS;
+                    db.Login_Track.Add(lt);
+                    db.SaveChanges();
+
+                    if (docmaster != null)
                     {
-                        var docmaster = db.Doctor_Master.Select(x => new { x.User_id, x.Clinic_name, x.Doctor_address, x.Doctor_city, x.Doctor_contact, x.Doctor_email, x.Doctor_country, x.Doctor_exp, x.Doctor_id, x.Doctor_name, x.Doctor_photo, x.Doctor_state, x.Gender, x.Reg_date, x.IsActive }).FirstOrDefault(x => x.Doctor_email == email);
+                        int TokenExpire = Convert.ToInt32(ConfigurationManager.AppSettings["TokenExpire"].ToString());
 
-                        Login_Track lt = new Login_Track();
-                        lt.Email = email;
-                        lt.App_Version = app_version;
-                        lt.Login_Date = DateTime.Now;
-                        lt.User_Id = user.Id;
-                        lt.OS = OS;
-                        db.Login_Track.Add(lt);
-                        db.SaveChanges();
+                        Token UserSessionToken = new Token();
 
-                        if (docmaster != null)
+                        UserSessionToken = HttpContext.Current.Session["TokenUserId_" + user.Id] as Token;
+
+                        if (UserSessionToken != null)
                         {
-                            int TokenExpire = Convert.ToInt32(ConfigurationManager.AppSettings["TokenExpire"].ToString());
-
-                            Token UserSessionToken = null;
-
-                            if ((HttpContext.Current.Session["TokenUserId_" + user.Id] as Token) != null)
+                            if (DateTime.Now > Convert.ToDateTime(UserSessionToken.RefreshToken).AddDays(TokenExpire))
                             {
-                                UserSessionToken = HttpContext.Current.Session["TokenUserId_" + user.Id] as Token;
-
-                                if (DateTime.Now > Convert.ToDateTime(UserSessionToken.RefreshToken).AddDays(TokenExpire))
-                                {
-                                    HttpContext.Current.Session["TokenUserId_" + user.Id] = null;
-                                }
+                                HttpContext.Current.Session["TokenUserId_" + user.Id] = null;
+                                UserSessionToken = null;
                             }
+                        }
 
 
-                            if (UserSessionToken == null)
+                        if (UserSessionToken == null)
+                        {
+                            //Access Authorization Token
+                            string baseAddress = string.Format("{0}://{1}{2}{3}",
+                                          System.Web.HttpContext.Current.Request.Url.Scheme,
+                                          System.Web.HttpContext.Current.Request.Url.Host,
+                                          System.Web.HttpContext.Current.Request.Url.Port == 80 ? string.Empty : ":" + System.Web.HttpContext.Current.Request.Url.Port,
+                                          System.Web.HttpContext.Current.Request.ApplicationPath);
+
+                            using (var client = new HttpClient())
                             {
-                                //Access Authorization Token
-                                string baseAddress = string.Format("{0}://{1}{2}{3}",
-                                              System.Web.HttpContext.Current.Request.Url.Scheme,
-                                              System.Web.HttpContext.Current.Request.Url.Host,
-                                              System.Web.HttpContext.Current.Request.Url.Port == 80 ? string.Empty : ":" + System.Web.HttpContext.Current.Request.Url.Port,
-                                              System.Web.HttpContext.Current.Request.ApplicationPath);
-
-                                using (var client = new HttpClient())
-                                {
-                                    var form = new Dictionary<string, string>{
+                                var form = new Dictionary<string, string>{
                                    {"grant_type", "password"},
-                                   {"username", email.Trim()},
+                                   {"username", username.Trim()},
                                    {"password", password.Trim()},
                                 };
 
-                                    var tokenResponse = client.PostAsync(baseAddress + "/token", new FormUrlEncodedContent(form)).Result;
-                                    //var token = tokenResponse.Content.ReadAsStringAsync().Result;  
-                                    var token = tokenResponse.Content.ReadAsAsync<Token>(new[] { new JsonMediaTypeFormatter() }).Result;
+                                var tokenResponse = client.PostAsync(baseAddress + "/token", new FormUrlEncodedContent(form)).Result;
+                                //var token = tokenResponse.Content.ReadAsStringAsync().Result;  
+                                var token = tokenResponse.Content.ReadAsAsync<Token>(new[] { new JsonMediaTypeFormatter() }).Result;
 
-                                    returnData.data3 = token.AccessToken;
+                                returnData.data3 = token.AccessToken;
 
-                                    token.ExpiresIn = TokenExpire;
-                                    token.RefreshToken = DateTime.Now.ToString();
+                                token.ExpiresIn = TokenExpire;
+                                token.RefreshToken = DateTime.Now.ToString();
 
-                                    HttpContext.Current.Session["TokenUserId_" + user.Id] = token;
-                                    token = null;
-                                }
+                                HttpContext.Current.Session["TokenUserId_" + user.Id] = token;
 
-                            }
-                            else
-                            {
-                                returnData.data3 = UserSessionToken.AccessToken;
+                                token = null;
                             }
 
-                        }
-
-                        if (docmaster != null && docmaster.Doctor_country == "India")
-                        {
-                            var Smscount = db.monthly_sms.Where(x => x.date.Value.Month == DateTime.Now.Month && x.date.Value.Year == DateTime.Now.Year && x.user_id == user.Id).FirstOrDefault();
-                            if (Smscount == null)
-                            {
-                                monthly_sms ms = new monthly_sms();
-                                ms.user_id = user.Id;
-                                ms.sms_count = 50;
-                                ms.sms_remaining_count = 50;
-                                ms.date = DateTime.Now;
-                                db.monthly_sms.Add(ms);
-                                db.SaveChanges();
-                            }
-                            returnData.data1 = user;
-                            returnData.data2 = docmaster;
-                            returnData.message = "Successfull";
-                            returnData.status_code = Convert.ToInt32(Status.Sucess);
-                            return returnData;
                         }
                         else
                         {
-                            returnData.data1 = user;
-                            returnData.message = "Doctor data not found";
-                            returnData.status_code = Convert.ToInt32(Status.Failed);
-                            return returnData;
+                            returnData.data3 = UserSessionToken.AccessToken;
                         }
+
+                    }
+
+                    if (docmaster != null && docmaster.Doctor_country == "India")
+                    {
+                        var Smscount = db.monthly_sms.Where(x => x.date.Value.Month == DateTime.Now.Month && x.date.Value.Year == DateTime.Now.Year && x.user_id == user.Id).FirstOrDefault();
+                        if (Smscount == null)
+                        {
+                            monthly_sms ms = new monthly_sms();
+                            ms.user_id = user.Id;
+                            ms.sms_count = 50;
+                            ms.sms_remaining_count = 50;
+                            ms.date = DateTime.Now;
+                            db.monthly_sms.Add(ms);
+                            db.SaveChanges();
+                        }
+
+                        returnData.data1 = new usr()
+                        {
+                            Id = user.Id,
+                            Firstname = user.Firstname,
+                            Lastname = user.Lastname,
+                            AccountId = user.AccountId,
+                            Email = user.Email,
+                            Gender = user.Gender,
+                            IsActive = user.IsActive,
+                            passwd = "",
+                            token_id = user.token_id
+                        };
+
+                        returnData.data2 = docmaster;
+                        returnData.data4 = new AppointmentAPIController().Get_DoctorsShift(docmaster.Doctor_id).data1;
+                        returnData.message = "Successfull";
+                        returnData.status_code = Convert.ToInt32(Status.Sucess);
+                        return returnData;
                     }
                     else
                     {
-                        returnData.message = "Enter valid password.";
+                        returnData.data1 = user;
+                        returnData.message = "Doctor data not found";
                         returnData.status_code = Convert.ToInt32(Status.Failed);
                         return returnData;
                     }
@@ -2095,7 +2142,12 @@ namespace DoctorDiaryAPI.Controllers
                 dm.Reg_date = DateTime.Now;
                 dm.User_id = doc.User_id;
                 dm.Doctor_state = doc.Doctor_state;
-                dm.Doctor_photo = filepath;
+
+                if (filepath != "")
+                {
+                    dm.Doctor_photo = filepath;
+                }
+
                 dm.Doctor_name = doc.Doctor_name;
                 dm.Doctor_exp = doc.Doctor_exp;
                 dm.Doctor_email = doc.Doctor_email;
@@ -4406,7 +4458,7 @@ namespace DoctorDiaryAPI.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-       
+
         [HttpPost]
         [ActionName("SynchronizeData")]
         //public ReturnObject SynchronizeData(List<csPatient> modelList)
@@ -4426,6 +4478,9 @@ namespace DoctorDiaryAPI.Controllers
             List<Disease> modelDiseaseList = new List<Disease>();
             List<symptom> modelSymptomsList = new List<symptom>();
             List<medicine_table> modelMedicineList = new List<medicine_table>();
+
+            List<csTritmentImage> listTreatmentImages = new List<csTritmentImage>();
+            List<csTritmentImage> listPrescriptionImages = new List<csTritmentImage>();
 
             if (!string.IsNullOrEmpty(requestData))
             {
@@ -4513,12 +4568,28 @@ namespace DoctorDiaryAPI.Controllers
 
                                 var treatmentModel = InsertSyncTreatment(modelList[i].ModeltreatmentList[j], TreatmentImages, PrescriptionImage);
 
-
                                 //Change By Vishal - End
 
-                                modelList[i].ModeltreatmentList[j].Treat_crno = ((Treatment_Master)treatmentModel.data1).Treat_crno;
-                                modelList[i].ModeltreatmentList[j].modelPrescriptions = new List<csPrescription>();
-                                modelList[i].ModeltreatmentList[j].modelPrescriptions.AddRange(ConvertPrescriptiondbtolocal((List<prescription_table>)treatmentModel.data2));
+                                //modelList[i].ModeltreatmentList[j].Treat_crno = ((Treatment_Master)treatmentModel.data1).Treat_crno;
+                                //modelList[i].ModeltreatmentList[j].modelPrescriptions = new List<csPrescription>();
+                                //modelList[i].ModeltreatmentList[j].modelPrescriptions.AddRange(ConvertPrescriptiondbtolocal((List<prescription_table>)treatmentModel.data2));
+
+                                if (treatmentModel.data1 != null)
+                                {
+                                    var tr = treatmentModel.data1 as Treatment_Master;
+
+                                    if (tr != null)
+                                    {
+                                        modelList[i].ModeltreatmentList[j].Treat_crno = tr.Treat_crno;
+                                    }
+                                }
+
+                                if (treatmentModel.data2 != null)
+                                {
+                                    List<prescription_table> listPre = treatmentModel.data2 as List<prescription_table>;
+
+                                    modelList[i].ModeltreatmentList[j].modelPrescriptions.AddRange(ConvertPrescriptiondbtolocal(listPre));
+                                }
 
                                 if ((List<symptom>)treatmentModel.data4 != null)
                                 {
@@ -4534,6 +4605,17 @@ namespace DoctorDiaryAPI.Controllers
                                 {
                                     modelMedicineList = (List<medicine_table>)treatmentModel.data3;
                                 }
+
+                                if (treatmentModel.data6 != null)
+                                {
+                                    modelList[i].ModeltreatmentList[j].Prescription_Images = treatmentModel.data6 as List<csTritmentImage>;
+                                }
+
+                                if (treatmentModel.data7 != null)
+                                {
+                                    modelList[i].ModeltreatmentList[j].treatment_Images = treatmentModel.data7 as List<csTritmentImage>;
+                                }
+
                                 //foreach (var item in (List<symptom>)treatmentModel.data4)
                                 //{
                                 //    modelSymptomsList.Add((symptom)item);
@@ -4555,6 +4637,7 @@ namespace DoctorDiaryAPI.Controllers
 
 
                             }
+
                             modelNewObject.Add(modelList[i]);
                         }
                     }
@@ -4565,6 +4648,7 @@ namespace DoctorDiaryAPI.Controllers
                     ObjReturn.data2 = modelSymptomsList;
                     ObjReturn.data3 = modelDiseaseList;
                     ObjReturn.data4 = modelMedicineList;
+
 
                     transaction.Commit();
                 }
@@ -4644,13 +4728,15 @@ namespace DoctorDiaryAPI.Controllers
         /// <returns></returns>
         public ReturnObject InsertSyncTreatment(csTreat model, List<HttpPostedFile> TreatImages, List<HttpPostedFile> PrescriptionImage)
         {
+
             ReturnObject returnData = new ReturnObject();
             List<Disease> modelDiseaseList = new List<Disease>();
             List<symptom> modelSymptomsList = new List<symptom>();
             List<prescription_table> modelPrescriptionList = new List<prescription_table>();
             List<medicine_table> modelMedicineList = new List<medicine_table>();
 
-            List<csTritmentImage> modelTreatmentImage = new List<csTritmentImage>();
+            List<csTritmentImage> listTreatmentImages = new List<csTritmentImage>();
+            List<csTritmentImage> listPrescriptionImages = new List<csTritmentImage>();
 
             try
             {
@@ -4799,34 +4885,49 @@ namespace DoctorDiaryAPI.Controllers
                     db.SaveChanges();
                     db.Entry(treat).Reload();
 
-
                     //Change By Vishal - Start
 
                     if (PrescriptionImage != null)
                     {
-                        string folderPath = System.Web.HttpContext.Current.Server.MapPath("~/Upload/PrescriptionImages/");
-                        if (!Directory.Exists(folderPath))
-                        {
-                            Directory.CreateDirectory(folderPath);
-                        }
-
                         if (PrescriptionImage.Count > 0)
                         {
-                            var file = PrescriptionImage[0];
-
-                            if (file != null)
+                            string folderPath = System.Web.HttpContext.Current.Server.MapPath("~/Upload/PrescriptionImages/");
+                            if (!Directory.Exists(folderPath))
                             {
-                                var filename = Path.GetFileName(file.FileName);
-                                var uniuqe = treat.Treat_crno + "_" + DateTime.Now.ToString("ddMMyyyyHHmmsss") + ".png";
-                                var path = Path.Combine(folderPath + uniuqe);
-                                file.SaveAs(path);
-
-                                treat.Prescription_Image = ("~/Upload/PrescriptionImages/" + uniuqe);
-
-                                db.Entry(treat).State = EntityState.Modified;
-                                db.SaveChanges();
-                                db.Entry(treat).Reload();
+                                Directory.CreateDirectory(folderPath);
                             }
+
+                            Directory.CreateDirectory(folderPath + treat.Treat_crno);
+                            for (int i = 1; i <= PrescriptionImage.Count; i++)
+                            {
+                                csTritmentImage modelImage = new csTritmentImage();
+                                //var file = HttpContext.Current.Request.Files["img" + i];
+                                var file = PrescriptionImage[i - 1];
+                                if (file != null)
+                                {
+                                    var filename = Path.GetFileName(file.FileName);
+                                    filename = filename.Replace(" ", "-");
+                                    var path = Path.Combine(folderPath + treat.Treat_crno, filename + "_" + treat.Treat_crno + "_" + i + ".png");
+                                    file.SaveAs(path);
+
+                                    string DbImagePath = ("~/Upload/PrescriptionImages/" + treat.Treat_crno + "/" + filename + "_" + treat.Treat_crno + "_" + i + ".png");
+                                    modelImage.Treat_crno = treat.Treat_crno;
+                                    modelImage.Image_Path = DbImagePath;
+                                    modelImage.CreatedDate = DateTime.Now;
+                                    listPrescriptionImages.Add(modelImage);
+                                }
+
+                            }
+
+                        }
+
+                        if (treat.Treat_crno > 0 && listPrescriptionImages.Count > 0)
+                        {
+                            List<Treatment_Image_Master> listTreatImages = new List<Treatment_Image_Master>();
+                            listTreatImages = ConvertTreatmentImageModel(listPrescriptionImages);
+                            db.Treatment_Image_Master.AddRange(listTreatImages);
+                            db.SaveChanges();
+
                         }
                     }
 
@@ -4835,7 +4936,7 @@ namespace DoctorDiaryAPI.Controllers
                         //var fileCount = HttpContext.Current.Request.Files;
                         //This portion is check treatment image folder is exist or not 
                         var defaultPath = System.Web.HttpContext.Current.Server;
-                        string folderPath = System.Web.HttpContext.Current.Server.MapPath("~/TreatmentImage/");
+                        string folderPath = System.Web.HttpContext.Current.Server.MapPath("~/Upload/TreatmentImage/");
                         if (!Directory.Exists(folderPath))
                         {
                             Directory.CreateDirectory(folderPath);
@@ -4851,74 +4952,81 @@ namespace DoctorDiaryAPI.Controllers
                             if (file != null)
                             {
                                 var filename = Path.GetFileName(file.FileName);
-                                var path = Path.Combine(folderPath + treat.Treat_crno, treat.Treat_crno + "_" + i + ".png");
+                                filename = filename.Replace(" ", "-");
+                                var path = Path.Combine(folderPath + treat.Treat_crno, filename + "_" + treat.Treat_crno + "_" + i + ".png");
                                 file.SaveAs(path);
 
-                                string DbImagePath = ("~/TreatmentImage/" + treat.Treat_crno + "/" + treat.Treat_crno + "_" + i + ".png");
+                                string DbImagePath = ("~/Upload/TreatmentImage/" + treat.Treat_crno + "/" + filename + "_" + treat.Treat_crno + "_" + i + ".png");
                                 modelImage.Treat_crno = treat.Treat_crno;
                                 modelImage.Image_Path = DbImagePath;
                                 modelImage.CreatedDate = DateTime.Now;
-                                modelTreatmentImage.Add(modelImage);
+                                listTreatmentImages.Add(modelImage);
                             }
 
                         }
-                    }
 
-                    if (treat.Treat_crno > 0 && modelTreatmentImage.Count > 0)
-                    {
-                        List<Treatment_Image_Master> modelTreatImage = new List<Treatment_Image_Master>();
-                        modelTreatImage = ConvertTreatmentImageModel(modelTreatmentImage);
-                        db.Treatment_Image_Master.AddRange(modelTreatImage);
-                        db.SaveChanges();
+                        if (treat.Treat_crno > 0 && listTreatmentImages.Count > 0)
+                        {
+                            List<Treatment_Image_Master> listTreatImages = new List<Treatment_Image_Master>();
+                            listTreatImages = ConvertTreatmentImageModel(listTreatmentImages);
+                            db.Treatment_Image_Master.AddRange(listTreatImages);
+                            db.SaveChanges();
 
-                        treat.Treatment_Image_Master = modelTreatImage;
+                        }
                     }
 
                     //Change By Vishal - End
 
                     if (treat.Treat_crno > 0)
                     {
-                        List<csPrescription> items = null;// SendTransaction(tr.prescription);modelPrescriptions
-                                                          //if (model.prescription != null && model.prescription != "")
-                                                          //{
-                                                          //    items = SendTransaction(model.prescription);
-                                                          //}
-                        if (model.modelPrescriptions != null)
+
+                        try
                         {
-                            foreach (csPrescription obj in model.modelPrescriptions)
+
+                            if (model.modelPrescriptions != null)
                             {
 
-                                prescription_table pt = new prescription_table();
-                                pt.Doctor_id = treat.User_Id.Value;
-                                pt.Patient_Id = treat.Patient_Id.Value;
-                                pt.Treat_crno = treat.Treat_crno;
-                                pt.medicine_name = obj.medicine_name;
-                                pt.note = obj.note;
-                                pt.isMorning = obj.isMorning == "true" ? true : false;
-                                pt.isNight = obj.isNight == "true" ? true : false; //bool.Parse(obj.isNight);
-                                pt.isNoon = obj.isNoon == "true" ? true : false; //bool.Parse(obj.isNoon);
-                                pt.isEvening = obj.isEvening == "true" ? true : false;// bool.Parse(obj.isEvening);
-                                pt.no_of_tablet = obj.no_of_tablet;
-                                db.prescription_table.Add(pt);
-                                db.SaveChanges();
-                                db.Entry(pt).Reload();
-                                modelPrescriptionList.Add(pt);
-
-                                //Insert Medicine Table
-                                var medTablist = db.medicine_table.Where(x => x.Medicine == obj.medicine_name && x.Doctor_id == treat.User_Id).ToList();
-                                if (medTablist.Count == 0)
+                                foreach (csPrescription obj in model.modelPrescriptions)
                                 {
-                                    medicine_table mdt = new medicine_table();
-                                    mdt.Doctor_id = treat.User_Id;
-                                    mdt.Medicine = obj.medicine_name;
-                                    db.medicine_table.Add(mdt);
-                                    //mdt.medicine_id = db.SaveChanges();
-                                    db.SaveChanges();
-                                    db.Entry(mdt).Reload();
-                                    modelMedicineList.Add(mdt);
-                                }
-                            }
 
+                                    prescription_table pt = new prescription_table();
+                                    pt.Doctor_id = treat.User_Id == null ? 0 : Convert.ToInt32(treat.User_Id);
+                                    pt.Patient_Id = treat.Patient_Id == null ? 0 : Convert.ToInt32(treat.Patient_Id);
+                                    pt.Treat_crno = treat.Treat_crno;
+                                    pt.medicine_name = obj.medicine_name;
+                                    pt.note = obj.note;
+                                    pt.isMorning = obj.isMorning == "true" ? true : false;
+                                    pt.isNight = obj.isNight == "true" ? true : false; //bool.Parse(obj.isNight);
+                                    pt.isNoon = obj.isNoon == "true" ? true : false; //bool.Parse(obj.isNoon);
+                                    pt.isEvening = obj.isEvening == "true" ? true : false;// bool.Parse(obj.isEvening);
+                                    pt.no_of_tablet = obj.no_of_tablet;
+                                    db.prescription_table.Add(pt);
+                                    db.SaveChanges();
+                                    db.Entry(pt).Reload();
+                                    modelPrescriptionList.Add(pt);
+
+                                    //Insert Medicine Table
+                                    var medTablist = db.medicine_table.Where(x => x.Medicine == obj.medicine_name && x.Doctor_id == treat.User_Id).ToList();
+                                    if (medTablist.Count == 0)
+                                    {
+                                        medicine_table mdt = new medicine_table();
+                                        mdt.Doctor_id = treat.User_Id;
+                                        mdt.Medicine = obj.medicine_name;
+                                        db.medicine_table.Add(mdt);
+                                        //mdt.medicine_id = db.SaveChanges();
+                                        db.SaveChanges();
+                                        db.Entry(mdt).Reload();
+                                        modelMedicineList.Add(mdt);
+
+                                    }
+                                }
+
+
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            ErrHandler.WriteError("", ex);
                         }
 
                         returnData.data1 = treat;
@@ -4926,6 +5034,11 @@ namespace DoctorDiaryAPI.Controllers
                         returnData.data3 = modelMedicineList;
                         returnData.data4 = modelSymptomsList;
                         returnData.data5 = modelDiseaseList;
+
+                        //By Vishal Chudasama
+                        returnData.data6 = listTreatmentImages;
+                        returnData.data7 = listPrescriptionImages;
+
                         returnData.message = "Successfull";
                         returnData.status_code = Convert.ToInt32(Status.Sucess);
                         return returnData;
@@ -5467,6 +5580,8 @@ namespace DoctorDiaryAPI.Controllers
 
 
         public string Prescription_Image { get; set; }
+
+        public List<csTritmentImage> Prescription_Images { get; set; }
 
         public List<csTritmentImage> treatment_Images { get; set; }
         public string TreatmentImageKey { get; set; }
